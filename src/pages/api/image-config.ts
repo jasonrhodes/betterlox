@@ -1,5 +1,5 @@
 import { NextApiHandler } from "next";
-import { tmdb } from "../../server/lib/tmdb";
+import { tmdb } from "../../lib/tmdb";
 
 const ImageConfigRoute: NextApiHandler = async (req, res) => {
   const config = await tmdb.configuration();

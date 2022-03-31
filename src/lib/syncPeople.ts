@@ -3,7 +3,7 @@ import {
   findMissingCrewMembers,
   getPerson,
   insertPerson,
-} from "../db/client";
+} from "./db/client";
 import { log, separator } from "./logger";
 import { tmdb } from "./tmdb";
 import { backoff } from "./backoff";

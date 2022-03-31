@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 import { setupTables, SetupTableOptions } from "./setup";
-import { TmdbMovie, TmdbPerson } from "../lib/tmdb";
+import { TmdbMovie, TmdbPerson } from "../tmdb";
 import path from "path";
 
 import {

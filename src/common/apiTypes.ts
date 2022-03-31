@@ -1,4 +1,4 @@
-import { TmdbConfigurationResponse, TmdbCast, TmdbCredits } from "../server/lib/tmdb";
+import { TmdbConfigurationResponse, TmdbCast, TmdbCredits } from "../lib/tmdb";
 import { Person, RatedMovie, RatedTmdbCast } from "../common/models";
 
 export type OrderDirection = "ASC" | "DESC";

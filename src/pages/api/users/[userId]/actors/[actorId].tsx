@@ -1,8 +1,8 @@
 import { NextApiHandler } from "next";
 import { RatedTmdbCast } from "../../../../../common/models";
-import { getMoviesForActorAndUser, getAverageRatingForActor, getPerson } from "../../../../../server/db/client";
-import { tmdb, TmdbCast, TmdbCrew } from "../../../../../server/lib/tmdb";
-import { numericQueryParam } from "../../../../../utils/queryParams";
+import { getMoviesForActorAndUser, getAverageRatingForActor, getPerson } from "../../../../../lib/db/client";
+import { tmdb, TmdbCast, TmdbCrew } from "../../../../../lib/tmdb";
+import { numericQueryParam } from "../../../../../lib/queryParams";
 
 const UserStatsActorRoute: NextApiHandler = async (req, res) => {
   const { userId, actorId, castOrderThreshold } = req.query;

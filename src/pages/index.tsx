@@ -6,7 +6,7 @@ import { Button } from '@mui/material';
 
 const Home: NextPage = () => {
   return (
-    <PageTemplate title="Home">
+    <PageTemplate title="Home" isPublic={true}>
       <UserContextConsumer>
         {context => {
           if (!context) {

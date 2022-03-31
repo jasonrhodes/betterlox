@@ -1,5 +1,5 @@
 import { NextApiHandler } from "next";
-import { getRatingsForUser } from "../../../../server/db/client";
+import { getRatingsForUser } from "../../../../lib/db/client";
 
 const UserRatingsRoute: NextApiHandler = async (req, res) => {
   const { userId } = req.query;

@@ -10,11 +10,11 @@ import {
   addProductionCompanyToMovie,
   addCastMemberToMovie,
   addCrewMemberToMovie,
-} from "../db/client";
+} from "./db/client";
 import { tmdb, TmdbMovie } from "./tmdb";
 import { log } from "./logger";
 import axios from "axios";
-import { JOB_ALLOW_LIST } from "../constants";
+import { JOB_ALLOW_LIST } from "../common/constants";
 
 interface Rating {
   Date: string;

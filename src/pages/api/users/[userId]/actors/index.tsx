@@ -1,5 +1,5 @@
 import { NextApiHandler } from "next";
-import { getActorsForUser } from "../../../../../server/db/client";
+import { getActorsForUser } from "../../../../../lib/db/client";
 
 const UserStatsActorsRoute: NextApiHandler = async (req, res) => {
   const { userId, castOrderThreshold } = req.query;

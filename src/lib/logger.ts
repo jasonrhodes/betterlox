@@ -1,4 +1,4 @@
-import { LOG_LEVELS } from "../constants";
+import { LOG_LEVELS } from "../common/constants";
 
 const { LOG_LEVEL = "info" } = process.env;
 

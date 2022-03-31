@@ -29,10 +29,10 @@ export function StarRating({
   };
 
   for (i; i < Math.floor(rating); i++) {
-    stars.push(<Star sx={computedStyle} />);	
+    stars.push(<Star key={`star-${i}`} sx={computedStyle} />);	
   }
   if (rating !== Math.floor(rating)) {
-    stars.push(<Box sx={halfStyle}>½</Box>)
+    stars.push(<Box key="star-half" sx={halfStyle}>½</Box>)
   }
 
   return <>{stars}</>;

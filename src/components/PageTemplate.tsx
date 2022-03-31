@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Head from 'next/head';
-import { Avatar, Box, Container, Typography } from '@mui/material';
+import { Avatar, Box, Button, CircularProgress, Container, Typography } from '@mui/material';
 import { MainNav } from "./MainNav";
-import Link from './Link';
+import Link from 'next/link';
 import { BasicImage } from './images';
+import { UserContext, UserContextConsumer } from '../hooks/UserContext';
+import { useRouter } from 'next/router';
 
 export interface BackLinkProps {
   url: string;
@@ -12,22 +14,45 @@ export interface BackLinkProps {
 
 export interface PageTemplateProps {
   title: string;
+  isPublic?: boolean;
   backLink?: BackLinkProps;
   avatarUrl?: string;
 }
 
 const BackLink: React.FC<BackLinkProps> = ({ url, text = 'Go Back' }) => {
-  return <Typography variant='h6'><Link variant="button" href={url}>← {text}</Link></Typography>;
+  return (
+    <Link href={url}>
+      <Button>← {text}</Button>
+    </Link>
+  );
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, children, avatarUrl }) => {
+const Loading: React.FC = () => (
+  <Box><CircularProgress /></Box>
+);
+
+export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, children, avatarUrl, isPublic }) => {
+  const router = useRouter();
+  const { user } = useContext(UserContext);
+  const [ready, setReady] = useState(false);
+
+  console.log({ ready, title, isPublic, user });
+
+  useEffect(() => {
+    if (!isPublic && !user) {
+      router.push('/');
+    } else {
+      setReady(true);
+    }
+  }, [isPublic, user]);
+
   const headingStyles = avatarUrl ? {
     float: 'left',
     width: 500,
     lineHeight: '150px'
   } : {};
-
-  return (
+  
+  return !ready ? null : (
     <>
       <MainNav />
       <Container maxWidth="lg">
@@ -54,5 +79,5 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, chi
         </Box>
       </Container>
     </>
-  )
+  );
 }

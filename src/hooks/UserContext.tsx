@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import api from '../utils/callApi';
+import api from '../lib/callApi';
 
 interface User {
   id: number;
@@ -13,7 +13,10 @@ interface UserContext {
   logout: () => void;
 }
 
-const UserContext = React.createContext<UserContext | null>(null);
+const UserContext = React.createContext<UserContext>({
+  login: () => null,
+  logout: () => null
+});
 const UserContextConsumer = UserContext.Consumer;
 
 const UserContextProvider: React.FC<{}> = ({ children }) => {
@@ -22,6 +25,7 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
 
   async function login() {
     const response = await api.login("u", "pw");
+    console.log("logging in", response);
     setUser(response.data.user);
   }
 
@@ -35,12 +39,12 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     errorStatus
   };
 
-  if (user) {
-    value.user = user;
+  if (value === null) {
+    return null;
   }
 
   return (
-    <UserContext.Provider value={value}>
+    <UserContext.Provider value={{ ...value, user }}>
       {children}
     </UserContext.Provider>
   )

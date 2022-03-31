@@ -1,4 +1,4 @@
-import { TmdbCast } from "../server/lib/tmdb";
+import { TmdbCast } from "../lib/tmdb";
 
 export interface Person {
   biography: string;

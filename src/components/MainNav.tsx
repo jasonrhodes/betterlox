@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppBar, Container, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Button, Tooltip, Avatar } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
-import Link from './Link';
+import Link from 'next/link';
 import { UserContextConsumer } from '../hooks/UserContext';
 
 const pages = [
@@ -100,14 +100,16 @@ export function MainNav() {
         <AppBar position="static">
           <Container maxWidth="xl">
             <Toolbar disableGutters>
-              <Typography
-                variant="h6"
-                noWrap
-                component="div"
-                sx={{ mr: 2, display: { xs: 'none', md: 'flex' } }}
-              >
-                LOGO
-              </Typography>
+              <Link href="/" passHref>
+                <Typography
+                  variant="h6"
+                  noWrap
+                  component="div"
+                  sx={{ fontWeight: 700, mr: 2, display: { xs: 'none', md: 'flex' } }}
+                >
+                  BETTERLOX
+                </Typography>
+              </Link>
 
               <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                 <IconButton
@@ -139,30 +141,34 @@ export function MainNav() {
                   }}
                 >
                   {pages.map((page) => (
-                    <MenuItem href={page.route} key={page.label} onClick={handleCloseNavMenu}>
-                      <Typography textAlign="center">{page.label}</Typography>
-                    </MenuItem>
+                    <Link href={page.route} key={page.label} passHref>
+                      <MenuItem onClick={handleCloseNavMenu}>
+                        <Typography textAlign="center">{page.label}</Typography>
+                      </MenuItem>
+                    </Link>
                   ))}
                 </Menu>
               </Box>
-              <Typography
-                variant="h6"
-                noWrap
-                component="div"
-                sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
-              >
-                LOGO
-              </Typography>
+              <Link href="/" passHref>
+                <Typography
+                  variant="h6"
+                  noWrap
+                  component="div"
+                  sx={{ fontWeight: 900, flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
+                >
+                  BETTERLOX
+                </Typography>
+              </Link>
               <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 {pages.map((page) => (
-                  <Button
-                    key={page.label}
-                    href={page.route}
-                    onClick={handleCloseNavMenu}
-                    sx={{ my: 2, color: 'white', display: 'block' }}
-                  >
-                    {page.label}
-                  </Button>
+                  <Link key={page.label} href={page.route} passHref>
+                    <Button
+                      onClick={handleCloseNavMenu}
+                      sx={{ my: 2, color: 'white', display: 'block' }}
+                    >
+                      {page.label}
+                    </Button>
+                  </Link>
                 ))}
               </Box>
               
