@@ -39,3 +39,4 @@ yarn-error.log*
 
 # custom
 .env.sh
+package-lock.json

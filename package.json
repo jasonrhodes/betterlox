@@ -45,5 +45,8 @@
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0"
   },
-  "cacheDirectories": [".next/cache"]
+  "cacheDirectories": [".next/cache"],
+  "engines": {
+    "node": ">=16"
+  }
 }
