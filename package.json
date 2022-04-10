@@ -26,11 +26,13 @@
     "express": "^4.17.3",
     "fast-csv": "^4.3.6",
     "formik": "^2.2.9",
+    "formik-mui": "^4.0.0-alpha.3",
     "http-proxy-middleware": "^2.0.4",
     "moviedb-promise": "^3.1.13",
     "next": "12.1.0",
     "nodemon": "^2.0.15",
     "react": "17.0.2",
+    "react-cookie": "^4.1.1",
     "react-dom": "17.0.2",
     "yup": "^1.0.0-beta.3"
   },

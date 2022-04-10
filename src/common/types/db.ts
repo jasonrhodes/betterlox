@@ -41,7 +41,7 @@ export interface Rating {
   year?: number;
 }
 
-export interface User {
+export interface DBUser {
   id: number;
   email: string;
   password: string;
@@ -50,10 +50,10 @@ export interface User {
   letterboxdUsername: string;
   letterboxdName: string;
   letterboxdAccountLevel: LetterboxdAccountLevel;
-  rememberMeToken?: string;
+  rememberMeToken?: string | null;
 }
 
-export type UserPublic = Omit<User, "password" | "salt">;
+export type UserPublic = Omit<DBUser, "password" | "salt">;
 
 export type RatedMovie = Movie & Pick<Rating, "rating" | "year">;
 

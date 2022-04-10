@@ -5,6 +5,7 @@ import { ImageContextProvider } from "../hooks/ImageConfigContext";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/variable.css"
 import { UserContextProvider } from '../hooks/UserContext';
+import { CookiesProvider } from 'react-cookie';
 
 const theme = createTheme({
   palette: {
@@ -24,11 +25,13 @@ function MyApp({ Component, pageProps }: AppProps) {
   
   return (
     <ThemeProvider theme={theme}>
-      <ImageContextProvider>
-        <UserContextProvider>
-          <Component {...pageProps} />
-        </UserContextProvider>
-      </ImageContextProvider>
+      <CookiesProvider>
+        <ImageContextProvider>
+          <UserContextProvider>
+            <Component {...pageProps} />
+          </UserContextProvider>
+        </ImageContextProvider>
+      </CookiesProvider>
     </ThemeProvider>
   );
 }

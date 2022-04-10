@@ -13,9 +13,9 @@ const Home: NextPage = () => {
             return <p>Context is missing, oof!</p>;
           }
           if (!context.user) {
-            return <p>You are not logged in. <Button onClick={() => context.login("a", "b")}>Log In</Button></p>
+            return <p>You are not logged in. <Button href="/login">Log In</Button></p>
           }
-          return <p>Hello, {context.user.letterboxd}! <Button onClick={() => context.logout()}>Log Out</Button></p>
+          return <p>Hello, {context.user.letterboxdUsername}! <Button onClick={() => context.logout()}>Log Out</Button></p>
         }}
       </UserContextConsumer>
     </PageTemplate>

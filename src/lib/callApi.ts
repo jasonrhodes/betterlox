@@ -1,12 +1,15 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { LetterboxdAccountLevel } from "../common/types/base";
+import { UserPublic } from "../common/types/db";
 import { ApiGetLetterboxdDetailsResponse } from "../pages/api/letterboxd";
+import { CheckTokenApiRequest, CheckTokenApiResponse } from "../pages/api/users/check-token";
 
 const client = axios.create();
 
 interface ApiLoginRequest {
   password: string;
   email: string;
+  rememberMe: boolean;
 }
 
 interface User {
@@ -15,7 +18,7 @@ interface User {
 }
 
 interface ApiLoginResponse {
-  user: User;
+  user: UserPublic;
 }
 
 interface ApiCheckIfExistsResponse {
@@ -46,6 +49,7 @@ interface UserType {
 const api = {
   call: callApi,
   login,
+  checkRememberMeToken,
   checkIfEmailExists,
   register,
   updateUser,
@@ -53,8 +57,26 @@ const api = {
 };
 export default api;
 
-async function login(email: string, password: string) {
-  return callApi<ApiLoginResponse, ApiLoginRequest>({ url: "/api/users/login", method: "POST", data: { email, password }});
+export interface LoginOptions {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+async function login({ email, password, rememberMe = false }: LoginOptions) {
+  return callApi<ApiLoginResponse, ApiLoginRequest>({
+    url: "/api/users/login",
+    method: "POST", 
+    data: { email, password, rememberMe }
+  });
+}
+
+async function checkRememberMeToken(token: string) {
+  return callApi<CheckTokenApiResponse, CheckTokenApiRequest>({
+    url: "/api/users/check-token",
+    method: "POST",
+    data: { token }
+  });
 }
 
 async function checkIfUsernameExists(username: string) {

@@ -2,7 +2,8 @@ import React from 'react';
 import { AppBar, Container, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Button, Tooltip, Avatar } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
-import { UserContextConsumer } from '../hooks/UserContext';
+import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
+import { UserPublic } from '../common/types/db';
 
 const pages = [
   { label: 'Home', route: '/' },
@@ -16,17 +17,23 @@ const loggedOutMenuItems = [
   { label: 'Register', route: '/register' }
 ];
 
-const settings = [
+interface AccountMenuItem {
+  label: string;
+  route?: string;
+  action?: (userContext: UserContextValue) => void;
+}
+
+const accountMenuItems: AccountMenuItem[] = [
   { label: 'My Account', route: "/account" }, 
   { label: 'Upload Data', route: "/upload" },
-  { label: 'Log out', route: "/logout" }
+  { label: 'Log out', action: (userContext) => userContext.logout() }
 ];
 
 interface UserMenuProps {
-  // ??
+  user: UserPublic
 }
 
-const UserMenu: React.FC<UserMenuProps> = () => {
+const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const [anchorElUser, setAnchorElUser] = React.useState<Element | null>(null);
   const handleOpenUserMenu: React.MouseEventHandler = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -39,7 +46,7 @@ const UserMenu: React.FC<UserMenuProps> = () => {
     <Box sx={{ flexGrow: 0 }}>
       <Tooltip title="Open settings">
         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-          <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+          <Avatar alt={user.letterboxdName} src={user.avatarUrl} />
         </IconButton>
       </Tooltip>
       <Menu
@@ -58,14 +65,37 @@ const UserMenu: React.FC<UserMenuProps> = () => {
         open={Boolean(anchorElUser)}
         onClose={handleCloseUserMenu}
       >
-        {settings.map((setting) => (
-          <MenuItem href={setting.route} key={setting.label} onClick={handleCloseUserMenu}>
-            <Typography textAlign="center">{setting.label}</Typography>
-          </MenuItem>
+        {accountMenuItems.map((item) => (
+          <AccountMenuItem item={item} handleClick={handleCloseUserMenu} />
         ))}
       </Menu>
     </Box>
   )
+}
+
+const AccountMenuItem: React.FC<{ item: AccountMenuItem, handleClick?: () => void }> = ({ item, handleClick = () => null }) => {
+  const userContext = useCurrentUser();
+  if (item.route) {
+    return (
+      <Link href={item.route} key={item.label} passHref>
+        <MenuItem onClick={handleClick}>
+          <Typography textAlign="center">{item.label}</Typography>
+        </MenuItem>
+      </Link>
+    );
+  }
+  if (item.action) {
+    const wrappedHandleClick = () => {
+      handleClick();
+      item.action && item.action(userContext);
+    };
+    return (
+      <MenuItem key={item.label} onClick={wrappedHandleClick}>
+        <Typography textAlign="center">{item.label}</Typography>
+      </MenuItem>
+    );
+  }
+  return null;
 }
 
 const LoggedOutMenu: React.FC = () => {
@@ -172,7 +202,7 @@ export function MainNav() {
                 ))}
               </Box>
               
-              {context?.user ? <UserMenu /> : <LoggedOutMenu />}
+              {context?.user ? <UserMenu user={context.user} /> : <LoggedOutMenu />}
               
             </Toolbar>
           </Container>

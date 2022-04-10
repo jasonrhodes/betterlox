@@ -32,26 +32,26 @@ const Loading: React.FC = () => (
   <Box><CircularProgress /></Box>
 );
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, children, avatarUrl, isPublic, maxWidth = 'lg' }) => {
+export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, children, isPublic, maxWidth = 'lg' }) => {
   const router = useRouter();
-  const { user } = useContext(UserContext);
+  const { user, validating } = useContext(UserContext);
   const [ready, setReady] = useState(false);
 
-  console.log({ ready, title, isPublic, user });
-
   useEffect(() => {
+    if (validating) {
+      return;
+    }
     if (!isPublic && !user) {
-      router.push('/');
+      const target = window.location.href.split('/').slice(3).join('/');
+      if (target) {
+        router.push(`/login?redirect=/${target}`);
+      } else {
+        router.push('/login');
+      }
     } else {
       setReady(true);
     }
-  }, [isPublic, user]);
-
-  const headingStyles = avatarUrl ? {
-    float: 'left',
-    width: 500,
-    lineHeight: '150px'
-  } : {};
+  }, [isPublic, user, validating]);
   
   return !ready ? null : (
     <>
@@ -72,8 +72,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, chi
           <Box>
             {backLink && backLink.url ? <BackLink {...backLink} /> : null}
             <Box>
-              {avatarUrl ? <BasicImage path={avatarUrl} shape='circle' sx={{ float: 'left', width: 150, height: 150, marginRight: '20px', border: '1px solid rgba(0,0,0,0.3)', boxShadow: '0 3px 4px rgba(0,0,0,0.3)' }} /> : null}
-              <Typography sx={headingStyles} component='h1' variant='h4' gutterBottom={true}><strong>{title}</strong></Typography>
+              <Typography component='h1' variant='h4' gutterBottom={true}><strong>{title}</strong></Typography>
             </Box>
           </Box>
           {children}

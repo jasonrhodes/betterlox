@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { LetterboxdAccountLevel } from "../../common/types/base";
+import { DBUser, UserPublic } from "../../common/types/db";
 import { db } from "../db/client";
 import ResponseError from "../ResponseError";
 
@@ -98,10 +99,18 @@ export async function getByEmail(email: string) {
     SELECT * FROM users
     WHERE email = ?
   `);
-  return stmt.get(email) as User | undefined;
+  return stmt.get(email) as DBUser | undefined;
 }
 
-export async function update(id: number, user: Partial<User>) {
+export async function getByRememberToken(token: string) {
+  const stmt = db.prepare<string>(`
+    SELECT * FROM users
+    WHERE rememberMeToken = ?
+  `);
+  return stmt.get(token) as DBUser | undefined;
+}
+
+export async function update(id: number, user: Partial<DBUser>) {
   const fields = Object.keys(user).map(field => `${field} = ?`);
   const stmt = db.prepare(`
     UPDATE users
@@ -112,27 +121,74 @@ export async function update(id: number, user: Partial<User>) {
   return stmt.run(...Object.values(user), id);
 }
 
-export async function checkLogin(email: string, password: string, rememberMe?: boolean) {
+export interface LoginResponse {
+  user: UserPublic;
+  rememberMeToken?: string;
+}
+
+function removeCredentials(user: DBUser): UserPublic {
+  const {
+    id,
+    email,
+    avatarUrl,
+    letterboxdUsername,
+    letterboxdName,
+    letterboxdAccountLevel,
+    rememberMeToken
+  } = user;
+  return {
+    id,
+    email,
+    avatarUrl,
+    letterboxdUsername,
+    letterboxdName,
+    letterboxdAccountLevel,
+    rememberMeToken
+  };
+}
+
+export async function checkLogin(email: string, password: string, rememberMe?: boolean): Promise<LoginResponse> {
   const user = await getByEmail(email);
   if (!user) {
+    console.log('No user found', email);
     throw new ResponseError(401, "Invalid username or password");
   }
-  const valid = hash(password, user.salt) === user.password;
+  const hashed = hash(password, user.salt);
+  const valid = hashed === user.password;
   if (!valid) {
+    console.log("Passwords don't match:", hashed, "|", user.password);
     throw new ResponseError(401, "Invalid username or password");
   }
+
+  const userPublic = removeCredentials(user);
 
   if (rememberMe) {
     // create remember me token, store in db, send it back
-    const token = await updateRememberMeToken(user.id);
-    return { user, token, rememberMe };
+    const rememberMeToken = await updateRememberMeToken(user.id);
+    userPublic.rememberMeToken = rememberMeToken;
   }
 
-  return { user, rememberMe };
+  return { user: userPublic };
 }
 
 export async function updateRememberMeToken(id: number) {
+  console.log('updating remember me token');
   const token = crypto.randomBytes(24).toString("hex");
+  console.log('using token', token);
   await update(id, { rememberMeToken: token });
   return token;
+}
+
+export async function clearRememberMeToken(id: number) {
+  return update(id, { rememberMeToken: null });
+}
+
+export async function checkToken(token: string) {
+  const user = await getByRememberToken(token);
+
+  if (!user) {
+    throw new ResponseError(404, 'Remember me token not found');
+  }
+  
+  return { user: removeCredentials(user) };
 }
