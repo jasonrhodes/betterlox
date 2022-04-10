@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { MoviesForActorTable } from '../../../components/MoviesForActorTable';
 import { useApi } from '../../../hooks/useApi';
 import { PageTemplate } from '../../../components/PageTemplate';
-import { GetMoviesForActorAndUserResponse } from '../../../common/apiTypes';
+import { GetMoviesForActorAndUserResponse } from '../../../common/types/api';
 import { LinearProgress } from '@mui/material';
 
 const ActorsPage: NextPage = () => {

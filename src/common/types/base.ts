@@ -1,0 +1,1 @@
+export type LetterboxdAccountLevel = 'basic' | 'pro' | 'patron';

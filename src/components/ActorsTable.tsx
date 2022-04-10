@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DataGrid } from "@mui/x-data-grid";
-import { GetActorsForUserResponse } from '../common/apiTypes';
+import { GetActorsForUserResponse } from '../common/types/api';
 import Link from './Link';
 import CreditControls from './CreditControls';
 import { useApi } from '../hooks/useApi';

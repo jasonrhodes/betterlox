@@ -1,5 +1,5 @@
 import { NextApiHandler } from "next";
-import { RatedTmdbCast } from "../../../../../common/models";
+import { RatedTmdbCast } from "../../../../../common/types/db";
 import { getMoviesForActorAndUser, getAverageRatingForActor, getPerson } from "../../../../../lib/db/client";
 import { tmdb, TmdbCast, TmdbCrew } from "../../../../../lib/tmdb";
 import { numericQueryParam } from "../../../../../lib/queryParams";

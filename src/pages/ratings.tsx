@@ -2,7 +2,7 @@ import React from 'react';
 import type { NextPage } from 'next';
 import { Box, LinearProgress, Container, Typography, Button } from '@mui/material';
 import { DataGrid } from "@mui/x-data-grid";
-import { GetRatingsForUserResponse } from '../common/apiTypes';
+import { GetRatingsForUserResponse } from '../common/types/api';
 import { useApi } from '../hooks/useApi';
 import { StarRating } from '../components/StarRating';
 import { PageTemplate } from '../components/PageTemplate';

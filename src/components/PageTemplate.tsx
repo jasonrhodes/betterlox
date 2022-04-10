@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import Head from 'next/head';
-import { Avatar, Box, Button, CircularProgress, Container, Typography } from '@mui/material';
+import { Avatar, Box, Breakpoint, Button, CircularProgress, Container, Typography } from '@mui/material';
 import { MainNav } from "./MainNav";
 import Link from 'next/link';
 import { BasicImage } from './images';
@@ -17,6 +17,7 @@ export interface PageTemplateProps {
   isPublic?: boolean;
   backLink?: BackLinkProps;
   avatarUrl?: string;
+  maxWidth?: false | Breakpoint;
 }
 
 const BackLink: React.FC<BackLinkProps> = ({ url, text = 'Go Back' }) => {
@@ -31,7 +32,7 @@ const Loading: React.FC = () => (
   <Box><CircularProgress /></Box>
 );
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, children, avatarUrl, isPublic }) => {
+export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, children, avatarUrl, isPublic, maxWidth = 'lg' }) => {
   const router = useRouter();
   const { user } = useContext(UserContext);
   const [ready, setReady] = useState(false);
@@ -55,7 +56,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, chi
   return !ready ? null : (
     <>
       <MainNav />
-      <Container maxWidth="lg">
+      <Container maxWidth={maxWidth}>
         <Head>
           <title>{title}</title>
           <link rel="icon" href="/favicon.ico" />
@@ -72,7 +73,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, chi
             {backLink && backLink.url ? <BackLink {...backLink} /> : null}
             <Box>
               {avatarUrl ? <BasicImage path={avatarUrl} shape='circle' sx={{ float: 'left', width: 150, height: 150, marginRight: '20px', border: '1px solid rgba(0,0,0,0.3)', boxShadow: '0 3px 4px rgba(0,0,0,0.3)' }} /> : null}
-              <Typography sx={headingStyles} variant='h3' gutterBottom={true}>{title}</Typography>
+              <Typography sx={headingStyles} component='h1' variant='h4' gutterBottom={true}><strong>{title}</strong></Typography>
             </Box>
           </Box>
           {children}

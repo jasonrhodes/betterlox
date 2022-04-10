@@ -1,20 +1,23 @@
+/**
+ * TODO: This file should be broken into models and moved
+ * into models/{model-file} to keep things organized
+ * 
+ */
 import Database from "better-sqlite3";
 import { setupTables, SetupTableOptions } from "./setup";
 import { TmdbMovie, TmdbPerson } from "../tmdb";
-import path from "path";
 
 import {
+  ActorResult,
   GetActorsForUserOptions,
   GetMoviesForActorAndUserOptions,
   GetRatingsForUserOptions,
   RatingResult
-} from "../../common/apiTypes";
-import { Person, Movie, RatedMovie } from "../../common/models";
+} from "../../common/types/api";
+import { Person, Movie, RatedMovie } from "../../common/types/db";
 
 const dbPath = "./.db/movies.db";
-const db = new Database(dbPath);
-
-console.log("DB loaded from", dbPath, path.resolve(dbPath));
+export const db = new Database(dbPath);
 
 type Optional<T> = T | undefined | null;
 
@@ -24,11 +27,6 @@ interface InitializeOptions {
 
 export async function initialize(options: InitializeOptions = {}) {
   await setupTables(options.tables);
-}
-
-export async function run(query: string, replacements: unknown[] = []) {
-  const statement = db.prepare(query);
-  return statement.run(...replacements);
 }
 
 export async function getMovie(movieId: number) {
@@ -300,13 +298,14 @@ interface FindMissingPersonResult {
 
 export async function findMissingCastMembers({
   limit,
-}: FindMissingPeopleOptions = {}) {
+}: FindMissingPeopleOptions = {}): Promise<number[]> {
   const stmt = db.prepare(`
     SELECT DISTINCT(join_movies_cast.person_id)
     FROM join_movies_cast
     LEFT JOIN people
     ON join_movies_cast.person_id = people.id
     WHERE people.id IS NULL
+    ${limit ? `LIMIT ${limit}` : ''}
   `);
 
   const result = stmt.all() as FindMissingPersonResult[];
@@ -315,13 +314,14 @@ export async function findMissingCastMembers({
 
 export async function findMissingCrewMembers({
   limit,
-}: FindMissingPeopleOptions = {}) {
-  const stmt = db.prepare(`
+}: FindMissingPeopleOptions = {}): Promise<number[]> {
+  let stmt = db.prepare(`
     SELECT DISTINCT(join_movies_crew.person_id)
     FROM join_movies_crew
     LEFT JOIN people
     ON join_movies_crew.person_id = people.id
     WHERE people.id IS NULL
+    ${limit ? `LIMIT ${limit}` : ''}
   `);
 
   const result = stmt.all() as FindMissingPersonResult[];
@@ -330,30 +330,18 @@ export async function findMissingCrewMembers({
 
 export async function getRatingsForUser({
   userId
-}: GetRatingsForUserOptions) {
+}: GetRatingsForUserOptions): Promise<RatingResult[]> {
 
-  try {
-    const stmt = db.prepare<[number]>(`
-      SELECT ratings.rating, ratings.date, ratings.year, movies.title, movies.poster_path
-      FROM ratings
-      INNER JOIN movies
-      ON ratings.movie_id = movies.id
-      WHERE user_id = ?
-      ORDER BY date DESC;
-    `);
+  const stmt = db.prepare<[number]>(`
+    SELECT ratings.rating, ratings.date, ratings.year, movies.title, movies.poster_path
+    FROM ratings
+    INNER JOIN movies
+    ON ratings.movie_id = movies.id
+    WHERE user_id = ?
+    ORDER BY date DESC;
+  `);
 
-    try {
-      const results = await stmt.all(userId) as RatingResult[];
-      console.log("results returned", results.length);
-      return results;
-    } catch (err) {
-      console.log("Error while running stmt.all()", err);
-      return false;
-    }
-  } catch (err) {
-    console.log("Error while preparing query", err);
-    return false;
-  }
+  return stmt.all(userId);
 }
 
 export async function getActorsForUser({
@@ -361,8 +349,7 @@ export async function getActorsForUser({
   orderBy = "count",
   order = "DESC",
   castOrderThreshold = 15
-}: GetActorsForUserOptions) {
-  console.log("GEtTing AcTorS for USrer]", { userId, orderBy, order, castOrderThreshold });
+}: GetActorsForUserOptions): Promise<ActorResult[]> {
   // NOTE: if you add/remove selected values here, they should map to type ActorResult
   const stmt = db.prepare<[number, number]>(`
     SELECT p.id, p.name, COUNT(m.title) AS count, AVG(r.rating) AS avg_rating, AVG(jmc.cast_order) as avg_cast_order, p.known_for_department, p.popularity, p.profile_path
@@ -379,15 +366,15 @@ export async function getActorsForUser({
     ORDER BY ${orderBy} ${order};
   `);
 
-  return stmt.all(userId, castOrderThreshold)
+  return stmt.all(userId, castOrderThreshold);
 }
 
 export async function getMoviesForActorAndUser({
   userId,
   actorId,
   castOrderThreshold = 15
-}: GetMoviesForActorAndUserOptions) {
-  console.log("Getting movies for Actor and User, cast order threshold:", castOrderThreshold);
+}: GetMoviesForActorAndUserOptions): Promise<RatedMovie[]> {
+
   const stmt = db.prepare<[number, number, number]>(`
     SELECT movies.*, ratings.rating, ratings.year
     FROM movies
@@ -401,7 +388,7 @@ export async function getMoviesForActorAndUser({
     ORDER BY release_date ASC;
   `);
 
-  return stmt.all(userId, actorId, castOrderThreshold) as RatedMovie[];
+  return stmt.all(userId, actorId, castOrderThreshold);
 }
 
 export async function getAverageRatingForActor({

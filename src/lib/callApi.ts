@@ -1,4 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { LetterboxdAccountLevel } from "../common/types/base";
+import { ApiGetLetterboxdDetailsResponse } from "../pages/api/letterboxd";
 
 const client = axios.create();
 
@@ -21,6 +23,14 @@ interface ApiCheckIfExistsResponse {
   user?: Record<string, any>;
 }
 
+export interface ApiRegisterOptions {
+  email: string;
+  password: string;
+  avatarUrl: string;
+  letterboxdUsername: string;
+  letterboxdName: string;
+  letterboxdAccountLevel: LetterboxdAccountLevel;
+}
 interface ApiRegisterResponse {
   created: boolean;
   username: string;
@@ -33,11 +43,18 @@ interface UserType {
   password: string;
 }
 
-const api = { call: callApi, login, checkIfEmailExists, register, updateUser };
+const api = {
+  call: callApi,
+  login,
+  checkIfEmailExists,
+  register,
+  updateUser,
+  getLetterboxdUserDetails
+};
 export default api;
 
 async function login(email: string, password: string) {
-  return callApi<ApiLoginResponse, ApiLoginRequest>({ url: "/api/login", method: "POST", data: { email, password }});
+  return callApi<ApiLoginResponse, ApiLoginRequest>({ url: "/api/users/login", method: "POST", data: { email, password }});
 }
 
 async function checkIfUsernameExists(username: string) {
@@ -48,14 +65,19 @@ async function checkIfEmailExists(email: string) {
   return callApi<ApiCheckIfExistsResponse>({ url: "/api/users/find", params: { email }})
 }
 
-async function register(email: string, password: string, username?: string) {
-  return callApi<ApiRegisterResponse>({ url: "/api/users", method: "POST", data: { email, password, username }});
+async function register(data: ApiRegisterOptions) {
+  console.log('About to register', data);
+  return callApi<ApiRegisterResponse, ApiRegisterOptions>({ url: "/api/users/register", method: "POST", data });
 }
 
 async function updateUser({ id, ...user }: { id: number } & Partial<UserType>) {
-  return await callApi({ url: `/api/users/${id}`, method: "PUT", data: user });
+  return callApi({ url: `/api/users/${id}`, method: "PUT", data: user });
+}
+
+async function getLetterboxdUserDetails(username: string) {
+  return callApi<ApiGetLetterboxdDetailsResponse>({ url: `/api/letterboxd?username=${username}` })
 }
 
 async function callApi<T = unknown, D = unknown>(options: AxiosRequestConfig<D> = {}) {
-  return await client.request<T>(options);
+  return client.request<T>(options);
 }
