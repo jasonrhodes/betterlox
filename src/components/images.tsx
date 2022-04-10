@@ -1,6 +1,7 @@
 import React from "react";
 import { Avatar } from "@mui/material";
 import useImageConfigs from "../hooks/useImageConfigs";
+import Image from "next/image";
 
 const indexedSizes = ["smallest", "small", "medium", "large", "largest"];
 
@@ -14,9 +15,10 @@ export interface BasicImageProps {
   type?: ImageType;
   path: string;
   sx?: Record<string, any>;
+  alt?: string;
 }
 
-export const BasicImage: React.FC<BasicImageProps> = ({ path, type = "profile", size = "medium", shape = "default", sx = {} }) => {
+export const BasicImage: React.FC<BasicImageProps> = ({ path, type = "profile", size = "medium", shape = "default", sx = {}, alt = "no alt provided" }) => {
   const config = useImageConfigs();
   const sizes = config[`${type}_sizes`] || [];
   const index = (size === "smallest") ? 0 : (size === "largest") ? sizes.length - 1 : indexedSizes.indexOf(size);
@@ -29,6 +31,6 @@ export const BasicImage: React.FC<BasicImageProps> = ({ path, type = "profile", 
   }
 
   return (
-    <img src={url} style={sx} />
+    <Image src={url} alt={alt} />
   );
 }

@@ -66,7 +66,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
         onClose={handleCloseUserMenu}
       >
         {accountMenuItems.map((item) => (
-          <AccountMenuItem item={item} handleClick={handleCloseUserMenu} />
+          <AccountMenuItem key={item.label} item={item} handleClick={handleCloseUserMenu} />
         ))}
       </Menu>
     </Box>
@@ -77,7 +77,7 @@ const AccountMenuItem: React.FC<{ item: AccountMenuItem, handleClick?: () => voi
   const userContext = useCurrentUser();
   if (item.route) {
     return (
-      <Link href={item.route} key={item.label} passHref>
+      <Link href={item.route} passHref>
         <MenuItem onClick={handleClick}>
           <Typography textAlign="center">{item.label}</Typography>
         </MenuItem>
@@ -90,7 +90,7 @@ const AccountMenuItem: React.FC<{ item: AccountMenuItem, handleClick?: () => voi
       item.action && item.action(userContext);
     };
     return (
-      <MenuItem key={item.label} onClick={wrappedHandleClick}>
+      <MenuItem onClick={wrappedHandleClick}>
         <Typography textAlign="center">{item.label}</Typography>
       </MenuItem>
     );

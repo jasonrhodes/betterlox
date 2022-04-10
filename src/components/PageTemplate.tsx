@@ -22,7 +22,7 @@ export interface PageTemplateProps {
 
 const BackLink: React.FC<BackLinkProps> = ({ url, text = 'Go Back' }) => {
   return (
-    <Link href={url}>
+    <Link href={url} passHref>
       <Button>← {text}</Button>
     </Link>
   );
@@ -51,7 +51,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, backLink, chi
     } else {
       setReady(true);
     }
-  }, [isPublic, user, validating]);
+  }, [isPublic, user, validating, router]);
   
   return !ready ? null : (
     <>
