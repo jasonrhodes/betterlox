@@ -54,6 +54,6 @@
     ".next/cache"
   ],
   "engines": {
-    "node": ">16.9.0"
+    "node": "16.13.0"
   }
 }

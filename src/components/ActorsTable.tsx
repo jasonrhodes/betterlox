@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DataGrid } from "@mui/x-data-grid";
-import { GetActorsForUserResponse } from '../common/types/api';
+import { ActorResult, GetActorsForUserResponse } from '../common/types/api';
 import Link from './Link';
 import CreditControls from './CreditControls';
 import { useApi } from '../hooks/useApi';
@@ -18,7 +18,7 @@ export function ActorsTable({ response }: ActorsTableProps) {
 
   return (
     <DataGrid
-      getRowId={(row) => row.profile_path || row.name}
+      getRowId={(row) => row.profile_path || row.name!}
       sx={{
         width: '100%'
       }}
