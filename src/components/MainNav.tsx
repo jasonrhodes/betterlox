@@ -4,6 +4,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
 import { UserPublic } from '../common/types/db';
+import Image from "next/image";
 
 const pages = [
   { label: 'Home', route: '/' },
@@ -127,18 +128,26 @@ export function MainNav() {
   return (
     <UserContextConsumer>
       {context => (
-        <AppBar position="static">
+        <AppBar position="static" elevation={0}>
           <Container maxWidth="xl">
             <Toolbar disableGutters>
               <Link href="/" passHref>
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ fontWeight: 700, mr: 2, display: { xs: 'none', md: 'flex' } }}
-                >
-                  BETTERLOX
-                </Typography>
+                <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
+                  <Image
+                    alt="BETTERLOX"
+                    src="/img/iconmonstr-fish-1-240.png"
+                    height={40}
+                    width={40}
+                  />
+                  <Typography
+                    variant="h6"
+                    noWrap
+                    component="div"
+                    sx={{ fontWeight: 700, mx: 2, lineHeight: 2 }}
+                  >
+                    BETTERLOX
+                  </Typography>
+                </Box>
               </Link>
 
               <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -180,14 +189,22 @@ export function MainNav() {
                 </Menu>
               </Box>
               <Link href="/" passHref>
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ fontWeight: 900, flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
-                >
-                  BETTERLOX
-                </Typography>
+                <Box sx={{ cursor: "pointer", flexGrow: 1, display: { xs: 'flex', md: 'none' }}}>
+                  <Image
+                    alt="BETTERLOX"
+                    src="/img/iconmonstr-fish-1-240.png"
+                    height={40}
+                    width={40}
+                  />
+                  <Typography
+                    variant="h6"
+                    noWrap
+                    component="div"
+                    sx={{ fontWeight: 900, lineHeight: 2, mx: 1 }}
+                  >
+                    BETTERLOX
+                  </Typography>
+                </Box>
               </Link>
               <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 {pages.map((page) => (

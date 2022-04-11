@@ -1,10 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import Head from 'next/head';
-import { Avatar, Box, Breakpoint, Button, CircularProgress, Container, Typography } from '@mui/material';
+import { Box, Breakpoint, Button, CircularProgress, Container, Typography } from '@mui/material';
 import { MainNav } from "./MainNav";
 import Link from 'next/link';
-import { BasicImage } from './images';
-import { UserContext, UserContextConsumer } from '../hooks/UserContext';
+import { UserContext } from '../hooks/UserContext';
 import { useRouter } from 'next/router';
 
 export interface BackLinkProps {
