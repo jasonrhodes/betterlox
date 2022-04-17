@@ -95,19 +95,19 @@ export async function create({ email, password, letterboxd, avatarUrl, rememberM
 }
 
 export async function getByEmail(email: string) {
-  const stmt = db.prepare<string>(`
+  const stmt = db.prepare<[string], DBUser>(`
     SELECT * FROM users
     WHERE email = ?
   `);
-  return stmt.get(email) as DBUser | undefined;
+  return stmt.get(email);
 }
 
 export async function getByRememberToken(token: string) {
-  const stmt = db.prepare<string>(`
+  const stmt = db.prepare<[string], DBUser>(`
     SELECT * FROM users
     WHERE rememberMeToken = ?
   `);
-  return stmt.get(token) as DBUser | undefined;
+  return stmt.get(token);
 }
 
 export async function update(id: number, user: Partial<DBUser>) {

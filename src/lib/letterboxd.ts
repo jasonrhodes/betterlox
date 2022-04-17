@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
+import { Rating } from "../common/types/db";
 // import { Cast, Crew } from "moviedb-promise/dist/request-types";
 const MAX_TRIES = 5;
 
@@ -27,6 +28,10 @@ async function tryLetterboxd(
   url: string,
   tries: number = 0
 ): Promise<AxiosResponse<any, any>> {
+  if (!url.startsWith('http')) {
+    url = `https://letterboxd.com${url}`;
+  }
+
   if (tries >= MAX_TRIES) {
     throw new Error(`Exceeded max tries while attempting to reach ${url}`);
   }
@@ -110,4 +115,51 @@ export async function getUserDetails(username: string) {
   };
 }
 
-// src="data:image/jpeg;base64,{{ base64 string }}"
+interface ScrapeRatingsRecurseOptions {
+  totalSynced?: number;
+  page?: number;
+}
+
+export async function scrapeRatings(username: string, page: number) {
+  const { data } = await tryLetterboxd(
+    `https://letterboxd.com/${username}/films/ratings/page/${page}`
+  );
+  const $ = cheerio.load(data);
+  const ratings = $('.poster-list li');
+  if (!ratings.length) {
+    return { ratings: [] };
+  }
+
+  // process ratings
+  const processed = ratings.map(async (i, item) => {
+    const r: Partial<Rating> = {};
+    const ratingData = $(item).find('.film-poster').data();
+    if (typeof ratingData.filmSlug === "string") {
+      const { data } = await tryLetterboxd(ratingData.filmSlug);
+      const $$ = cheerio.load(data);
+      const { tmdbId } = $$("body").data();
+      const id = Number(tmdbId);
+      if (!isNaN(id)) {
+        r.movie_id = id;
+      }
+    }
+    const name = $(item).find("img").attr().alt;
+    if (typeof name === "string") {
+      r.name = name;
+    }
+
+    const stars = $(item).find("span.rating").attr().class;
+    if (typeof stars === "string") {
+      r.rating = Number(stars.substring(13)) / 2;
+    }
+
+    const rateDate = $(item).find("time").attr().datetime;
+    if (typeof rateDate === "string") {
+      r.date = rateDate.substring(0, 10);
+    }
+
+    return r;
+  }).get();
+
+  return { ratings: processed };
+}

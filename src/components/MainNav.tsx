@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
 import { UserPublic } from '../common/types/db';
 import Image from "next/image";
+import { pink } from "@mui/material/colors";
 
 const pages = [
   { label: 'Home', route: '/' },
@@ -26,7 +27,7 @@ interface AccountMenuItem {
 
 const accountMenuItems: AccountMenuItem[] = [
   { label: 'My Account', route: "/account" }, 
-  { label: 'Upload Data', route: "/upload" },
+  { label: 'Sync Letterboxd Data', route: "/account/sync" },
   { label: 'Log out', action: (userContext) => userContext.logout() }
 ];
 
@@ -115,6 +116,15 @@ const LoggedOutMenu: React.FC = () => {
   )
 }
 
+const Logo: React.FC = () => (
+  <Image
+    alt="BETTERLOX"
+    src="/img/lockup-cyan400.png"
+    height={40}
+    width={214}
+  />
+);
+
 export function MainNav() {
   const [anchorElNav, setAnchorElNav] = React.useState<Element | null>(null);
   
@@ -133,20 +143,7 @@ export function MainNav() {
             <Toolbar disableGutters>
               <Link href="/" passHref>
                 <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
-                  <Image
-                    alt="BETTERLOX"
-                    src="/img/iconmonstr-fish-1-240.png"
-                    height={40}
-                    width={40}
-                  />
-                  <Typography
-                    variant="h6"
-                    noWrap
-                    component="div"
-                    sx={{ fontWeight: 700, mx: 2, lineHeight: 2 }}
-                  >
-                    BETTERLOX
-                  </Typography>
+                  <Logo />
                 </Box>
               </Link>
 
@@ -190,20 +187,7 @@ export function MainNav() {
               </Box>
               <Link href="/" passHref>
                 <Box sx={{ cursor: "pointer", flexGrow: 1, display: { xs: 'flex', md: 'none' }}}>
-                  <Image
-                    alt="BETTERLOX"
-                    src="/img/iconmonstr-fish-1-240.png"
-                    height={40}
-                    width={40}
-                  />
-                  <Typography
-                    variant="h6"
-                    noWrap
-                    component="div"
-                    sx={{ fontWeight: 900, lineHeight: 2, mx: 1 }}
-                  >
-                    BETTERLOX
-                  </Typography>
+                  <Logo />
                 </Box>
               </Link>
               <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>

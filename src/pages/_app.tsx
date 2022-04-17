@@ -8,14 +8,14 @@ import { UserContextProvider } from '../hooks/UserContext';
 import { CookiesProvider } from 'react-cookie';
 
 const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#3f51b5',
-    },
-    secondary: {
-      main: '#f50057',
-    },
-  },
+  // palette: {
+  //   primary: {
+  //     main: '#FA8072', // salmon pink - tetradic theme: https://www.canva.com/colors/color-wheel/print/fa8072+a8fa72+72ecfa+c472fa/
+  //   },
+  //   secondary: {
+  //     main: '#72ECFA', // blue
+  //   },
+  // },
   typography: {
     fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
   },
