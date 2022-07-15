@@ -1,5 +1,5 @@
 import { NextApiHandler } from "next";
-import { addRating } from "../../../../lib/db/client";
+import { addRating } from "../../../../db/client";
 import { scrapeRatings } from "../../../../lib/letterboxd";
 import { numericQueryParam } from "../../../../lib/queryParams";
 import { SqliteError } from "better-sqlite3";

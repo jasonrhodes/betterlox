@@ -1,13 +1,12 @@
 import { NextApiHandler } from "next";
 import { UserPublic } from "../../../common/types/db";
-import { checkLogin, User } from "../../../lib/models/users";
+import { UserRepository, UserRepoError } from "../../../db/repositories/UserRepo";
+import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
-import ResponseError from "../../../lib/ResponseError";
 
 interface LoginApiResponseSuccess {
   success: true;
   user: UserPublic;
-  rememberMeToken?: string;
 }
 
 interface LoginApiResponseFailure {
@@ -23,11 +22,14 @@ const LoginRoute: NextApiHandler<LoginApiResponse> = async (req, res) => {
   const rememberMe = Boolean(singleQueryParam(req.body.rememberMe));
 
   try {
-    const { user, rememberMeToken } = await checkLogin(email, password, rememberMe);
-    res.json({ success: true, user, rememberMeToken });
+    const { user } = await UserRepository.login(email, password, rememberMe);
+    res.json({ success: true, user });
   } catch (error: unknown) {
-    if (error instanceof ResponseError) {
+    if (error instanceof UserRepoError) {
+      res.statusCode = 401;
       res.json({ success: false, errorMessage: error.message });
+    } else {
+      handleGenericError(error, res);
     }
   }
 }

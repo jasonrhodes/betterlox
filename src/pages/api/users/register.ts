@@ -1,13 +1,13 @@
 import { NextApiHandler } from "next";
-import { create, User, UserLetterboxdDetails } from "../../../lib/models/users";
+import { TypeORMError } from "typeorm";
+import { UserPublic } from "../../../common/types/db";
+import { UserRepository } from "../../../db/repositories/UserRepo";
+import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
-import ResponseError from "../../../lib/ResponseError";
 
 interface RegisterApiResponseSuccess {
   success: true;
-  rememberMe: boolean;
-  created: Omit<User, "password" | "salt">;
-  token?: string;
+  created: UserPublic;
 }
 
 interface RegisterApiResponseFailure {
@@ -18,19 +18,19 @@ interface RegisterApiResponseFailure {
 type RegisterApiResponse = RegisterApiResponseSuccess | RegisterApiResponseFailure;
 
 const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
-  const opts: Record<string, string | boolean> = {};
-  opts.email = singleQueryParam(req.body.email);
-  opts.password = singleQueryParam(req.body.password);
-  opts.avatarUrl = singleQueryParam(req.body.avatarUrl);
-  opts.letterboxdUsername = singleQueryParam(req.body.letterboxdUsername);
-  opts.letterboxdName = singleQueryParam(req.body.letterboxdName);
-  opts.letterboxdAccountLevel = singleQueryParam(req.body.letterboxdAccountLevel);
-  opts.rememberMe = Boolean(singleQueryParam(req.body.rememberMe));
+  const userOptions: Record<string, string | boolean> = {};
+  userOptions.email = singleQueryParam(req.body.email);
+  userOptions.password = singleQueryParam(req.body.password);
+  userOptions.avatarUrl = singleQueryParam(req.body.avatarUrl);
+  userOptions.username = singleQueryParam(req.body.letterboxdUsername);
+  userOptions.name = singleQueryParam(req.body.letterboxdName);
+  userOptions.letterboxdAccountLevel = singleQueryParam(req.body.letterboxdAccountLevel) || 'basic';
+  userOptions.rememberMe = Boolean(singleQueryParam(req.body.rememberMe));
 
   const missingRequiredKeys = [];
 
   for (let key of ['email', 'password', 'avatarUrl', 'letterboxdUsername', 'letterboxdName', 'letterboxdAccountLevel']) {
-    if (!opts[key]) {
+    if (!userOptions[key]) {
       missingRequiredKeys.push(key);
     }
   }
@@ -39,35 +39,20 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     res.status(400).json({ success: false, errorMessage: `Missing required properties ${missingRequiredKeys.join(', ')}`});
     return;
   }
-
-  const letterboxd: UserLetterboxdDetails = {
-    username: opts.letterboxdUsername,
-    name: opts.letterboxdName,
-    accountLevel: opts.letterboxdAccountLevel === 'pro'
-      ? 'pro'
-      : opts.letterboxdAccountLevel === 'patron'
-        ? 'patron'
-        : 'basic'
-  }
-
-  console.log('create request received');
+  
+  // validate lb account level? use enum column type in entity ...
 
   try {
-    const { created, token } = await create({
-      email: opts.email,
-      password: opts.password,
-      letterboxd,
-      avatarUrl: opts.avatarUrl
-    });
-    res.json({ success: true, rememberMe: opts.rememberMe, created, token });
+    const user = UserRepository.create(userOptions);
+    await UserRepository.save(user);
+    res.json({ success: true, created: user });
   } catch (error: unknown) {
-    if (error instanceof ResponseError) {
-      res.status(error.statusCode).json({ success: false, errorMessage: error.message });
-    } else if (error instanceof Error) {
-      res.status(500).json({ success: false, errorMessage: error.message })
+    // TODO: Need to inspect error that comes back if email already exists
+    if (error instanceof TypeORMError) {
+      res.statusCode = 400;
+      res.json({ success: false, errorMessage: error.message });
     } else {
-      console.log('Unknown error that is not an instance of Error?', error);
-      res.status(500).json({ success: false, errorMessage: 'Unknown error occurred' })
+      handleGenericError(error, res);
     }
   }
 }

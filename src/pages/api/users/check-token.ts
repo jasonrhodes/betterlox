@@ -1,8 +1,8 @@
 import { NextApiHandler } from "next";
 import { UserPublic } from "../../../common/types/db";
-import { checkLogin, checkToken, User } from "../../../lib/models/users";
+import { UserRepoError, UserRepository } from "../../../db/repositories/UserRepo";
+import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
-import ResponseError from "../../../lib/ResponseError";
 
 interface CheckTokenApiResponseSuccess {
   success: true;
@@ -24,11 +24,14 @@ const CheckTokenRoute: NextApiHandler<CheckTokenApiResponse> = async (req, res) 
   const token = singleQueryParam(req.body.token);
 
   try {
-    const { user } = await checkToken(token);
+    const { user } = await UserRepository.getUserByRememberMeToken(token);
     res.json({ success: true, user });
   } catch (error: unknown) {
-    if (error instanceof ResponseError) {
+    if (error instanceof UserRepoError) {
+      res.statusCode = 404;
       res.json({ success: false, errorMessage: error.message });
+    } else {
+      handleGenericError(error, res);
     }
   }
 }

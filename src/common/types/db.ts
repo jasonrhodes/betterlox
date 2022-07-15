@@ -1,5 +1,6 @@
 import { TmdbCast } from "../../lib/tmdb";
-import { LetterboxdAccountLevel } from "./base";
+import { User } from "../../db/entities/User";
+import { Entity } from "typeorm";
 
 export interface Person {
   biography: string;
@@ -41,19 +42,7 @@ export interface Rating {
   year?: number;
 }
 
-export interface DBUser {
-  id: number;
-  email: string;
-  password: string;
-  salt: string;
-  avatarUrl: string;
-  letterboxdUsername: string;
-  letterboxdName: string;
-  letterboxdAccountLevel: LetterboxdAccountLevel;
-  rememberMeToken?: string | null;
-}
-
-export type UserPublic = Omit<DBUser, "password" | "salt">;
+export type UserPublic = Omit<User, "password" | "salt" | "prepareUser">;
 
 export type RatedMovie = Movie & Pick<Rating, "rating" | "year">;
 
