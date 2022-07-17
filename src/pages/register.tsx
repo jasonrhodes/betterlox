@@ -8,7 +8,7 @@ import { RegistrationForm } from '../components/RegistrationForm';
 const RegisterPage: NextPage = () => {
   const router = useRouter();
   return (
-    <PageTemplate title="Create Account" isPublic={true} maxWidth='sm'>
+    <PageTemplate title="Create Account" maxWidth='sm'>
       <UserContextConsumer>
         {context => {
           if (!context) {

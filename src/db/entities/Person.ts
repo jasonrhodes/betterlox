@@ -1,10 +1,10 @@
 
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, OneToMany, Relation } from "typeorm";
 import { CastRole } from "./CastRole";
 import { CrewRole } from "./CrewRole";
 
 @Entity('people')
-export class Person extends BaseEntity {
+export class Person {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,24 +23,24 @@ export class Person extends BaseEntity {
   @Column({ nullable: true })
   gender: number;
 
-  @Column({ nullable: true, name: "imdb_id" })
+  @Column({ nullable: true })
   imdbId: number;
 
-  @Column({ nullable: true, name: "known_for_department" })
+  @Column({ nullable: true })
   knownForDepartment: string;
 
-  @Column({ nullable: true, name: "place_of_birth" })
+  @Column({ nullable: true })
   placeOfBirth: string;
 
   @Column({ nullable: true })
   popularity: number;
 
-  @Column({ nullable: true, name: "profile_path" })
+  @Column({ nullable: true })
   profilePath: string;
 
   @OneToMany(() => CastRole, (cast) => cast.actor)
-  castRoles: CastRole[];
+  castRoles: Relation<CastRole[]>;
 
   @OneToMany(() => CrewRole, (crew) => crew.person)
-  crewRoles: CrewRole[];
+  crewRoles: Relation<CrewRole[]>;
 }

@@ -1,13 +1,13 @@
-import { BaseEntity, Entity, PrimaryColumn, Column, OneToMany, ManyToOne } from "typeorm";
+import { BaseEntity, Entity, PrimaryColumn, Column, ManyToOne, Relation, JoinColumn } from "typeorm";
 import { Movie } from "./Movie";
 import { User } from "./User";
 
 @Entity("ratings")
 export class Rating extends BaseEntity {
-  @PrimaryColumn({ name: "user_id" })
+  @PrimaryColumn()
   userId: number;
 
-  @PrimaryColumn({ name: "movie_id" })
+  @PrimaryColumn()
   movieId: number;
 
   @Column({ type: "float" })
@@ -23,8 +23,10 @@ export class Rating extends BaseEntity {
   year: number;
 
   @ManyToOne(() => Movie, (movie) => movie.ratings)
-  movie: Movie;
+  @JoinColumn({ name: 'movieId' })
+  movie: Relation<Movie>;
 
   @ManyToOne(() => User, (user) => user.ratings)
-  user: User;
+  @JoinColumn({ name: 'userId' })
+  user: Relation<User>;
 }

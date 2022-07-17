@@ -1,6 +1,6 @@
 import { NextApiHandler } from "next";
 import { UserPublic } from "../../../common/types/db";
-import { UserRepository, UserRepoError } from "../../../db/repositories/UserRepo";
+import { getUserRepository, UserRepoError } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
 
@@ -20,6 +20,10 @@ const LoginRoute: NextApiHandler<LoginApiResponse> = async (req, res) => {
   const email = singleQueryParam(req.body.email);
   const password = singleQueryParam(req.body.password);
   const rememberMe = Boolean(singleQueryParam(req.body.rememberMe));
+
+  console.log("In Login Route");
+
+  const UserRepository = await getUserRepository();
 
   try {
     const { user } = await UserRepository.login(email, password, rememberMe);

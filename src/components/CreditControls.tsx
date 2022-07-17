@@ -9,7 +9,8 @@ interface CastControlsProps {
 const CreditControls: React.FC<CastControlsProps> = ({ castOrderThreshold, setCastOrderThreshold }) => {
   return (
     <Box>
-      <Typography>Cast Order Threshold: <Chip label={castOrderThreshold} /></Typography>
+      <Typography>Cast Order Threshold:</Typography>
+      <Chip label={castOrderThreshold} />
       <Slider
         defaultValue={castOrderThreshold}
         step={1}

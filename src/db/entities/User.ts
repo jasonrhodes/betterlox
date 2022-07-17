@@ -1,5 +1,4 @@
-import options from "cheerio/lib/options";
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique, Relation } from "typeorm";
 import { getSalt, hash, getRememberMeToken } from "../../lib/hashPassword";
 import { Rating } from "./Rating";
 
@@ -24,10 +23,10 @@ export class User {
   @Column({ nullable: true })
   rememberMeToken: string;
 
-  @Column({ name: 'letterboxdUsername' })
+  @Column()
   username: string;
 
-  @Column({ name: "letterboxdName" })
+  @Column()
   name: string;
 
   @Column()
@@ -37,7 +36,7 @@ export class User {
   letterboxdAccountLevel: 'basic' | 'pro' | 'patron';
 
   @ManyToOne(() => Rating, rating => rating.user)
-  ratings: Rating[];
+  ratings: Relation<Rating[]>;
 
   @BeforeInsert()
   prepareUser() {

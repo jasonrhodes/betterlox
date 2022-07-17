@@ -1,6 +1,6 @@
 import { User } from "../entities/User";
-import { dataSource } from "../orm";
-import { getRememberMeToken, getSalt, hash } from "../../lib/hashPassword";
+import { getDataSource } from "../orm";
+import { getRememberMeToken, hash } from "../../lib/hashPassword";
 import { LetterboxdAccountLevel } from "../../common/types/base";
 
 export interface UserLetterboxdDetails {
@@ -26,7 +26,7 @@ function removeCredentials(user: User) {
   return userPublic;
 }
 
-export const UserRepository = dataSource.getRepository(User).extend({
+export const getUserRepository = async () => (await getDataSource()).getRepository(User).extend({
   // formerly checkLogin
   async login(email: string, password: string, rememberMe?: boolean) {
     const user = await this.findOne({

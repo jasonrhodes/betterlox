@@ -1,7 +1,7 @@
 import { NextApiHandler } from "next";
 import { TypeORMError } from "typeorm";
 import { UserPublic } from "../../../common/types/db";
-import { UserRepository } from "../../../db/repositories/UserRepo";
+import { getUserRepository } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
 
@@ -22,14 +22,14 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
   userOptions.email = singleQueryParam(req.body.email);
   userOptions.password = singleQueryParam(req.body.password);
   userOptions.avatarUrl = singleQueryParam(req.body.avatarUrl);
-  userOptions.username = singleQueryParam(req.body.letterboxdUsername);
-  userOptions.name = singleQueryParam(req.body.letterboxdName);
+  userOptions.username = singleQueryParam(req.body.username);
+  userOptions.name = singleQueryParam(req.body.name);
   userOptions.letterboxdAccountLevel = singleQueryParam(req.body.letterboxdAccountLevel) || 'basic';
   userOptions.rememberMe = Boolean(singleQueryParam(req.body.rememberMe));
 
   const missingRequiredKeys = [];
 
-  for (let key of ['email', 'password', 'avatarUrl', 'letterboxdUsername', 'letterboxdName', 'letterboxdAccountLevel']) {
+  for (let key of ['email', 'password', 'avatarUrl', 'username', 'name', 'letterboxdAccountLevel']) {
     if (!userOptions[key]) {
       missingRequiredKeys.push(key);
     }
@@ -39,6 +39,8 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     res.status(400).json({ success: false, errorMessage: `Missing required properties ${missingRequiredKeys.join(', ')}`});
     return;
   }
+
+  const UserRepository = await getUserRepository();
   
   // validate lb account level? use enum column type in entity ...
 

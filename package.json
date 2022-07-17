@@ -13,6 +13,7 @@
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.8.1",
     "@fontsource/inter": "^4.5.5",
+    "@fontsource/rubik": "^4.5.10",
     "@mui/icons-material": "^5.5.1",
     "@mui/lab": "^5.0.0-alpha.76",
     "@mui/material": "^5.5.1",

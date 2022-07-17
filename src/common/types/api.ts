@@ -1,3 +1,4 @@
+import { Rating } from "../../db/entities";
 import { TmdbConfigurationResponse, TmdbCast, TmdbCredits } from "../../lib/tmdb";
 import { Person, RatedMovie, RatedTmdbCast } from "./db";
 
@@ -27,7 +28,7 @@ export interface GetRatingsForUserOptions extends UserQueryOptions {
 }
 
 export interface GetRatingsForUserResponse {
-  ratings: RatingResult[],
+  ratings: Rating[],
   image_config: ImageConfig
 }
 

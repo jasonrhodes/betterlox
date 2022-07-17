@@ -8,9 +8,9 @@ export class ProductionCompany extends BaseEntity {
   @Column()
   name: string;
 
-  @Column({ name: 'logo_path' })
+  @Column({ nullable: true })
   logoPath: string;
 
-  @Column({ name: 'origin_country' })
-  country: string;
+  @Column({ nullable: true })
+  originCountry: string;
 }

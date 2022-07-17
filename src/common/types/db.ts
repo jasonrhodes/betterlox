@@ -1,6 +1,5 @@
 import { TmdbCast } from "../../lib/tmdb";
-import { User } from "../../db/entities/User";
-import { Entity } from "typeorm";
+import { User } from "../../db/entities";
 
 export interface Person {
   biography: string;

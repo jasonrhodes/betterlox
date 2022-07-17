@@ -1,32 +1,32 @@
-import { BaseEntity, Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from "typeorm";
+import { BaseEntity, Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, Relation } from "typeorm";
 import { Movie } from "./Movie";
 import { Person } from "./Person";
 
 @Entity('join_movies_cast')
 export class CastRole extends BaseEntity {
-  @PrimaryColumn({ name: "movie_id" })
+  @PrimaryColumn()
   movieId: number;
 
-  @PrimaryColumn({ name: "person_id" })
+  @PrimaryColumn()
   personId: number;
 
-  @Column({ name: "cast_id" })
+  @Column()
   castId: number;
 
   @Column({ nullable: true })
   character: string;
 
-  @Column({ name: "cast_order" })
+  @Column()
   castOrder: number;
 
-  @Column({ name: "credit_id" })
+  @Column()
   creditId: string;
 
   @ManyToOne(() => Person, (person) => person.castRoles)
-  @JoinColumn({ name: "person_id" })
-  actor: Person;
+  @JoinColumn({ name: "personId" })
+  actor: Relation<Person>;
 
   @ManyToOne(() => Movie, (movie) => movie.cast)
-  @JoinColumn({ name: "movie_id" })
-  movie: Movie;
+  @JoinColumn({ name: "movieId" })
+  movie: Relation<Movie>;
 }

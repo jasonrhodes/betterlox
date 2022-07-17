@@ -7,6 +7,7 @@ import api from '../lib/callApi';
 import { getUserDetails } from '../lib/letterboxd';
 import { CheckCircle, Error as ErrorIcon } from '@mui/icons-material';
 import { FormikTextField } from "./formControls/FormikTextField";
+import { useRouter } from 'next/router';
 
 const validationSchema = yup.object({
   email: yup
@@ -17,9 +18,9 @@ const validationSchema = yup.object({
     .string()
     .min(6, 'Password should be of minimum 6 characters length')
     .required('Password is required'),
-  letterboxdUsername: yup
+  username: yup
     .string()
-    .required('Letterboxd Username is required')
+    .required('Valid Letterboxd username is required')
 });
 
 type RegisterValidationType = yup.InferType<typeof validationSchema>;
@@ -34,11 +35,12 @@ export const RegistrationForm = () => {
     retrieved: false
   });
   const [letterboxdLookupLoading, setLLL] = useState(false);
+  const router = useRouter();
   const formik = useFormik<RegisterValidationType>({
     initialValues: {
       email: '',
       password: '',
-      letterboxdUsername: ''
+      username: ''
     },
     validationSchema: validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -50,11 +52,12 @@ export const RegistrationForm = () => {
         email: values.email,
         password: values.password,
         avatarUrl: details.avatarUrl,
-        letterboxdUsername: values.letterboxdUsername,
-        letterboxdName: details.name,
+        username: values.username,
+        name: details.name,
         letterboxdAccountLevel: details.isPatron ? 'patron' : details.isPro ? 'pro' : 'basic'
       });
       setSubmitting(false);
+      router.push("/login");
     },
   });
 
@@ -99,7 +102,7 @@ export const RegistrationForm = () => {
         fullWidth
         formik={formik as any} // TODO: fix also
         required={true}
-        id='letterboxdUsername'
+        id='username'
         label='Letterboxd Username'
         InputProps={{
           endAdornment: letterboxdStatus

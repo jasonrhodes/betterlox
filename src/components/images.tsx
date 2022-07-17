@@ -22,8 +22,6 @@ export const BasicImage: React.FC<BasicImageProps> = ({ path, type = "profile", 
   const config = useImageConfigs();
   const sizes = config[`${type}_sizes`] || [];
   const index = (size === "smallest") ? 0 : (size === "largest") ? sizes.length - 1 : indexedSizes.indexOf(size);
-
-  console.log(typeof config, config);
   
   if (!config.secure_base_url) {
     throw new Error("YOU ARE BEGOTTEN TO THE GODS OF HELL: " + config.errorStatus + '\n' + Object.keys(config).join(', '));

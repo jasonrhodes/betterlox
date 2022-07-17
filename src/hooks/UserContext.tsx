@@ -22,6 +22,10 @@ export interface UserContextValue {
   logout: () => void;
 }
 
+export interface ValidUserContextValue extends UserContextValue {
+  user: UserPublic;
+}
+
 const UserContext = React.createContext<UserContextValue>({
   validating: true,
   login: () => null,
@@ -85,15 +89,12 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     login,
     logout,
     errorStatus,
-    validating
+    validating,
+    user
   };
 
-  if (value === null) {
-    return null;
-  }
-
   return (
-    <UserContext.Provider value={{ ...value, user }}>
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   )

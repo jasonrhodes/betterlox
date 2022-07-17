@@ -1,13 +1,13 @@
-import { BaseEntity, Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from "typeorm";
+import { BaseEntity, Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, Relation } from "typeorm";
 import { Movie } from "./Movie";
 import { Person } from "./Person";
 
 @Entity('join_movies_crew')
 export class CrewRole extends BaseEntity {
-  @PrimaryColumn({ name: "movie_id" })
+  @PrimaryColumn()
   movieId: number;
 
-  @PrimaryColumn({ name: "person_id" })
+  @PrimaryColumn()
   personId: number;
 
   @Column({ nullable: true })
@@ -16,14 +16,14 @@ export class CrewRole extends BaseEntity {
   @Column({ nullable: true })
   department: string;
 
-  @Column({ name: "credit_id" })
+  @Column()
   creditId: string;
 
   @ManyToOne(() => Person, (person) => person.crewRoles)
-  @JoinColumn({ name: "person_id" })
-  person: Person;
+  @JoinColumn({ name: "personId" })
+  person: Relation<Person>;
 
   @ManyToOne(() => Movie, (movie) => movie.crew)
-  @JoinColumn({ name: "movie_id" })
-  movie: Movie;
+  @JoinColumn({ name: "movieId" })
+  movie: Relation<Movie>;
 }

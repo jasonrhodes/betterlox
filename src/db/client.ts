@@ -327,22 +327,6 @@ export async function findMissingCrewMembers({
   return result.map(({ person_id }) => person_id);
 }
 
-export async function getRatingsForUser({
-  userId
-}: GetRatingsForUserOptions) {
-
-  const stmt = db.prepare<[number], RatingResult>(`
-    SELECT ratings.rating, ratings.date, ratings.year, movies.title, movies.poster_path
-    FROM ratings
-    INNER JOIN movies
-    ON ratings.movie_id = movies.id
-    WHERE user_id = ?
-    ORDER BY date DESC;
-  `);
-
-  return stmt.all(userId);
-}
-
 export async function getActorsForUser({
   userId,
   orderBy = "count",

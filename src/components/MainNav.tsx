@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
 import { UserPublic } from '../common/types/db';
 import Image from "next/image";
-import { pink } from "@mui/material/colors";
 
 const pages = [
   { label: 'Home', route: '/' },
@@ -48,7 +47,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
     <Box sx={{ flexGrow: 0 }}>
       <Tooltip title="Open settings">
         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-          <Avatar alt={user.letterboxdName} src={user.avatarUrl} />
+          <Avatar alt={user.name} src={user.avatarUrl} />
         </IconButton>
       </Tooltip>
       <Menu
@@ -117,12 +116,24 @@ const LoggedOutMenu: React.FC = () => {
 }
 
 const Logo: React.FC = () => (
-  <Image
-    alt="BETTERLOX"
-    src="/img/lockup-cyan400.png"
-    height={40}
-    width={214}
-  />
+  <>
+    <Box sx={{ padding: '5px 15px 5px 0', cursor: "pointer" }}>
+      <Image
+        alt="BETTERLOX"
+        src="/img/salmon-lox.png"
+        height={40}
+        width={63}
+      />
+    </Box>
+    <Typography sx={{
+      fontFamily: 'Rubik',
+      fontWeight: 700,
+      fontSize: '32px',
+      paddingRight: '15px',
+      color: '#E1440E',
+      cursor: 'pointer'
+    }}>Betterlox</Typography>
+  </>
 );
 
 export function MainNav() {
@@ -138,8 +149,8 @@ export function MainNav() {
   return (
     <UserContextConsumer>
       {context => (
-        <AppBar position="static" elevation={0}>
-          <Container maxWidth="xl">
+        <AppBar position="static" elevation={0} style={{ backgroundColor: 'transparent' }}>
+          <Container maxWidth="lg">
             <Toolbar disableGutters>
               <Link href="/" passHref>
                 <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
@@ -154,7 +165,7 @@ export function MainNav() {
                   aria-controls="menu-appbar"
                   aria-haspopup="true"
                   onClick={handleOpenNavMenu}
-                  color="inherit"
+                  color="primary"
                 >
                   <MenuIcon />
                 </IconButton>
@@ -195,7 +206,7 @@ export function MainNav() {
                   <Link key={page.label} href={page.route} passHref>
                     <Button
                       onClick={handleCloseNavMenu}
-                      sx={{ my: 2, color: 'white', display: 'block' }}
+                      sx={{ my: 2, display: 'block' }}
                     >
                       {page.label}
                     </Button>

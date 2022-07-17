@@ -1,8 +1,16 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany, JoinColumn, ManyToOne } from "typeorm";
+import {
+  BaseEntity,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+  Relation
+} from "typeorm";
 import { CastRole } from "./CastRole";
 import { CrewRole } from "./CrewRole";
 import { Genre } from "./Genre";
-import { Person } from "./Person";
 import { ProductionCompany } from "./ProductionCompany";
 import { Rating } from "./Rating";
 
@@ -11,23 +19,23 @@ export class Movie extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  backdrop_path: string;
+  @Column({ nullable: true })
+  backdropPath: string;
 
   @Column()
-  imdb_id: number;
+  imdbId: number;
 
   @Column()
-  original_language: string;
+  originalLanguage: string;
 
   @Column()
-  original_title: string;
+  originalTitle: string;
 
   @Column()
   overview: string;
 
-  @Column()
-  poster_path: string;
+  @Column({ nullable: true })
+  posterPath: string;
 
   @Column()
   popularity: number;
@@ -36,7 +44,7 @@ export class Movie extends BaseEntity {
   runtime: number;
 
   @Column()
-  release_date: string;
+  releaseDate: string;
 
   @Column()
   title: string;
@@ -45,36 +53,40 @@ export class Movie extends BaseEntity {
   @JoinTable({
     name: "join_movies_genres",
     joinColumn: {
-      name: "movie_id",
+      name: "movieId",
       referencedColumnName: "id"
     },
     inverseJoinColumn: {
-      name: "genre_id",
+      name: "genreId",
       referencedColumnName: "id"
     }
   })
-  genres: Genre[];
+  genres: Relation<Genre[]>;
 
   @ManyToMany((type) => ProductionCompany)
   @JoinTable({
     name: "join_movies_production_companies",
     joinColumn: {
-      name: "movie_id",
+      name: "movieId",
       referencedColumnName: "id"
     },
     inverseJoinColumn: {
-      name: "production_company_id",
+      name: "productionCompanyId",
       referencedColumnName: "id"
     }
   })
-  productionCompanies: ProductionCompany[];
+  productionCompanies: Relation<ProductionCompany[]>;
 
+  // OneToMany because we use a join table entity,
+  // because we have attributes on the join
   @OneToMany(() => CastRole, (cast) => cast.movie)
-  cast: CastRole[];
+  cast: Relation<CastRole[]>;
 
+  // OneToMany because we use a join table entity,
+  // because we have attributes on the join
   @OneToMany(() => CrewRole, (crew) => crew.movie)
-  crew: CrewRole[];
+  crew: Relation<CrewRole[]>;
 
   @OneToMany(() => Rating, (rating) => rating.movie)
-  ratings: Rating[];
+  ratings: Relation<Rating[]>;
 }

@@ -30,8 +30,8 @@ export interface ApiRegisterOptions {
   email: string;
   password: string;
   avatarUrl: string;
-  letterboxdUsername: string;
-  letterboxdName: string;
+  username: string;
+  name: string;
   letterboxdAccountLevel: LetterboxdAccountLevel;
 }
 interface ApiRegisterResponse {
@@ -88,8 +88,11 @@ async function checkIfEmailExists(email: string) {
 }
 
 async function register(data: ApiRegisterOptions) {
-  console.log('About to register', data);
-  return callApi<ApiRegisterResponse, ApiRegisterOptions>({ url: "/api/users/register", method: "POST", data });
+  return callApi<ApiRegisterResponse, ApiRegisterOptions>({
+    url: "/api/users/register",
+    method: "POST",
+    data
+  });
 }
 
 async function updateUser({ id, ...user }: { id: number } & Partial<UserType>) {

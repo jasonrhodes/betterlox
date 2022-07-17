@@ -3,19 +3,22 @@ import type { AppProps } from 'next/app';
 import { createTheme, ThemeProvider } from "@mui/material";
 import { ImageContextProvider } from "../hooks/ImageConfigContext";
 import "@fontsource/inter/400.css";
+import "@fontsource/rubik/400.css";
+import "@fontsource/rubik/700.css";
 import "@fontsource/inter/variable.css"
+import "@fontsource/rubik/variable.css"
 import { UserContextProvider } from '../hooks/UserContext';
 import { CookiesProvider } from 'react-cookie';
 
 const theme = createTheme({
-  // palette: {
-  //   primary: {
-  //     main: '#FA8072', // salmon pink - tetradic theme: https://www.canva.com/colors/color-wheel/print/fa8072+a8fa72+72ecfa+c472fa/
-  //   },
-  //   secondary: {
-  //     main: '#72ECFA', // blue
-  //   },
-  // },
+  palette: {
+    primary: {
+      main: '#F26230', // salmon pink
+    },
+    secondary: {
+      main: '#F2C330', // yellow analagous
+    }
+  },
   typography: {
     fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
   },
