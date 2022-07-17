@@ -100,14 +100,16 @@ export async function getUserDetails(username: string) {
 
   let avatarUrl = '';
 
-  if (avatar.length === 1) {
-    let image = await axios.get(avatar.attr().src, { responseType: 'arraybuffer' });
+  const avatarSrc = (avatar.length === 1) ? avatar.attr()?.src : null;
+
+  if (avatarSrc) {
+    let image = await axios.get(avatarSrc, { responseType: 'arraybuffer' });
     const avatarB64string = Buffer.from(image.data).toString('base64');
     avatarUrl = `data:image/jpeg;base64,${avatarB64string}`;
   }
 
   return {
-    avatar: avatar.length === 1 ? avatar.attr().src : '',
+    avatar: avatarSrc,
     avatarUrl,
     name: name.length === 1 ? name.text() : '',
     isPro: isPro.length === 1 || isPatron.length === 1 ? true : false,
@@ -143,17 +145,17 @@ export async function scrapeRatings(username: string, page: number) {
         r.movie_id = id;
       }
     }
-    const name = $(item).find("img").attr().alt;
+    const name = $(item).find("img")?.attr()?.alt;
     if (typeof name === "string") {
       r.name = name;
     }
 
-    const stars = $(item).find("span.rating").attr().class;
+    const stars = $(item).find("span.rating")?.attr()?.class;
     if (typeof stars === "string") {
       r.rating = Number(stars.substring(13)) / 2;
     }
 
-    const rateDate = $(item).find("time").attr().datetime;
+    const rateDate = $(item).find("time")?.attr()?.datetime;
     if (typeof rateDate === "string") {
       r.date = rateDate.substring(0, 10);
     }
