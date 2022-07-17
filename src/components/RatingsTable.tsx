@@ -35,7 +35,7 @@ export function RatingsTable({ ratings }: RatingsTableProps) {
           renderCell: ({ row }) => {
             console.log(row);
             return row.movie && row.movie.posterPath
-              ? <BasicImage sx={{ height: '100px', width: 'auto' }} path={row.movie.poster_path} />
+              ? <BasicImage sx={{ height: '100px', width: 'auto' }} path={row.movie.posterPath} />
               : null;
           }
         },
