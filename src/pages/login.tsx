@@ -8,7 +8,7 @@ import { LoginForm } from '../components/LoginForm';
 const LoginPage: NextPage = () => {
   const router = useRouter();
   return (
-    <PageTemplate title="Log In" isPublic={true} maxWidth='sm'>
+    <PageTemplate title="Log In" maxWidth='sm'>
       <UserContextConsumer>
         {context => {
           if (!context) {

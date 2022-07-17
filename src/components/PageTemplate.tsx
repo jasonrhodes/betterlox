@@ -12,7 +12,7 @@ export interface BackLinkProps {
   text?: string;
 }
 
-type ChildrenFunction = (props: ValidUserContextValue) => JSX.Element;
+type ChildrenFunction = (props: ValidUserContextValue) => JSX.Element | null;
 export interface PublicPageTemplateProps {
   title: string;
   headTitle?: string;

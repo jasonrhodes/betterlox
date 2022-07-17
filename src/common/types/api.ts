@@ -1,6 +1,6 @@
-import { Rating } from "../../db/entities";
-import { TmdbConfigurationResponse, TmdbCast, TmdbCredits } from "../../lib/tmdb";
-import { Person, RatedMovie, RatedTmdbCast } from "./db";
+import { Rating, Person } from "../../db/entities";
+import { TmdbConfigurationResponse } from "../../lib/tmdb";
+import { RatedMovie, RatedTmdbCast } from "./db";
 
 export type OrderDirection = "ASC" | "DESC";
 export type ImageConfig = TmdbConfigurationResponse["images"];
@@ -13,10 +13,13 @@ export interface RatingResult {
   poster_path: string;
 }
 
-export interface ActorResult extends Partial<Person> {
-  count: number;
-  avg_rating: number;
-  avg_cast_order: number;
+export interface ActorTableResult {
+  actorId: number;
+  name: string;
+  profilePath: string;
+  countMoviesSeen: number;
+  avgRating: number;
+  avgCastOrder: number;
 }
 
 export interface UserQueryOptions {
@@ -33,14 +36,14 @@ export interface GetRatingsForUserResponse {
 }
 
 // get actors for user
-export interface GetActorsForUserOptions extends UserQueryOptions {
-  orderBy?: keyof ActorResult;
-  order?: OrderDirection;
-  castOrderThreshold?: number;
-}
+// export interface GetActorsForUserOptions extends UserQueryOptions {
+//   orderBy?: keyof ActorResult;
+//   order?: OrderDirection;
+//   castOrderThreshold?: number;
+// }
 
 export interface GetActorsForUserResponse {
-  actors: ActorResult[];
+  actors: ActorTableResult[];
   image_config: ImageConfig;
 };
 

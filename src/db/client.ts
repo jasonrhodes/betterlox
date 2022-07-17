@@ -7,11 +7,7 @@ import { setupTables, SetupTableOptions } from "./setup";
 import { TmdbMovie, TmdbPerson } from "../lib/tmdb";
 
 import {
-  ActorResult,
-  GetActorsForUserOptions,
-  GetMoviesForActorAndUserOptions,
-  GetRatingsForUserOptions,
-  RatingResult
+  GetMoviesForActorAndUserOptions
 } from "../common/types/api";
 import { Person, Movie, RatedMovie } from "../common/types/db";
 import { getDBClient } from "./adapter";
@@ -327,30 +323,30 @@ export async function findMissingCrewMembers({
   return result.map(({ person_id }) => person_id);
 }
 
-export async function getActorsForUser({
-  userId,
-  orderBy = "count",
-  order = "DESC",
-  castOrderThreshold = 15
-}: GetActorsForUserOptions) {
-  // NOTE: if you add/remove selected values here, they should map to type ActorResult
-  const stmt = db.prepare<[number, number], ActorResult>(`
-    SELECT p.id, p.name, COUNT(m.title) AS count, AVG(r.rating) AS avg_rating, AVG(jmc.cast_order) as avg_cast_order, p.known_for_department, p.popularity, p.profile_path
-    FROM movies AS m
-    INNER JOIN ratings AS r
-    ON m.id = r.movie_id
-    INNER JOIN join_movies_cast as jmc
-    ON m.id = jmc.movie_id
-    INNER JOIN people AS p
-    ON jmc.person_id = p.id
-    WHERE r.user_id = ?
-    AND jmc.cast_order <= ?
-    GROUP BY jmc.person_id
-    ORDER BY ${orderBy} ${order};
-  `);
+// export async function getActorsForUser({
+//   userId,
+//   orderBy = "count",
+//   order = "DESC",
+//   castOrderThreshold = 15
+// }: GetActorsForUserOptions) {
+//   // NOTE: if you add/remove selected values here, they should map to type ActorResult
+//   const stmt = db.prepare<[number, number], ActorResult>(`
+//     SELECT p.id, p.name, COUNT(m.title) AS count, AVG(r.rating) AS avg_rating, AVG(jmc.cast_order) as avg_cast_order, p.known_for_department, p.popularity, p.profile_path
+//     FROM movies AS m
+//     INNER JOIN ratings AS r
+//     ON m.id = r.movie_id
+//     INNER JOIN join_movies_cast as jmc
+//     ON m.id = jmc.movie_id
+//     INNER JOIN people AS p
+//     ON jmc.person_id = p.id
+//     WHERE r.user_id = ?
+//     AND jmc.cast_order <= ?
+//     GROUP BY jmc.person_id
+//     ORDER BY ${orderBy} ${order};
+//   `);
 
-  return stmt.all(userId, castOrderThreshold);
-}
+//   return stmt.all(userId, castOrderThreshold);
+// }
 
 export async function getMoviesForActorAndUser({
   userId,

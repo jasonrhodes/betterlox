@@ -27,14 +27,14 @@ export function RatingsTable({ ratings }: RatingsTableProps) {
       rows={filtered}
       columns={[
         {
-          field: "movie.poster_path",
+          field: "movie.posterPath",
           headerName: "",
           sortable: false,
           align: "left",
           width: 80,
           renderCell: ({ row }) => {
             console.log(row);
-            return row.movie && row.movie.poster_path
+            return row.movie && row.movie.posterPath
               ? <BasicImage sx={{ height: '100px', width: 'auto' }} path={row.movie.poster_path} />
               : null;
           }

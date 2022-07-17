@@ -42,7 +42,7 @@ const ActorsPage: NextPage = () => {
   }
 
   return (
-    <PageTemplate title={title} avatarUrl={response?.actor.profile_path} backLink={{ url: "/stats/actors", text: "Back to actors" }}>  
+    <PageTemplate title={title} avatarUrl={response?.actor.profilePath} backLink={{ url: "/stats/actors", text: "Back to actors" }}>  
       {content}
     </PageTemplate>
   );

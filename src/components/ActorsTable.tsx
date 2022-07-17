@@ -1,11 +1,11 @@
 import React from 'react';
 import { DataGrid } from "@mui/x-data-grid";
-import { ActorResult } from '../common/types/api';
+import { ActorTableResult } from '../common/types/api';
 import Link from './Link';
 import { BasicImage } from './images';
 
 export interface ActorsTableProps {
-  actors: ActorResult[] | undefined;
+  actors: ActorTableResult[];
 }
 
 export function ActorsTable({ actors }: ActorsTableProps) {
