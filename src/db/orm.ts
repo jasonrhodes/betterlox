@@ -34,6 +34,13 @@ async function init() {
         type: "postgres",
         url: DATABASE_URL
       };
+      if (process.env.DATABASE_MODE && process.env.DATABASE_MODE === "dev") {
+        dbOptions.ssl = {
+          rejectUnauthorized: false
+        }
+      } else {
+        dbOptions.ssl = true;
+      }
       if (process.env.DATABASE_HOST) {
         dbOptions.host = process.env.DATABASE_HOST;
       }
