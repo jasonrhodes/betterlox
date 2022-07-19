@@ -32,15 +32,19 @@ async function init() {
       }
       dbOptions = {
         type: "postgres",
-        url: DATABASE_URL
-      };
-      if (process.env.DATABASE_MODE && process.env.DATABASE_MODE === "dev") {
-        dbOptions.ssl = {
+        url: DATABASE_URL,
+        ssl: {
           rejectUnauthorized: false
         }
-      } else {
-        dbOptions.ssl = true;
-      }
+      };
+      // if (process.env.DATABASE_MODE && process.env.DATABASE_MODE === "dev") {
+      //   console.log("DEV MODE ACTIVATED");
+      //   dbOptions.ssl = {
+      //     rejectUnauthorized: false
+      //   }
+      // } else {
+      //   dbOptions.ssl = true;
+      // }
       if (process.env.DATABASE_HOST) {
         dbOptions.host = process.env.DATABASE_HOST;
       }
@@ -61,6 +65,7 @@ async function init() {
       }
       break;
   }
+
   const ds = new DataSource({
     ...dbOptions,
     entities,
