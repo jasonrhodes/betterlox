@@ -67,7 +67,7 @@ export const RegistrationForm = () => {
     letterboxdStatus = <CircularProgress />;
   } else if (letterboxdDetails.retrieved && letterboxdDetails.details && letterboxdDetails.details.avatarUrl) {
     letterboxdStatus = (
-      <Avatar src={letterboxdDetails.details.avatarUrl} />
+      <Avatar src={letterboxdDetails.details.avatarUrl} sx={{ boxShadow: "0 0 1px rgba(0,0,0,0.8)"}} />
     );
   } else if (
     letterboxdDetails.retrieved && 

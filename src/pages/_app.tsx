@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app';
 import { createTheme, ThemeProvider } from "@mui/material";
 import { ImageContextProvider } from "../hooks/ImageConfigContext";
 import "@fontsource/inter/400.css";
+import "@fontsource/inter/700.css";
 import "@fontsource/rubik/400.css";
 import "@fontsource/rubik/700.css";
 import "@fontsource/inter/variable.css"
@@ -20,7 +21,11 @@ const theme = createTheme({
     }
   },
   typography: {
-    fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Rubik", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontSize: '36px',
+      fontWeight: 400
+    }
   },
 });
 

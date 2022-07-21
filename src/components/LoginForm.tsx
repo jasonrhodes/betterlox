@@ -1,7 +1,7 @@
 import React from 'react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
-import { Button, ButtonProps, Checkbox, FormControlLabel, FormGroup } from '@mui/material';
+import { Box, Button, ButtonProps, Checkbox, FormControlLabel, FormGroup } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { FormikTextField } from "./formControls/FormikTextField";
 import { UserContextValue } from '../hooks/UserContext';
@@ -70,7 +70,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
         type='password'
         autoComplete='current-password'
       />
-      <FormGroup>
+      <FormGroup sx={{ flexDirection: "row", alignContent: "space-between" }}>
         <FormControlLabel 
           control={<Checkbox
             id="rememberMe"

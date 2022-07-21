@@ -96,7 +96,7 @@ export function PageTemplate({ title, headTitle = title, maxWidth = 'lg', backLi
           <Box>
             {backLink && backLink.url ? <BackLink {...backLink} /> : null}
             <Box>
-              <Typography component='h1' variant='h4' gutterBottom={true}><strong>{title}</strong></Typography>
+              <Typography component='h1' variant='h1' gutterBottom={true}>{title}</Typography>
             </Box>
           </Box>
           {children}

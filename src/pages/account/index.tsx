@@ -6,12 +6,12 @@ import { Avatar, Grid, Paper, Typography } from '@mui/material';
 
 const LoginPage: NextPage = () => {
   return (
-    <UserPageTemplate title="My Account" maxWidth='md'>
+    <UserPageTemplate title="My Account" maxWidth='lg'>
       {({ user }) => (
-        <Paper elevation={2} sx={{ p: 3 }}>
+        <Paper elevation={0} sx={{ p: 3 }}>
         <Grid container spacing={2}>
           <Grid item xs={3}>
-            <Avatar src={user.avatarUrl} sx={{ height: 'auto', width: '80%' }} />
+            <Avatar src={user.avatarUrl} sx={{ height: 'auto', width: '80%', boxShadow: '0 0 1px rgba(0,0,0,0.8)' }} />
           </Grid>
           <Grid item xs={9}>
             <Typography sx={{ fontWeight: 'bold' }}>Email</Typography>

@@ -1,20 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
 import { Rating } from "../common/types/db";
-// import { Cast, Crew } from "moviedb-promise/dist/request-types";
 const MAX_TRIES = 5;
-
-// function findValues(crew: Crew[] = []) {
-//   const jobs = new Set();
-//   const departments = new Set();
-
-//   for (let i = 0; i < crew.length; i++) {
-//     jobs.add(crew[i].job);
-//     departments.add(crew[i].department);
-//   }
-
-//   return { jobs, departments };
-// }
 
 async function wait(ms: number) {
   return new Promise((resolve) => {
@@ -62,20 +49,6 @@ export async function getTmdbIdFromShortUrl(shortUrl: string) {
   const $ = cheerio.load(html.data);
   const id = $("body").data("tmdb-id") as string;
   return Number(id);
-
-  // const movie = await tmdb.movieInfo(id);
-  // return movie;
-  // const { cast, crew } = await tmdb.movieCredits(id);
-
-  // const { jobs, departments } = findValues(crew);
-
-  // console.log("HTML", "\n\nMOVIE\n\n", movie, "\n\nCREDITS\n\n", jobs, departments);
-
-  // if (crew && crew.length > 0) {
-  //   console.log(crew.slice(0, 5));
-  // } else {
-  //   console.log("No crew");
-  // }
 }
 
 export async function getUserDetails(username: string) {
@@ -117,23 +90,33 @@ export async function getUserDetails(username: string) {
   };
 }
 
-interface ScrapeRatingsRecurseOptions {
+interface ScrapeRatingsOptions {
+  username: string;
+  allProcessed?: Array<Partial<Rating>>;
   totalSynced?: number;
   page?: number;
 }
 
-export async function scrapeRatings(username: string, page: number) {
+export async function scrapeRatings({
+  username,
+  allProcessed = [], 
+  totalSynced = 0,
+  page = 0
+}: ScrapeRatingsOptions): Promise<{ ratings: Array<Partial<Rating>> }> {
+  const pagePath = page ? `/page/${page}` : '';
   const { data } = await tryLetterboxd(
-    `https://letterboxd.com/${username}/films/ratings/page/${page}`
+    `https://letterboxd.com/${username}/films/ratings${pagePath}`
   );
   const $ = cheerio.load(data);
   const ratings = $('.poster-list li');
   if (!ratings.length) {
-    return { ratings: [] };
+    return { ratings: allProcessed };
   }
 
+  const processed: Array<Partial<Rating>> = [];
+
   // process ratings
-  const processed = ratings.map(async (i, item) => {
+  await ratings.each(async (_, i, item) => {
     const r: Partial<Rating> = {};
     const ratingData = $(item).find('.film-poster').data();
     if (typeof ratingData.filmSlug === "string") {
@@ -160,8 +143,11 @@ export async function scrapeRatings(username: string, page: number) {
       r.date = rateDate.substring(0, 10);
     }
 
-    return r;
-  }).get();
+    processed.push(r);
+  });
 
-  return { ratings: processed };
+  return scrapeRatings({
+    username,
+    allProcessed: [...allProcessed, ...processed]
+  });
 }

@@ -29,6 +29,7 @@ export const BasicImage: React.FC<BasicImageProps> = ({ path, type = "profile", 
   const url = `${config.secure_base_url}/${sizes[index]}${path}`;
 
   if (shape === "circle") {
+    sx.boxShadow = sx.boxShadow || "0 0 1px rgba(0,0,0,0.8)";
     return (
       <Avatar src={url} sx={sx} />
     );

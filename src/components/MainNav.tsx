@@ -47,7 +47,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
     <Box sx={{ flexGrow: 0 }}>
       <Tooltip title="Open settings">
         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-          <Avatar alt={user.name} src={user.avatarUrl} />
+          <Avatar alt={user.name} src={user.avatarUrl} sx={{ boxShadow: "0 0 1px rgba(0,0,0,0.8)" }} />
         </IconButton>
       </Tooltip>
       <Menu
@@ -128,7 +128,8 @@ const Logo: React.FC = () => (
     <Typography sx={{
       fontFamily: 'Rubik',
       fontWeight: 700,
-      fontSize: '32px',
+      fontSize: '42px',
+      lineHeight: '1.1',
       paddingRight: '15px',
       color: '#E1440E',
       cursor: 'pointer'
