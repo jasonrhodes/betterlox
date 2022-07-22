@@ -11,7 +11,7 @@ export class Rating extends BaseEntity {
   movieId: number;
 
   @Column({ type: "float" })
-  rating: number;
+  stars: number;
 
   @Column()
   date: Date;
@@ -22,7 +22,9 @@ export class Rating extends BaseEntity {
   @Column({ nullable: true })
   year: number;
 
-  @ManyToOne(() => Movie, (movie) => movie.ratings)
+  @ManyToOne(() => Movie, {
+    createForeignKeyConstraints: false
+  })
   @JoinColumn({ name: 'movieId' })
   movie: Relation<Movie>;
 

@@ -13,40 +13,43 @@ export function RatingsTable({ ratings }: RatingsTableProps) {
     return null;
   }
 
-  const filtered = ratings.filter((r) => r.movie)
+  // const filtered = ratings.filter((r) => r.movie)
 
-  console.log(filtered);
-
+  const getRowId = React.useCallback((row: typeof ratings[number]) => row.name + '-' + row.date, []);
+  
   return (
     <DataGrid
       getRowId={(row) => row.name + '-' + row.date}
-      rowHeight={100}
+      getRowHeight={(options) => {
+        return 100;
+      }}
+      autoHeight={true}
       sx={{
         width: '100%'
       }}
-      rows={filtered}
+      rows={ratings}
       columns={[
+        // {
+        //   field: "movie.posterPath",
+        //   headerName: "",
+        //   sortable: false,
+        //   align: "left",
+        //   width: 80,
+        //   renderCell: ({ row }) => {
+        //     console.log(row);
+        //     return row.movie && row.movie.posterPath
+        //       ? <BasicImage sx={{ height: '100px', width: 'auto' }} path={row.movie.posterPath} />
+        //       : null;
+        //   }
+        // },
         {
-          field: "movie.posterPath",
-          headerName: "",
-          sortable: false,
-          align: "left",
-          width: 80,
-          renderCell: ({ row }) => {
-            console.log(row);
-            return row.movie && row.movie.posterPath
-              ? <BasicImage sx={{ height: '100px', width: 'auto' }} path={row.movie.posterPath} />
-              : null;
-          }
-        },
-        {
-          field: "movie.title",
+          field: "name",
           headerName: "Title",
           flex: 150,
-          renderCell: ({ row }) => row.movie.title
+          // renderCell: ({ row }) => row.movie.title
         },
         {
-          field: "rating",
+          field: "stars",
           headerName: "Rating",
           width: 150,
           renderCell: ({ value }) => <StarRating rating={value} style={{

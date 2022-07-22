@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
-import { Rating } from "../common/types/db";
+import { Rating } from "../db/entities";
 const MAX_TRIES = 5;
 
 async function wait(ms: number) {
@@ -90,34 +90,37 @@ export async function getUserDetails(username: string) {
   };
 }
 
-interface ScrapeRatingsOptions {
+export async function findLastRatingsPage(username: string) {
+  const { data } = await tryLetterboxd(`https://letterboxd.com/${username}/films/ratings/`);
+  const $ = cheerio.load(data);
+  const lastPageLink = $('.paginate-pages li.paginate-page:last-child');
+  const lastPage = lastPageLink.text();
+  return Number(lastPage);
+}
+
+interface ScrapeRatingsByPageOptions {
   username: string;
-  allProcessed?: Array<Partial<Rating>>;
-  totalSynced?: number;
   page?: number;
 }
 
-export async function scrapeRatings({
+export async function scrapeRatingsByPage({
   username,
-  allProcessed = [], 
-  totalSynced = 0,
-  page = 0
-}: ScrapeRatingsOptions): Promise<{ ratings: Array<Partial<Rating>> }> {
-  const pagePath = page ? `/page/${page}` : '';
+  page = 1
+}: ScrapeRatingsByPageOptions): Promise<{ ratings: Array<Promise<Partial<Rating>>> }> {
   const { data } = await tryLetterboxd(
-    `https://letterboxd.com/${username}/films/ratings${pagePath}`
+    `https://letterboxd.com/${username}/films/ratings/page/${page}`
   );
   const $ = cheerio.load(data);
-  const ratings = $('.poster-list li');
-  if (!ratings.length) {
-    return { ratings: allProcessed };
+  const ratingElements = $('.poster-list li');
+
+  if (!ratingElements.length) {
+    return { ratings: [] };
   }
 
-  const processed: Array<Partial<Rating>> = [];
-
   // process ratings
-  await ratings.each(async (_, i, item) => {
+  const ratings = await ratingElements.map(async (i, item) => {
     const r: Partial<Rating> = {};
+
     const ratingData = $(item).find('.film-poster').data();
     if (typeof ratingData.filmSlug === "string") {
       const { data } = await tryLetterboxd(ratingData.filmSlug);
@@ -125,9 +128,10 @@ export async function scrapeRatings({
       const { tmdbId } = $$("body").data();
       const id = Number(tmdbId);
       if (!isNaN(id)) {
-        r.movie_id = id;
+        r.movieId = id;
       }
     }
+
     const name = $(item).find("img")?.attr()?.alt;
     if (typeof name === "string") {
       r.name = name;
@@ -135,19 +139,16 @@ export async function scrapeRatings({
 
     const stars = $(item).find("span.rating")?.attr()?.class;
     if (typeof stars === "string") {
-      r.rating = Number(stars.substring(13)) / 2;
+      r.stars = Number(stars.substring(13)) / 2;
     }
 
     const rateDate = $(item).find("time")?.attr()?.datetime;
     if (typeof rateDate === "string") {
-      r.date = rateDate.substring(0, 10);
+      r.date = new Date(rateDate);
     }
 
-    processed.push(r);
-  });
+    return r;
+  }).get();
 
-  return scrapeRatings({
-    username,
-    allProcessed: [...allProcessed, ...processed]
-  });
+  return { ratings };
 }
