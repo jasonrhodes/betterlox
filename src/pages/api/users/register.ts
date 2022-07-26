@@ -4,6 +4,7 @@ import { UserPublic } from "../../../common/types/db";
 import { getUserRepository } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
+import { syncAllRatingsForUser } from "../../../lib/syncAllRatingsForUser";
 
 interface RegisterApiResponseSuccess {
   success: true;
@@ -18,7 +19,7 @@ interface RegisterApiResponseFailure {
 type RegisterApiResponse = RegisterApiResponseSuccess | RegisterApiResponseFailure;
 
 const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
-  const userOptions: Record<string, string | boolean> = {};
+  const userOptions: Record<string, string | boolean | undefined> = {};
   userOptions.email = singleQueryParam(req.body.email);
   userOptions.password = singleQueryParam(req.body.password);
   userOptions.avatarUrl = singleQueryParam(req.body.avatarUrl);
@@ -46,8 +47,11 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
 
   try {
     const user = UserRepository.create(userOptions);
-    await UserRepository.save(user);
+    const saved = await UserRepository.save(user);
     res.json({ success: true, created: user });
+
+    // after responding to the request, kick off a ratings sync for this user
+    syncAllRatingsForUser(user.id, user.username);
   } catch (error: unknown) {
     // TODO: Need to inspect error that comes back if email already exists
     if (error instanceof TypeORMError) {

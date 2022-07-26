@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
 import { Rating } from "../db/entities";
+import { getDataImageTagFromUrl } from "./dataImageUtils";
 const MAX_TRIES = 5;
 
 async function wait(ms: number) {
@@ -71,19 +72,16 @@ export async function getUserDetails(username: string) {
   const isPro = $('.profile-name .badge.-pro');
   const isPatron = $('.profile-name .badge.-patron');
 
-  let avatarUrl = '';
-
+  let avatarDataSrc = '';
   const avatarSrc = (avatar.length === 1) ? avatar.attr()?.src : null;
 
   if (avatarSrc) {
-    let image = await axios.get(avatarSrc, { responseType: 'arraybuffer' });
-    const avatarB64string = Buffer.from(image.data).toString('base64');
-    avatarUrl = `data:image/jpeg;base64,${avatarB64string}`;
+    avatarDataSrc = await getDataImageTagFromUrl(avatarSrc);
   }
 
   return {
     avatar: avatarSrc,
-    avatarUrl,
+    avatarUrl: avatarDataSrc,
     name: name.length === 1 ? name.text() : '',
     isPro: isPro.length === 1 || isPatron.length === 1 ? true : false,
     isPatron: isPatron.length === 1 ? true : false

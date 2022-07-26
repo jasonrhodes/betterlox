@@ -1,6 +1,6 @@
 import { NextApiHandler } from "next";
 import { CastRole, Movie, Rating } from "../../../../../db/entities";
-import { getPersonRepository } from "../../../../../db/repositories/PersonRepo";
+import { getPeopleRepository } from "../../../../../db/repositories/PeopleRepo";
 
 const UserStatsActorsRoute: NextApiHandler = async (req, res) => {
   const { userId, castOrderThreshold } = req.query;
@@ -12,7 +12,7 @@ const UserStatsActorsRoute: NextApiHandler = async (req, res) => {
   //   castOrderThreshold: !isNaN(numericCastOrderThreshold) ? numericCastOrderThreshold : undefined
   // });
 
-  const PersonRepository = await getPersonRepository();
+  const PeopleRepository = await getPeopleRepository();
   // const actors = await ActorsRepository.find({
   //   where: {
   //     castRoles: {
@@ -32,7 +32,7 @@ const UserStatsActorsRoute: NextApiHandler = async (req, res) => {
   //   }
   // });
 
-  const query = PersonRepository
+  const query = PeopleRepository
     .createQueryBuilder("actor")
     .leftJoin("actor.castRoles", 'castRole')
     .leftJoin("castRole.movie", 'movie')

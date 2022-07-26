@@ -3,6 +3,7 @@ import { UserPublic } from "../../../common/types/db";
 import { getUserRepository, UserRepoError } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
+import { syncAllRatingsForUser } from "../../../lib/syncAllRatingsForUser";
 
 interface LoginApiResponseSuccess {
   success: true;
@@ -17,17 +18,17 @@ interface LoginApiResponseFailure {
 type LoginApiResponse = LoginApiResponseSuccess | LoginApiResponseFailure;
 
 const LoginRoute: NextApiHandler<LoginApiResponse> = async (req, res) => {
-  const email = singleQueryParam(req.body.email);
-  const password = singleQueryParam(req.body.password);
+  const email = singleQueryParam(req.body.email) || "";
+  const password = singleQueryParam(req.body.password) || "";
   const rememberMe = Boolean(singleQueryParam(req.body.rememberMe));
-
-  console.log("In Login Route");
-
   const UserRepository = await getUserRepository();
 
   try {
     const { user } = await UserRepository.login(email, password, rememberMe);
     res.json({ success: true, user });
+
+    // after responding to the request, kick off a ratings sync for this user
+    syncAllRatingsForUser(user.id, user.username);
   } catch (error: unknown) {
     if (error instanceof UserRepoError) {
       res.statusCode = 401;

@@ -6,3 +6,5 @@ export * from "./Person";
 export * from "./ProductionCompany";
 export * from "./Rating";
 export * from "./User";
+export * from "./Sync";
+export * from "./Collection";

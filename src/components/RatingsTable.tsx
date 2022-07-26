@@ -1,64 +1,58 @@
 import React from 'react';
-import { DataGrid } from "@mui/x-data-grid";
+import DataGrid from "react-data-grid";
 import { StarRating } from '../components/StarRating';
-import { BasicImage } from '../components/images';
+import { TMDBImage } from '../components/images';
 import { Rating } from '../db/entities';
+import Image, { ImageProps } from 'next/image';
 
 interface RatingsTableProps {
   ratings: Rating[] | undefined;
 }
 
-export function RatingsTable({ ratings }: RatingsTableProps) {
-  if (!ratings) {
-    return null;
-  }
-
-  // const filtered = ratings.filter((r) => r.movie)
-
+export function RatingsTable({ ratings = [] }: RatingsTableProps) {
   const getRowId = React.useCallback((row: typeof ratings[number]) => row.name + '-' + row.date, []);
   
   return (
     <DataGrid
-      getRowId={(row) => row.name + '-' + row.date}
-      getRowHeight={(options) => {
-        return 100;
-      }}
-      autoHeight={true}
-      sx={{
-        width: '100%'
-      }}
+      className="fill-grid"
+      rowKeyGetter={getRowId}
+      rowHeight={100}
       rows={ratings}
       columns={[
-        // {
-        //   field: "movie.posterPath",
-        //   headerName: "",
-        //   sortable: false,
-        //   align: "left",
-        //   width: 80,
-        //   renderCell: ({ row }) => {
-        //     console.log(row);
-        //     return row.movie && row.movie.posterPath
-        //       ? <BasicImage sx={{ height: '100px', width: 'auto' }} path={row.movie.posterPath} />
-        //       : null;
-        //   }
-        // },
         {
-          field: "name",
-          headerName: "Title",
-          flex: 150,
-          // renderCell: ({ row }) => row.movie.title
+          key: "movie.posterPath",
+          name: "",
+          sortable: false,
+          width: 60,
+          formatter: ({ row }) => {
+            const sharedProps: Partial<ImageProps> = {
+              height: 100,
+              width: 66,
+              layout: "responsive",
+              alt: `${row.name} Poster`
+            };
+            return (row.movie && row.movie.posterPath) ?
+              <TMDBImage
+                {...sharedProps}
+                tmdbPath={row.movie.posterPath}
+              /> :
+              <Image {...sharedProps} src="/img/no-poster.png" />;
+          }
         },
         {
-          field: "stars",
-          headerName: "Rating",
+          key: "movie.title",
+          name: "Title",
+          formatter: ({ row }) => <>{row.movie?.title}</>
+        },
+        {
+          key: "stars",
+          name: "Rating",
           width: 150,
-          renderCell: ({ value }) => <StarRating rating={value} style={{
-
-          }} />
+          formatter: ({ row }) => <StarRating rating={row.stars} />
         },
         {
-          field: "date",
-          headerName: "Date",
+          key: "date",
+          name: "Date",
           width: 150
         }
       ]}

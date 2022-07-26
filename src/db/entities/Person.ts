@@ -24,7 +24,7 @@ export class Person {
   gender: number;
 
   @Column({ nullable: true })
-  imdbId: number;
+  imdbId: string;
 
   @Column({ nullable: true })
   knownForDepartment: string;
@@ -32,7 +32,7 @@ export class Person {
   @Column({ nullable: true })
   placeOfBirth: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "float" })
   popularity: number;
 
   @Column({ nullable: true })

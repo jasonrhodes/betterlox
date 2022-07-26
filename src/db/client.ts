@@ -1,37 +1,19 @@
 /**
- * TODO: This file should be broken into models and moved
- * into models/{model-file} to keep things organized
- * 
+ * TODO: This file is now defunct. Once everything in
+ * the app is replaced, this file can be safely removed.
  */
-import { setupTables, SetupTableOptions } from "./setup";
 import { TmdbMovie, TmdbPerson } from "../lib/tmdb";
 
 import {
   GetMoviesForActorAndUserOptions
 } from "../common/types/api";
-import { Person, Movie, RatedMovie } from "../common/types/db";
+import { RatedMovie } from "../common/types/db";
 import { getDBClient } from "./adapter";
 
 const config = { path: "./.db/movies.db" };
 export const db = getDBClient("sqlite", config);
 
 type Optional<T> = T | undefined | null;
-
-interface InitializeOptions {
-  tables?: SetupTableOptions;
-}
-
-export async function initialize(options: InitializeOptions = {}) {
-  await setupTables(options.tables);
-}
-
-export async function getMovie(movieId: number) {
-  const stmt = db.prepare<[number], Movie>(`
-    SELECT * FROM movies
-    WHERE id = ?
-  `);
-  return stmt.get(movieId);
-}
 
 export async function upsertMovie(movie: TmdbMovie) {
   if (!movie.id) {
@@ -88,13 +70,13 @@ export async function upsertMovie(movie: TmdbMovie) {
   );
 }
 
-export async function getPerson(personId: number) {
-  const stmt = db.prepare<[number], Person>(`
-    SELECT * FROM people
-    WHERE id = ?
-  `);
-  return stmt.get(personId);
-}
+// export async function getPerson(personId: number) {
+//   const stmt = db.prepare<[number], Person>(`
+//     SELECT * FROM people
+//     WHERE id = ?
+//   `);
+//   return stmt.get(personId);
+// }
 
 export async function upsertPerson(person: TmdbPerson) {
   return insertPerson(person, { replace: true });

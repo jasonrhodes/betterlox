@@ -1,13 +1,16 @@
-import { BaseEntity, Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, Relation } from "typeorm";
+import { BaseEntity, Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, Relation, PrimaryGeneratedColumn } from "typeorm";
 import { Movie } from "./Movie";
 import { Person } from "./Person";
 
 @Entity('join_movies_crew')
 export class CrewRole extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   movieId: number;
 
-  @PrimaryColumn()
+  @Column()
   personId: number;
 
   @Column({ nullable: true })
@@ -19,7 +22,9 @@ export class CrewRole extends BaseEntity {
   @Column()
   creditId: string;
 
-  @ManyToOne(() => Person, (person) => person.crewRoles)
+  @ManyToOne(() => Person, {
+    createForeignKeyConstraints: false
+  })
   @JoinColumn({ name: "personId" })
   person: Relation<Person>;
 

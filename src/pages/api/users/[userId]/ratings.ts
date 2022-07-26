@@ -9,6 +9,9 @@ const UserRatingsRoute: NextApiHandler = async (req, res) => {
       where: {
         userId: Number(userId)
       },
+      order: {
+        date: "DESC"
+      },
       relations: {
         movie: true
       }

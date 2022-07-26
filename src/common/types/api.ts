@@ -1,4 +1,4 @@
-import { Rating, Person } from "../../db/entities";
+import { Rating, Person, Movie } from "../../db/entities";
 import { TmdbConfigurationResponse } from "../../lib/tmdb";
 import { RatedMovie, RatedTmdbCast } from "./db";
 
@@ -60,6 +60,29 @@ export interface GetMoviesForActorAndUserResponse {
   cast_credits: RatedTmdbCast[];
 }
 
-export interface ApiError {
-  errorMessage: string;
+export interface ApiSuccessResponse {
+  success: true;
 }
+
+export interface ApiErrorResponse {
+  success: false;
+  code: number;
+  message: string;
+}
+
+export interface SyncRatingsMoviesResponse extends ApiSuccessResponse {
+  missingMovies: number[];
+  synced: Array<Movie | null>;
+}
+
+export interface SyncMoviesPeopleResponse extends ApiSuccessResponse {
+  missingPeople: number[];
+  synced: Array<Person | null>;
+}
+
+export interface SyncNone extends ApiSuccessResponse {
+  synced: undefined[];
+  message: string;
+}
+
+export type SyncResponse = SyncRatingsMoviesResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;

@@ -1,13 +1,16 @@
-import { BaseEntity, Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, Relation } from "typeorm";
+import { Entity, Column, ManyToOne, JoinColumn, Relation, PrimaryGeneratedColumn } from "typeorm";
 import { Movie } from "./Movie";
 import { Person } from "./Person";
 
 @Entity('join_movies_cast')
-export class CastRole extends BaseEntity {
-  @PrimaryColumn()
+export class CastRole {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   movieId: number;
 
-  @PrimaryColumn()
+  @Column()
   personId: number;
 
   @Column()
@@ -22,7 +25,9 @@ export class CastRole extends BaseEntity {
   @Column()
   creditId: string;
 
-  @ManyToOne(() => Person, (person) => person.castRoles)
+  @ManyToOne(() => Person, {
+    createForeignKeyConstraints: false
+  })
   @JoinColumn({ name: "personId" })
   actor: Relation<Person>;
 

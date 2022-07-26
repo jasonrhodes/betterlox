@@ -1,7 +1,6 @@
 import React from 'react';
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../components/PageTemplate';
-import { UserContextConsumer } from '../hooks/UserContext';
 import { Button } from '@mui/material';
 
 const Home: NextPage = () => {

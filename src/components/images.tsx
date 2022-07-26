@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar } from "@mui/material";
 import useImageConfigs from "../hooks/useImageConfigs";
-import Image from "next/image";
+import Image, { ImageProps } from "next/image";
 
 const indexedSizes = ["smallest", "small", "medium", "large", "largest"];
 
@@ -9,25 +9,38 @@ export type ImageSize = "smallest" | "small" | "medium" | "large" | "largest";
 export type ImageShape = "default" | "square" | "circle";
 export type ImageType = "profile" | "backdrop" | "logo" | "poster" | "still";
 
-export interface BasicImageProps {
+export interface TMDBImageProps extends Omit<ImageProps, 'src'> {
   size?: ImageSize;
   shape?: ImageShape;
   type?: ImageType;
-  path: string;
+  tmdbPath: string;
   sx?: Record<string, any>;
-  alt?: string;
+  urlOverride?: string;
 }
 
-export const BasicImage: React.FC<BasicImageProps> = ({ path, type = "profile", size = "medium", shape = "default", sx = {}, alt = "no alt provided" }) => {
-  const config = useImageConfigs();
-  const sizes = config[`${type}_sizes`] || [];
-  const index = (size === "smallest") ? 0 : (size === "largest") ? sizes.length - 1 : indexedSizes.indexOf(size);
-  
-  if (!config.secure_base_url) {
-    throw new Error("YOU ARE BEGOTTEN TO THE GODS OF HELL: " + config.errorStatus + '\n' + Object.keys(config).join(', '));
+export const TMDBImage: React.FC<TMDBImageProps> = ({
+  tmdbPath, 
+  type = "profile", 
+  size = "medium", 
+  shape = "default", 
+  sx = {}, 
+  urlOverride,
+  ...rest
+}) => {
+  let url = '';
+  if (urlOverride) {
+    url = urlOverride;
+  } else {
+    const config = useImageConfigs();
+    const sizes = config[`${type}_sizes`] || [];
+    const index = (size === "smallest") ? 0 : (size === "largest") ? sizes.length - 1 : indexedSizes.indexOf(size);
+    
+    if (!config.secure_base_url) {
+      throw new Error("YOU ARE BEGOTTEN TO THE GODS OF HELL: " + config.errorStatus + '\n' + Object.keys(config).join(', '));
+    }
+    url = `${config.secure_base_url}/${sizes[index]}${tmdbPath}`;
   }
-  const url = `${config.secure_base_url}/${sizes[index]}${path}`;
-
+  
   if (shape === "circle") {
     sx.boxShadow = sx.boxShadow || "0 0 1px rgba(0,0,0,0.8)";
     return (
@@ -36,6 +49,6 @@ export const BasicImage: React.FC<BasicImageProps> = ({ path, type = "profile", 
   }
 
   return (
-    <Image src={url} alt={alt} height={100} width={67} />
+    <Image {...rest} src={url} />
   );
 }

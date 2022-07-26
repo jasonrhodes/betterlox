@@ -1,7 +1,6 @@
 import {
   findMissingCastMembers,
   findMissingCrewMembers,
-  getPerson,
   insertPerson,
 } from "../db/client";
 import { log, separator } from "./logger";

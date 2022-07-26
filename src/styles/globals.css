@@ -16,3 +16,7 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.rdg.fill-grid {
+  block-size: 100%;
+}
