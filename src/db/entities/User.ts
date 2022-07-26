@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique, Relation } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique, Relation, BeforeUpdate } from "typeorm";
 import { getSalt, hash, getRememberMeToken } from "../../lib/hashPassword";
 import { Rating } from "./Rating";
 
@@ -39,6 +39,7 @@ export class User {
   ratings: Relation<Rating[]>;
 
   @BeforeInsert()
+  @BeforeUpdate()
   prepareUser() {
     const salt = getSalt();
     const hashedPassword = hash(this.password, salt);
@@ -50,9 +51,3 @@ export class User {
     }
   }
 }
-
-// user.email = options.email;
-// user.name = options.letterboxd.name;
-// user.letterboxdAccountLevel = options.letterboxd.accountLevel;
-// user.avatarUrl = options.avatarUrl;
-// user.username = options.letterboxd.username;

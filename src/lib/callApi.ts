@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { ApiErrorResponse, ApiSuccessResponse } from "../common/types/api";
 import { LetterboxdAccountLevel } from "../common/types/base";
 import { UserPublic } from "../common/types/db";
 import { ApiGetLetterboxdDetailsResponse } from "../pages/api/letterboxd";
@@ -53,10 +54,15 @@ const api = {
   checkIfEmailExists,
   register,
   updateUser,
-  getLetterboxdUserDetails
+  getLetterboxdUserDetails,
+  forgotPassword,
+  resetPassword
 };
 export default api;
 
+async function callApi<T = unknown, D = unknown>(options: AxiosRequestConfig<D> = {}) {
+  return client.request<T>(options);
+}
 export interface LoginOptions {
   email: string;
   password: string;
@@ -103,6 +109,19 @@ async function getLetterboxdUserDetails(username: string) {
   return callApi<ApiGetLetterboxdDetailsResponse>({ url: `/api/letterboxd?username=${username}` })
 }
 
-async function callApi<T = unknown, D = unknown>(options: AxiosRequestConfig<D> = {}) {
-  return client.request<T>(options);
+interface ForgotPasswordOptions {
+  email: string;
+}
+
+async function forgotPassword(data: ForgotPasswordOptions) {
+  return callApi<unknown, ForgotPasswordOptions>({ url: "/api/users/forgot-password", method: "POST", data })
+}
+
+interface ResetPasswordOptions {
+  token: string;
+  updatedPassword: string;
+}
+
+async function resetPassword(data: ResetPasswordOptions) {
+  return callApi<ApiSuccessResponse | ApiErrorResponse, ResetPasswordOptions>({ url: "/api/users/reset-password", method: "POST", data });
 }

@@ -1,10 +1,11 @@
 import React from 'react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
-import { Box, Button, ButtonProps, Checkbox, FormControlLabel, FormGroup } from '@mui/material';
+import { Box, Button, ButtonProps, Checkbox, FormControlLabel, FormGroup, Link as MuiLink } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { FormikTextField } from "./formControls/FormikTextField";
 import { UserContextValue } from '../hooks/UserContext';
+import Link from 'next/link';
 
 const validationSchema = yup.object({
   email: yup
@@ -70,7 +71,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
         type='password'
         autoComplete='current-password'
       />
-      <FormGroup sx={{ flexDirection: "row", alignContent: "space-between" }}>
+      <FormGroup sx={{ display: "flex", flexDirection: "row", alignContent: "space-between" }}>
         <FormControlLabel 
           control={<Checkbox
             id="rememberMe"
@@ -82,6 +83,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
           />}
           label="Remember me?"
         />
+        <Box sx={{ paddingTop: '12px' }}>
+          <Link href="/reset-password" passHref>
+            <MuiLink>I forgot my password</MuiLink>
+          </Link>
+        </Box>
       </FormGroup>
       {formik.isSubmitting
         ? <LoadingButton loading {...submitButtonProps}>Logging in ...</LoadingButton>

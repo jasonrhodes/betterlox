@@ -11,3 +11,7 @@ export function getSalt() {
 export function getRememberMeToken() {
   return crypto.randomBytes(24).toString("hex");
 }
+
+export function getResetToken() {
+  return crypto.randomBytes(24).toString("hex");
+}

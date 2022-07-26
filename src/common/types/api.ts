@@ -62,6 +62,7 @@ export interface GetMoviesForActorAndUserResponse {
 
 export interface ApiSuccessResponse {
   success: true;
+  message?: string;
 }
 
 export interface ApiErrorResponse {
