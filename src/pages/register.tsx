@@ -4,7 +4,7 @@ import { PageTemplate } from '../components/PageTemplate';
 import { UserContextConsumer } from '../hooks/UserContext';
 import { useRouter } from 'next/router';
 import { RegistrationForm } from '../components/RegistrationForm';
-import Link from '../components/Link';
+import Link from 'next/link';
 import { Typography } from '@mui/material';
 
 const RegisterPage: NextPage = () => {

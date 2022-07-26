@@ -3,7 +3,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import React from 'react';
 import { RatedMovie, RatedTmdbCast } from '../common/types/db';
 import CreditControls from './CreditControls';
-import { BasicImage } from './images';
+import { TMDBImage } from './images';
 
 export interface MoviesForActorTableProps {
   castOrderThreshold: number;
@@ -12,7 +12,7 @@ export interface MoviesForActorTableProps {
   ratings?: RatedMovie[];
 }
 
-export const MoviesForActorTable: React.FC<MoviesForActorTableProps> = ({ credits, ratings = [], setCastOrderThreshold, castOrderThreshold }) => {
+export const MoviesForActorTable: React.FC<MoviesForActorTableProps> = ({ credits, setCastOrderThreshold, castOrderThreshold }) => {
   return (
     <Box maxWidth="lg" sx={{ height: 600 }}>
       <CreditControls castOrderThreshold={castOrderThreshold} setCastOrderThreshold={setCastOrderThreshold} />
@@ -38,7 +38,7 @@ function Table({ credits }: { credits: RatedTmdbCast[] }) {
           align: "center",
           renderCell: ({ value }) => {
             return value
-              ? <BasicImage sx={{ height: '52px', width: 'auto' }} size="small" path={value} />
+              ? <TMDBImage sx={{ height: '52px', width: 'auto' }} size="small" tmdbPath={value} />
               : null;
           }
         },

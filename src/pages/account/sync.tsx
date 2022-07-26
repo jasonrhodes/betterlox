@@ -2,7 +2,7 @@ import React from 'react';
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
 import { Avatar, Button, Grid, Paper, Typography } from '@mui/material';
-import Link from '../../components/Link';
+import Link from 'next/link';
 
 const LoginPage: NextPage = () => {
   return (

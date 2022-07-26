@@ -57,7 +57,7 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     } else {
       setValidating(false);
     }
-  }, []);
+  }, [cookies.rememberMe, removeCookie]);
 
   async function login({ email, password, rememberMe }: LoginOptions) {
     const response = await api.login({ email, password, rememberMe });

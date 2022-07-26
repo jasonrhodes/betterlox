@@ -1,6 +1,6 @@
 import React from 'react';
 import type { NextPage } from 'next';
-import Link from '../../components/Link';
+import Link from 'next/link';
 import { PageTemplate } from '../../components/PageTemplate';
 
 const StatsPage: NextPage = () => {

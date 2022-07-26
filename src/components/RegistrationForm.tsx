@@ -115,7 +115,7 @@ export const RegistrationForm = () => {
           setLLL(true);
           const { data } = await api.getLetterboxdUserDetails(e.target.value);
           setLLL(false);
-          if ('errorMessage' in data) {
+          if ('code' in data) {
             setLetterboxdDetails({ retrieved: true });
             return;
           }

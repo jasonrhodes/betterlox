@@ -1,8 +1,8 @@
 import React from 'react';
 import { DataGrid } from "@mui/x-data-grid";
 import { ActorTableResult } from '../common/types/api';
-import Link from './Link';
-import { BasicImage } from './images';
+import Link from 'next/link';
+import { TMDBImage } from './images';
 
 export interface ActorsTableProps {
   actors: ActorTableResult[];
@@ -29,7 +29,7 @@ export function ActorsTable({ actors }: ActorsTableProps) {
           align: "center",
           renderCell: ({ row, value }) => {
             return value
-              ? <BasicImage sx={{ height: '52px', width: 'auto' }} path={value} />
+              ? <TMDBImage sx={{ height: '52px', width: 'auto' }} tmdbPath={value} />
               : null;
           }
         },

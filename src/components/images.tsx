@@ -27,16 +27,16 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
   urlOverride,
   ...rest
 }) => {
+  const config = useImageConfigs();
   let url = '';
   if (urlOverride) {
     url = urlOverride;
   } else {
-    const config = useImageConfigs();
     const sizes = config[`${type}_sizes`] || [];
     const index = (size === "smallest") ? 0 : (size === "largest") ? sizes.length - 1 : indexedSizes.indexOf(size);
     
     if (!config.secure_base_url) {
-      throw new Error("YOU ARE BEGOTTEN TO THE GODS OF HELL: " + config.errorStatus + '\n' + Object.keys(config).join(', '));
+      throw new Error("No secure_base_url provided from TMDB oh noes " + config.errorStatus + '\n' + Object.keys(config).join(', '));
     }
     url = `${config.secure_base_url}/${sizes[index]}${tmdbPath}`;
   }
@@ -44,11 +44,11 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
   if (shape === "circle") {
     sx.boxShadow = sx.boxShadow || "0 0 1px rgba(0,0,0,0.8)";
     return (
-      <Avatar src={url} sx={sx} />
+      <Avatar src={url} sx={sx} alt="" />
     );
   }
 
   return (
-    <Image {...rest} src={url} />
+    <Image alt="" {...rest} src={url} />
   );
 }

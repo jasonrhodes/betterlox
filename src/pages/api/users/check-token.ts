@@ -21,19 +21,13 @@ export interface CheckTokenApiRequest {
 }
 
 const CheckTokenRoute: NextApiHandler<CheckTokenApiResponse> = async (req, res) => {
-  const token = singleQueryParam(req.body.token);
-
-  console.log("check token route 1");
-
+  const token = singleQueryParam(req.body.token) || '';
   const UserRepository = await getUserRepository();
-
-  console.log("check token route 2");
 
   try {
     const { user } = await UserRepository.getUserByRememberMeToken(token);
     res.json({ success: true, user });
   } catch (error: unknown) {
-    console.log("check token route 3");
     if (error instanceof UserRepoError) {
       res.statusCode = 404;
       res.json({ success: false, errorMessage: error.message });

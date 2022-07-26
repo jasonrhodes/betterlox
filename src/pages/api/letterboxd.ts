@@ -1,18 +1,20 @@
 import { NextApiHandler } from "next";
-import { ApiError } from "../../common/types/api";
+import { ApiErrorResponse } from "../../common/types/api";
 import { getUserDetails } from "../../lib/letterboxd";
 import { singleQueryParam } from "../../lib/queryParams";
 
-export type ApiGetLetterboxdDetailsResponse = { details: Awaited<ReturnType<typeof getUserDetails>> } | ApiError;
+export type ApiGetLetterboxdDetailsResponse = { details: Awaited<ReturnType<typeof getUserDetails>> } | ApiErrorResponse;
 
 const LetterboxdDetails: NextApiHandler<ApiGetLetterboxdDetailsResponse> = async (req, res) => {
   const { username = '' } = req.query;
   if (username.length === 0) {
     res.status(400).json({
-      errorMessage: 'Username is required'
+      success: false,
+      code: 400,
+      message: 'Username is required'
     });
   }
-  const singleUsername = singleQueryParam(username);
+  const singleUsername = singleQueryParam(username) || '';
   try {
     const details = await getUserDetails(singleUsername);
     res.json({ details });

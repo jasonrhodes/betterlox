@@ -36,7 +36,7 @@ export function RatingsTable({ ratings = [] }: RatingsTableProps) {
                 {...sharedProps}
                 tmdbPath={row.movie.posterPath}
               /> :
-              <Image {...sharedProps} src="/img/no-poster.png" />;
+              <Image {...sharedProps} src="/img/no-poster.png" alt="" />;
           }
         },
         {
