@@ -6,14 +6,16 @@ export const getRatingsRepository = async () => (await getDataSource()).getRepos
     const query = this.createQueryBuilder("rating")
       .leftJoinAndSelect("rating.movie", "movie")
       .select("rating.movieId", "movieId")
-      .distinctOn(["rating.movieId"])
+      .addSelect("rating.letterboxdSlug", "letterboxdSlug")
+      .distinctOn(["rating.movieId", "rating.letterboxdSlug"])
       .where("movie.title IS NULL")
       .andWhere("rating.movieId != :zero", { zero: 0 })
       .orderBy("rating.movieId", "ASC")
+      .addOrderBy("rating.letterboxdSlug", "ASC")
       .addOrderBy("rating.date", "DESC")
       .limit(limit);
   
-    const result = await query.getRawMany<{ movieId: number }>();
-    return result.map(({ movieId }) => movieId);
+    const result = await query.getRawMany<{ movieId: number; letterboxdSlug: string | null }>();
+    return result; //.map(({ movieId }) => movieId);
   }
 });

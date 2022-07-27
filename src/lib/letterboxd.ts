@@ -119,8 +119,11 @@ export async function scrapeRatingsByPage({
   const ratings = await ratingElements.map(async (i, item) => {
     const r: Partial<Rating> = {};
 
-    const ratingData = $(item).find('.film-poster').data();
+    const poster = $(item).find('.film-poster');
+    const ratingData = poster.data();
+
     if (typeof ratingData.filmSlug === "string") {
+      r.letterboxdSlug = ratingData.filmSlug;
       const { data } = await tryLetterboxd(ratingData.filmSlug);
       const $$ = cheerio.load(data);
       const { tmdbId } = $$("body").data();

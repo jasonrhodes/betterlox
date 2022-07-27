@@ -49,7 +49,8 @@ export async function syncAllRatingsForUser(userId: number, username?: string) {
           movieId,
           name,
           stars,
-          date
+          date,
+          letterboxdSlug
         } = rating;
 
         if (typeof movieId !== "number") {
@@ -74,6 +75,7 @@ export async function syncAllRatingsForUser(userId: number, username?: string) {
             userId,
             stars,
             date,
+            letterboxdSlug,
             name
           });
 

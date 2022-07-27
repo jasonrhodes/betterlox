@@ -1,5 +1,5 @@
 import { NextApiHandler } from "next";
-import { getRatingsRepository } from "../../../../db/repositories/RatingsRepo";
+import { getRatingsRepository } from "../../../../../db/repositories/RatingsRepo";
 
 const UserRatingsRoute: NextApiHandler = async (req, res) => {
   const { userId } = req.query;

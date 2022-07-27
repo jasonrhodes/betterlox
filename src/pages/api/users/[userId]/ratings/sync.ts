@@ -1,6 +1,6 @@
 import { NextApiHandler } from "next";
-import { numericQueryParam } from "../../../../lib/queryParams";
-import { syncAllRatingsForUser, SyncRatingsError } from "../../../../lib/syncAllRatingsForUser";
+import { numericQueryParam } from "../../../../../lib/queryParams";
+import { syncAllRatingsForUser, SyncRatingsError } from "../../../../../lib/syncAllRatingsForUser";
 
 const UserSyncRoute: NextApiHandler = async (req, res) => {
   const { userId = '' } = req.query;

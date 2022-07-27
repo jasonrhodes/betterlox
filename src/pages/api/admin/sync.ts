@@ -46,7 +46,7 @@ const SyncRatingsRoute = createAdminRoute<SyncResponse>(async (req, res) => {
           status: SyncStatus.COMPLETE,
           numSynced: synced.length
         });
-        return res.status(200).json({ success: true, missingMovies, synced });
+        return res.status(200).json({ success: true, missingMovies: missingMovies.map(({ movieId }) => movieId), synced });
       } else {
         console.log(`Attempted to sync ${missingMovies.length} movies, but 0 were synced. Attempted IDs: ${missingMovies.join(', ')}`);
         // continue to next sync type in this case...

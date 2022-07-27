@@ -1,11 +1,11 @@
 import { JOB_ALLOW_LIST } from "../../common/constants";
-import { tmdb, TmdbCredits, TmdbMovie, getMovieInfoSafely } from "../../lib/tmdb";
+import { tmdb, TmdbMovie, getMovieInfoSafely } from "../../lib/tmdb";
 import { Movie } from "../entities";
 import { getDataSource } from "../orm";
 import { getCastRepository, getCollectionsRepository, getCrewRepository, getGenresRepository, getProductionCompaniesRepository } from ".";
 
 export const getMoviesRepository = async () => (await getDataSource()).getRepository(Movie).extend({
-  async createFromTmdb(movie: TmdbMovie, credits?: TmdbCredits) {
+  async createFromTmdb(movie: TmdbMovie, slug?: string | null) {
     const genres = movie.genres 
       ? await Promise.all(movie.genres.map(async (genre) => (await getGenresRepository()).createFromTmdb(genre)))
       : [];
@@ -22,6 +22,7 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
       id: movie.id,
       backdropPath: movie.backdrop_path,
       imdbId: movie.imdb_id,
+      letterboxdSlug: slug === null ? undefined : slug,
       originalLanguage: movie.original_language,
       originalTitle: movie.original_title,
       overview: movie.overview,
@@ -41,17 +42,19 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
     return this.save(created);
   },
 
-  async syncMovies(ids: number[]) {
-    const retrievedMovies = await Promise.all(ids.map((id) => getMovieInfoSafely(id)));
+  async syncMovies(movies: Array<{ movieId: number; letterboxdSlug: string | null }>) {
+    const retrievedMovies = await Promise.all(movies.map(async ({ movieId, letterboxdSlug }) => ({ 
+      tmdbMovie: await getMovieInfoSafely(movieId), 
+      slug: letterboxdSlug 
+    })));
 
-    const MoviesRepo = await getMoviesRepository();
-    const saved = await Promise.all(retrievedMovies.map(async (tmdbMovie) => {
+    const saved = await Promise.all(retrievedMovies.map(async ({ tmdbMovie, slug }) => {
       if (tmdbMovie === null || typeof tmdbMovie.id === "undefined") {
         return null;
       }
 
       const credits = await tmdb.movieCredits(tmdbMovie.id);
-      const savedMovie = await MoviesRepo.createFromTmdb(tmdbMovie);
+      const savedMovie = await this.createFromTmdb(tmdbMovie, slug);
 
       const CastRepo = await getCastRepository();
       const CrewRepo = await getCrewRepository();

@@ -14,10 +14,10 @@ import { CookiesProvider } from 'react-cookie';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#F26230', // salmon pink
+      main: '#FA8072', // salmon pink
     },
     secondary: {
-      main: '#F2C330', // yellow analagous
+      main: '#72ECFA', // blue complementary
     }
   },
   typography: {

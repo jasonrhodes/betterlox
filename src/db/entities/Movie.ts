@@ -60,7 +60,10 @@ export class Movie extends BaseEntity {
   @Column()
   title: string;
 
-  @ManyToMany((type) => Genre)
+  @Column({ nullable: true })
+  letterboxdSlug: string;
+
+  @ManyToMany(() => Genre)
   @JoinTable({
     name: "join_movies_genres",
     joinColumn: {
@@ -74,7 +77,7 @@ export class Movie extends BaseEntity {
   })
   genres: Relation<Genre[]>;
 
-  @ManyToMany((type) => ProductionCompany)
+  @ManyToMany(() => ProductionCompany)
   @JoinTable({
     name: "join_movies_production_companies",
     joinColumn: {

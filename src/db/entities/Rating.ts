@@ -22,6 +22,9 @@ export class Rating extends BaseEntity {
   @Column({ nullable: true })
   year: number;
 
+  @Column({ nullable: true })
+  letterboxdSlug: string;
+
   @ManyToOne(() => Movie, {
     createForeignKeyConstraints: false
   })

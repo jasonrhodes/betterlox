@@ -42,13 +42,13 @@ export function RatingsTable({ ratings = [] }: RatingsTableProps) {
         {
           key: "movie.title",
           name: "Title",
-          formatter: ({ row }) => <>{row.movie?.title}</>
+          formatter: ({ row }) => <>{row.movie?.title || row.name}</>
         },
         {
           key: "stars",
           name: "Rating",
           width: 150,
-          formatter: ({ row }) => <StarRating rating={row.stars} />
+          formatter: ({ row }) => <StarRating color="primary" rating={row.stars} />
         },
         {
           key: "date",
