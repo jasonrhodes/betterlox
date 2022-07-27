@@ -7,7 +7,6 @@ import { UserPublic } from '../common/types/db';
 import Image from "next/image";
 
 const pages = [
-  { label: 'Home', route: '/' },
   { label: 'Ratings', route: '/ratings' },
   { label: 'Stats', route: '/stats' },
   { label: 'Lists', route: '/lists' },
@@ -120,18 +119,18 @@ const Logo: React.FC = () => (
     <Box sx={{ padding: '5px 15px 5px 0', cursor: "pointer" }}>
       <Image
         alt="BETTERLOX"
-        src="/img/salmon-lox.png"
-        height={40}
-        width={63}
+        src="/img/salmon-logo-pinks.png"
+        height={30}
+        width={47}
       />
     </Box>
     <Typography sx={{
       fontFamily: 'Rubik',
       fontWeight: 700,
-      fontSize: '42px',
-      lineHeight: '1.1',
+      fontSize: '25px',
+      lineHeight: 1.6,
       paddingRight: '15px',
-      color: '#E1440E',
+      color: 'primary.main',
       cursor: 'pointer'
     }}>Betterlox</Typography>
   </>
@@ -207,7 +206,8 @@ export function MainNav() {
                   <Link key={page.label} href={page.route} passHref>
                     <Button
                       onClick={handleCloseNavMenu}
-                      sx={{ my: 2, display: 'block' }}
+                      color="secondary"
+                      sx={{ my: 2, display: 'block', textAlign: 'center' }}
                     >
                       {page.label}
                     </Button>

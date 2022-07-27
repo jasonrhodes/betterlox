@@ -1,6 +1,5 @@
-import '../styles/globals.css';
 import type { AppProps } from 'next/app';
-import { createTheme, ThemeProvider } from "@mui/material";
+import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
 import { ImageContextProvider } from "../hooks/ImageConfigContext";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/700.css";
@@ -13,8 +12,13 @@ import { CookiesProvider } from 'react-cookie';
 
 const theme = createTheme({
   palette: {
+    mode: "dark",
+    background: {
+      default: '#011e3c'
+    },
     primary: {
       main: '#FA8072', // salmon pink
+      dark: '#DB1D08'
     },
     secondary: {
       main: '#72ECFA', // blue complementary
@@ -30,9 +34,9 @@ const theme = createTheme({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
-  
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <CookiesProvider>
         <ImageContextProvider>
           <UserContextProvider>
