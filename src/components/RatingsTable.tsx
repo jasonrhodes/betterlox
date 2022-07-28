@@ -4,13 +4,42 @@ import { TMDBImage } from '../components/images';
 import { Rating } from '../db/entities';
 import Image, { ImageProps } from 'next/image';
 import { DisplayTable } from './DisplayTable';
-import { Box, Typography } from '@mui/material';
-import Link from 'next/link';
+import { Box, Tooltip, Typography } from '@mui/material';
 import { useCurrentUser } from '../hooks/UserContext';
-import { Article } from '@mui/icons-material';
 
+const ICON_SIZE = 15;
 interface RatingsTableProps {
   ratings: Rating[] | undefined;
+}
+
+function LetterboxdLink({ username, slug }: { username?: string, slug?: string }) {
+  if (!username || !slug) {
+    return (
+      <Tooltip title="Movie data is still loading..." arrow>
+        <Image height={ICON_SIZE} width={ICON_SIZE} style={{ opacity: 0.4 }} src="/img/letterboxd-icon-2.webp" alt="Letterboxd.com logo" />
+      </Tooltip>
+    )
+  }
+  return (
+    <a target="_blank" rel="noreferrer" href={`https://letterboxd.com/${username}${slug}`}>
+      <Image height={ICON_SIZE} width={ICON_SIZE} src="/img/letterboxd-icon-2.webp" alt="Letterboxd.com logo" />
+    </a>
+  );
+}
+
+function ImdbLink({ id }: { id?: string }) {
+  if (!id) {
+    return (
+      <Tooltip title="Movie data is still loading..." arrow>
+        <Image height={ICON_SIZE} width={ICON_SIZE} style={{ opacity: 0.4 }} src="/img/imdb-icon.png" alt="Letterboxd.com logo" />
+      </Tooltip>
+    )
+  }
+  return (
+    <a target="_blank" rel="noreferrer" href={`https://www.imdb.com/title/${rating.movie?.imdbId}`}>
+      <Image height={ICON_SIZE} width={ICON_SIZE} src="/img/imdb-icon.png" alt="IMDb.com logo" />
+    </a>
+  );
 }
 
 function RatingCard({ rating }: { rating: Rating }) {
@@ -28,7 +57,7 @@ function RatingCard({ rating }: { rating: Rating }) {
     /> :
     <Image {...sharedProps} src="/img/no-poster.png" alt="" />;
   
-  const ICON_SIZE = 15;
+  
   const slug = rating.movie?.letterboxdSlug;
   return (
     <Box className="ratingCard" sx={{ display: "flex", paddingBottom: "15px" }}>
@@ -41,14 +70,10 @@ function RatingCard({ rating }: { rating: Rating }) {
         <Box><Typography variant="caption">{(new Date(rating.date)).toLocaleDateString()}</Typography></Box>
         <Box sx={{ display: "flex" }}>
           <Box sx={{ marginRight: "5px" }}>
-            <a target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user?.username}${slug}`}>
-              <Image height={ICON_SIZE} width={ICON_SIZE} src="/img/letterboxd-icon-2.webp" alt="Letterboxd.com logo" />
-            </a>
+            <LetterboxdLink username={user?.username} slug={slug} />
           </Box>
           <Box sx={{ marginRight: "5px" }}>
-            <a target="_blank" rel="noreferrer" href={`https://www.imdb.com/title/${rating.movie?.imdbId}`}>
-              <Image height={ICON_SIZE} width={ICON_SIZE} src="/img/imdb-icon.png" alt="Letterboxd.com logo" />
-            </a>
+            <ImdbLink id={rating.movie?.imdbId} />
           </Box>
         </Box>
       </Box>
