@@ -17,7 +17,7 @@ function applyTitleFilter(filterString: string, ratings: Rating[]) {
   return ratings.filter((r) => {
     const spacesReplaced = filterString.replace(' ', '.*')
     const regexp = new RegExp(`.*${spacesReplaced}.*`, 'i');
-    return regexp.test(r.movie?.title);
+    return regexp.test(r.name);
   });
 }
 
