@@ -41,9 +41,9 @@ function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
         }
       case 'movie.title':
         if (sortDir === 'ASC') {
-          return a.movie?.title < b.movie?.title ? -1 : 1;
+          return a.movie?.title.localeCompare(b.movie?.title);
         } else {
-          return a.movie?.title > b.movie?.title ? -1 : 1;
+          return a.movie?.title.localeCompare(b.movie?.title) * -1;
         }
     }
   })
