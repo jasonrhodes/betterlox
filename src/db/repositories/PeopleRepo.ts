@@ -13,6 +13,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
       ids.map(async (id) => {
         const tmdbPerson = await backoff(() => tmdb.personInfo(id), 5);
         const created = this.create({
+          id: tmdbPerson.id,
           name: tmdbPerson.name,
           biography: tmdbPerson.biography,
           birthday: denullify(tmdbPerson.birthday),

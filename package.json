@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "source ./.env.sh && next dev",
+    "dev": "source ./.env && next dev",
     "next": "next",
     "build": "next build",
     "start": "next start -p $PORT",
     "lint": "next lint"
   },
   "dependencies": {
+    "@elastic/apm-rum": "^5.12.0",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
     "@fontsource/inter": "^4.5.5",

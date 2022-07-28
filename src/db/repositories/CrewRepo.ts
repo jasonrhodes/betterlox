@@ -16,11 +16,11 @@ export const getCrewRepository = async () => (await getDataSource()).getReposito
 
   async getCrewRolesWithMissingPeople(limit?: number) {
     const query = this.createQueryBuilder("crewRole")
-      .leftJoinAndSelect("crewRole.actor", "person")
-      .select("person.personId", "personId")
-      .distinctOn(["person.personId"])
+      .leftJoinAndSelect("crewRole.person", "person")
+      .select("crewRole.personId", "personId")
+      .distinctOn(["crewRole.personId"])
       .where("person.name IS NULL")
-      .orderBy("person.personId", "ASC")
+      .orderBy("crewRole.personId", "ASC")
       .limit(limit);
   
     const result = await query.getRawMany<{ personId: number }>();

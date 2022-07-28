@@ -72,18 +72,22 @@ export interface ApiErrorResponse {
 }
 
 export interface SyncRatingsMoviesResponse extends ApiSuccessResponse {
-  missingMovies: number[];
+  success: true;
+  type: 'ratings_movies';
   synced: Array<Movie | null>;
 }
 
 export interface SyncMoviesPeopleResponse extends ApiSuccessResponse {
-  missingPeople: number[];
+  success: true;
+  type: 'movies_people' | 'movies_cast' | 'movies_crew';
   synced: Array<Person | null>;
 }
 
-export interface SyncNone extends ApiSuccessResponse {
+export interface SyncNone {
+  success: boolean;
+  type: 'none';
   synced: undefined[];
-  message: string;
+  message?: string;
 }
 
 export type SyncResponse = SyncRatingsMoviesResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;

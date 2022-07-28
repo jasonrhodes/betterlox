@@ -1,16 +1,16 @@
 
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, OneToMany, Relation } from "typeorm";
+import { Entity, Column, OneToMany, Relation, PrimaryColumn } from "typeorm";
 import { CastRole } from "./CastRole";
 import { CrewRole } from "./CrewRole";
 
 @Entity('people')
 export class Person {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  id: number; // tmdb ID
 
   @Column()
   name: string;
-
+  
   @Column({ nullable: true })
   biography: string;
 

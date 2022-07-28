@@ -84,7 +84,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
           label="Remember me?"
         />
         <Box sx={{ paddingTop: '12px' }}>
-          <Link href="/reset-password" passHref>
+          <Link href="/forgot-password" passHref>
             <MuiLink>I forgot my password</MuiLink>
           </Link>
         </Box>

@@ -66,7 +66,7 @@ export function ForgotPasswordForm() {
       />
       {formik.isSubmitting
         ? <LoadingButton loading {...submitButtonProps}>Sending ...</LoadingButton>
-        : <Button {...submitButtonProps}>Reset</Button>}
+        : <Button {...submitButtonProps}>Send Email</Button>}
     </form>
   );
 }

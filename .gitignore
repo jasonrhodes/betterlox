@@ -39,6 +39,7 @@ yarn-error.log*
 
 # custom
 .env.sh
+.env
 package-lock.json
 local-scripts
 .db
