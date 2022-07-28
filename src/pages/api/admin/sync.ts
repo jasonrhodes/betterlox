@@ -27,18 +27,19 @@ const SyncRatingsRoute = createAdminRoute<SyncResponse>(async (req, res) => {
   try {
     const numericLimit = numericQueryParam(req.query.limit);
 
-    // console.log('Syncing movies');
-    // const syncedMovies = await syncRatingsMovies(sync, numericLimit);
-    // if (syncedMovies.length > 0) {
-    //   return res.status(200).json({ success: true, type: 'ratings_movies', synced: syncedMovies });
-    // }
+    // Check for ratings with missing movie records
+    console.log('Syncing movies');
+    const syncedMovies = await syncRatingsMovies(sync, numericLimit);
+    if (syncedMovies.length > 0) {
+      return res.status(200).json({ success: true, type: 'ratings_movies', synced: syncedMovies });
+    }
 
     // Check for cast roles with missing people records
-    // console.log('Syncing cast roles...');
-    // const syncedCast = await syncCastPeople(sync, numericLimit);
-    // if (syncedCast.length > 0) {
-    //   return res.status(200).json({ success: true, type: 'movies_cast', synced: syncedCast });
-    // }
+    console.log('Syncing cast roles...');
+    const syncedCast = await syncCastPeople(sync, numericLimit);
+    if (syncedCast.length > 0) {
+      return res.status(200).json({ success: true, type: 'movies_cast', synced: syncedCast });
+    }
 
     // Check for crew roles with missing people records
     console.log('Syncing crew roles...');
