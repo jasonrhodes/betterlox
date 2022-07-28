@@ -36,7 +36,7 @@ function ImdbLink({ id }: { id?: string }) {
     )
   }
   return (
-    <a target="_blank" rel="noreferrer" href={`https://www.imdb.com/title/${rating.movie?.imdbId}`}>
+    <a target="_blank" rel="noreferrer" href={`https://www.imdb.com/title/${id}`}>
       <Image height={ICON_SIZE} width={ICON_SIZE} src="/img/imdb-icon.png" alt="IMDb.com logo" />
     </a>
   );
