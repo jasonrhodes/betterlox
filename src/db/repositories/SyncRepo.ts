@@ -1,16 +1,21 @@
-import { Not } from "typeorm";
+import { MoreThan, Not } from "typeorm";
 import { SyncStatus, SyncType } from "../../common/types/db";
 import { Sync } from "../entities";
 import { getDataSource } from "../orm";
+
+function minutesAgo(min: number, date: Date = new Date()) {
+  return new Date(date.getTime() - (min * 60 * 1000));
+}
 
 export const getSyncRepository = async () => (await getDataSource()).getRepository(Sync).extend({
   async queueSync() {
     const created = this.create();
     const sync = await this.save(created);
+    const minStart = minutesAgo(15); // wait 15 min for a rogue sync before we close that and start a new one
     const started = await this.find({
       where: [
-        { id: Not(sync.id), status: SyncStatus.PENDING },
-        { id: Not(sync.id), status: SyncStatus.IN_PROGRESS }
+        { id: Not(sync.id), status: SyncStatus.PENDING, started: MoreThan(minStart) },
+        { id: Not(sync.id), status: SyncStatus.IN_PROGRESS, started: MoreThan(minStart) }
       ]
     });
 

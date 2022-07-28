@@ -1,27 +1,24 @@
 import React from 'react';
-import { Star, StarHalf } from '@mui/icons-material';
-import { Box, PaletteColor } from '@mui/material';
+import { StarRounded, StarHalfRounded } from '@mui/icons-material';
+import { sizeHeight } from '@mui/system';
 
 export interface StarRatingOptions {
-  rating: number;
+  score: number;
   color?: "primary" | "secondary";
   style?: Record<string, any>;
+  size?: number;
 }
 
-const defaultStyles = {
-  // color: "#D4AF37", // gold yellow
-  fontSize: 24
-};
-
 export function StarRating({
-  rating,
+  score,
   color,
+  size = 20,
   style = {}
 }: StarRatingOptions) {
   const stars = [];
   let i = 0;
   const computedStyle = {
-    ...defaultStyles,
+    fontSize: size,
     ...style
   };
 
@@ -30,12 +27,12 @@ export function StarRating({
     fontSize: computedStyle.fontSize * 0.7
   };
 
-  for (i; i < Math.floor(rating); i++) {
-    stars.push(<Star color={color} key={`star-${i}`} sx={computedStyle} />);	
+  for (i; i < Math.floor(score); i++) {
+    stars.push(<StarRounded color={color} key={`star-${i}`} sx={computedStyle} />);	
   }
 
-  if (rating !== Math.floor(rating)) {
-    stars.push(<Box color={color} key="star-half" sx={halfStyle}>½</Box>)
+  if (score !== Math.floor(score)) {
+    stars.push(<StarHalfRounded color={color} key="star-half" sx={computedStyle} />);
   }
 
   return <>{stars}</>;

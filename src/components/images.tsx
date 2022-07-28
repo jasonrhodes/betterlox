@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar } from "@mui/material";
+import { SxProps } from "@mui/material";
 import useImageConfigs from "../hooks/useImageConfigs";
 import Image, { ImageProps } from "next/image";
 
@@ -14,7 +14,7 @@ export interface TMDBImageProps extends Omit<ImageProps, 'src'> {
   shape?: ImageShape;
   type?: ImageType;
   tmdbPath: string;
-  sx?: Record<string, any>;
+  sx?: SxProps;
   urlOverride?: string;
 }
 
@@ -40,15 +40,8 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
     }
     url = `${config.secure_base_url}/${sizes[index]}${tmdbPath}`;
   }
-  
-  if (shape === "circle") {
-    sx.boxShadow = sx.boxShadow || "0 0 1px rgba(0,0,0,0.8)";
-    return (
-      <Avatar src={url} sx={sx} alt="" />
-    );
-  }
 
   return (
-    <Image alt="" {...rest} src={url} />
+    <Image alt="" {...rest} src={url} style={{ borderRadius: "3%" }} />
   );
 }
