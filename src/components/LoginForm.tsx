@@ -30,7 +30,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
     initialValues: {
       email: '',
       password: '',
-      rememberMe: false
+      rememberMe: true
     },
     validationSchema: validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -48,7 +48,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
     color: 'primary',
     type: 'submit',
     sx: {
-      my: 2
+      my: 2,
+      marginRight: 2
     }
   };
 
@@ -71,26 +72,28 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
         autoComplete='current-password'
       />
       <FormGroup sx={{ display: "flex", flexDirection: "row", alignContent: "space-between" }}>
-        <FormControlLabel 
+        {/* <FormControlLabel 
           control={<Checkbox
             id="rememberMe"
             name="rememberMe"
-            disabled={formik.isSubmitting}
-            value={formik.values.rememberMe}
+            disabled={false}
+            value={true}
             onChange={formik.handleChange}
-            
           />}
           label="Remember me?"
-        />
-        <Box sx={{ verticalAlign: 'middle', paddingTop: '9px' }}>
-          <Link href="/forgot-password" passHref>
-            <MuiLink>I forgot my password</MuiLink>
-          </Link>
-        </Box>
+        /> */}
+        
       </FormGroup>
       {formik.isSubmitting
         ? <LoadingButton loading {...submitButtonProps}>Logging in ...</LoadingButton>
-        : <Button {...submitButtonProps}>Log In</Button>}
+        : (
+          <Box sx={{ verticalAlign: 'middle', paddingTop: '9px' }}>
+            <Button {...submitButtonProps}>Log In</Button>
+            <Link href="/forgot-password" passHref>
+              <MuiLink>I forgot my password</MuiLink>
+            </Link>
+          </Box>
+        )}
     </form>
   )
 }

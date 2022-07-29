@@ -22,7 +22,7 @@ export interface CheckTokenApiRequest {
 
 const CheckTokenRoute = createApiRoute<CheckTokenApiResponse>({
   handlers: {
-    get: async (req, res) => {
+    post: async (req, res) => {
       const token = singleQueryParam(req.body.token) || '';
       const UserRepository = await getUserRepository();
 

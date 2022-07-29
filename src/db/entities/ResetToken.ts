@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, Relation, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, Relation, JoinColumn, ManyToOne } from "typeorm";
 import { User } from ".";
 
 @Entity('reset_tokens')
@@ -9,7 +9,7 @@ export class ResetToken {
   @Column()
   token: string;
 
-  @OneToOne(() => User)
+  @ManyToOne(() => User)
   @JoinColumn()
   user: Relation<User>;
 

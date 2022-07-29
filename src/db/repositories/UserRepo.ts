@@ -40,6 +40,10 @@ export const getUserRepository = async () => (await getDataSource()).getReposito
     }
 
     const hashed = hash(password, user.salt);
+
+    console.log("Check hash:", hashed);
+    console.log("DB:", user.password);
+    
     const valid = hashed === user.password;
     if (!valid) {
       throw new LoginError('Invalid password');
@@ -60,6 +64,7 @@ export const getUserRepository = async () => (await getDataSource()).getReposito
   
   // formerly checkToken
   async getUserByRememberMeToken(token: string) {
+    console.log('getting user by remember me token', token);
     const user = await this.findOne({ where: { rememberMeToken: token }});
   
     if (!user) {

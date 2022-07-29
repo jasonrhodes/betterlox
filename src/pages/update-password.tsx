@@ -9,7 +9,7 @@ const ResetPasswordPage: NextPage = () => {
   const router = useRouter();
   const token = singleQueryParam(router.query.token) || '';
   return (
-    <PageTemplate title="Reset Password" maxWidth='md'>
+    <PageTemplate title="Choose New Password" maxWidth='md'>
       <ResetPasswordForm token={token} />
     </PageTemplate>
   );

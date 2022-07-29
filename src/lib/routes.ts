@@ -1,5 +1,4 @@
 import { NextApiHandler, NextApiResponse } from "next";
-import Router from "next/router";
 import { ApiErrorResponse } from "../common/types/api";
 const { BETTERLOX_API_TOKEN } = process.env;
 
@@ -37,10 +36,10 @@ export function createApiRoute<T>({
   isAdmin = false
 }: RouteOptions<T>): NextApiHandler<T | ApiErrorResponse> {
   return (req, res) => {
-    const methods = Object.keys(handlers).map(m => m.toUpperCase());
     try {
+      const methods = Object.keys(handlers).map(m => m.toUpperCase());
       if (!req.method) {
-        const message = `No method provided in request for ${Router.pathname}`;
+        const message = `No method provided in request for ${req.url}`;
         respondWithError(res, 500, message);
         throw message;
       }
@@ -52,15 +51,20 @@ export function createApiRoute<T>({
         }
       }
 
+      const handler = handlers[req.method.toLowerCase()];
+      if (!handler || typeof handler !== "function") {
+        throw new Error(`Handler error, likely problem with casing (${Object.keys(handlers)} vs. ${req.method})`);
+      }
+
       if (isAdmin) {
-        return createAdminRoute<T>(handlers[req.method])(req, res);
+        return createAdminRoute<T>(handler)(req, res);
       } else {
-        return handlers[req.method](req, res);
+        return handler(req, res);
       }
     } catch (error: unknown) {
       // global error handler for all API routes
       const message = error instanceof Error ? error.message : typeof error === "string" ? error : "Unknown error occurred";
-      console.error('[Global Error Handler]', message);
+      console.error(`[Global Error Handler] [${req.url}] ${message}`);
     }
   }
 }
