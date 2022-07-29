@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
-import { Box, Chip, FormControl, Input, InputLabel, LinearProgress, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { Box, Chip, FormControl, TextField, InputLabel, LinearProgress, MenuItem, Select } from '@mui/material';
 import { GetRatingsForUserResponse } from '../common/types/api';
 import { useApi } from '../hooks/useApi';
 import { UserPageTemplate } from '../components/PageTemplate';
 import { RatingsTable } from '../components/RatingsTable';
 import { Rating } from '../db/entities';
-import { ArrowDownward, ArrowUpward, Tune } from '@mui/icons-material';
+import { ArrowDownward, ArrowUpward, Close, Tune } from '@mui/icons-material';
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 function escapeRegExp(string: string) {
@@ -14,6 +14,7 @@ function escapeRegExp(string: string) {
 }
 
 function applyTitleFilter(filterString: string, ratings?: Rating[]) {
+  console.log('AF: in ATF', filterString);
   if (!ratings) {
     return [];
   }
@@ -31,7 +32,8 @@ type SortBy = 'date' | 'stars' | 'movie.title';
 type SortDir = 'ASC' | 'DESC';
 
 function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
-  return ratings.sort((a, b) => {
+  console.log("applying sort", { sortBy, sortDir, ratings })
+  const sorted = ratings.sort((a, b) => {
     switch (sortBy) {
       case 'date':
         if (sortDir === 'ASC') {
@@ -52,10 +54,13 @@ function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
           return a.movie?.title.localeCompare(b.movie?.title) * -1;
         }
     }
-  })
+  });
+  console.log( { sorted });
+  return sorted;
 }
 
 function PageContent({ userId }: { userId: number }) {
+  const [processedRatings, updateRatings] = useState<Rating[]>([]);
   const [titleFilter, updateTitleFilter] = useState<string>('');
   const { response, errorStatus } = useApi<GetRatingsForUserResponse>(
     `/api/users/${userId}/ratings`
@@ -66,19 +71,15 @@ function PageContent({ userId }: { userId: number }) {
   const [sortDir, setSortDir] = React.useState<SortDir>("DESC");
   const [activeControls, setActiveControls] = React.useState([]);
 
-  // 1. Filter, 2. Sort, 3. Slice
-  const memoFiltered = React.useMemo(
-    () => { console.log('x:filtering'); return applyTitleFilter(titleFilter, response?.ratings); },
-    [titleFilter, response?.ratings]
-  );
-  const memoFilteredSorted = React.useMemo(
-    () => { console.log('x:sorting'); return applySort(sortBy, sortDir, memoFiltered); },
-    [sortBy, sortDir, memoFiltered]
-  );
-  const processedRatings = React.useMemo(
-    () => { console.log('x:slicing'); return show === "all" ? memoFilteredSorted : memoFilteredSorted.slice(0, show); },
-    [show, memoFilteredSorted]
-  );
+  useEffect(() => {
+    // TODO: Look into how to avoid re-filtering the same data with the same filter
+    const filtered = applyTitleFilter(titleFilter, response?.ratings);
+    // TODO: Look into how to avoid re-sorting the same data over and over
+    const filteredSorted = applySort(sortBy, sortDir, filtered);
+    const filteredSortedSliced = show === "all" ? filteredSorted : filteredSorted.slice(0, show);
+
+    updateRatings(filteredSortedSliced);
+  }, [titleFilter, response?.ratings, sortBy, sortDir, show])
 
   const handleTitleFilterChange = React.useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateTitleFilter(escapeRegExp(event.target.value));
@@ -147,7 +148,7 @@ function PageContent({ userId }: { userId: number }) {
           <ArrowUpward color={sortDir === "ASC" ? "secondary" : "disabled"} />
           <ArrowDownward color={sortDir === "DESC" ? "secondary" : "disabled"} />
         </Box>
-        <Input sx={{ display: { xs: 'none', md: 'inline-flex' }, marginRight: '10px' }} placeholder="Filter by title" onChange={handleTitleFilterChange} />
+        <TextField size="small" value={titleFilter} sx={{ display: { xs: 'none', md: 'inline-flex' }, marginRight: '10px' }} placeholder="Filter by title" onChange={handleTitleFilterChange} />
         <Box sx={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle', marginRight: '10px' }} onClick={handleOpenControls}>
           <Tune color={activeControls.length > 0 ? "secondary" : "disabled"} />
         </Box>
