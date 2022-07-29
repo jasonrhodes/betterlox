@@ -14,7 +14,6 @@ function escapeRegExp(string: string) {
 }
 
 function applyTitleFilter(filterString: string, ratings?: Rating[]) {
-  console.log('AF: in ATF', filterString);
   if (!ratings) {
     return [];
   }
@@ -32,7 +31,6 @@ type SortBy = 'date' | 'stars' | 'movie.title';
 type SortDir = 'ASC' | 'DESC';
 
 function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
-  console.log("applying sort", { sortBy, sortDir, ratings })
   const sorted = ratings.sort((a, b) => {
     switch (sortBy) {
       case 'date':
@@ -55,7 +53,6 @@ function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
         }
     }
   });
-  console.log( { sorted });
   return sorted;
 }
 

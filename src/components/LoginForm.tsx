@@ -39,6 +39,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
         password: values.password,
         rememberMe: true
       });
+      console.log({ result });
       setSubmitting(false);
     },
   });
