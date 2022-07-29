@@ -37,7 +37,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
       const result = await userContext.login({
         email: values.email,
         password: values.password,
-        rememberMe: values.rememberMe
+        rememberMe: true
       });
       setSubmitting(false);
     },
