@@ -55,8 +55,14 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
   } catch (error: unknown) {
     // TODO: Need to inspect error that comes back if email already exists
     if (error instanceof TypeORMError) {
-      res.statusCode = 400;
-      res.json({ success: false, errorMessage: error.message });
+      if (error.message.startsWith("duplicate key value violates unique constraint")) {
+        res.statusCode = 409;
+        res.json({ success: false, errorMessage: 'User with this name already exists, please login' });
+      } else {
+        res.statusCode = 400;
+        console.log(`Database error while trying to register account ${JSON.stringify(userOptions)}, received message: ${error.message}`)
+        res.json({ success: false, errorMessage: `Error while registering` });
+      }
     } else {
       handleGenericError(error, res);
     }

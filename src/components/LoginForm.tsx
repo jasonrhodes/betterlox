@@ -1,11 +1,12 @@
 import React from 'react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
-import { Box, Button, ButtonProps, Checkbox, FormControlLabel, FormGroup, Link as MuiLink } from '@mui/material';
+import { Alert, AlertTitle, Box, Button, ButtonProps, Checkbox, FormControlLabel, FormGroup, Link as MuiLink } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { FormikTextField } from "./formControls/FormikTextField";
 import { UserContextValue } from '../hooks/UserContext';
 import Link from 'next/link';
+import axios, { Axios } from 'axios';
 
 const validationSchema = yup.object({
   email: yup
@@ -26,6 +27,7 @@ interface LoginFormProps {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
+  const [pageError, setPageError] = React.useState<string | null>(null);
   const formik = useFormik<LoginValidationType>({
     initialValues: {
       email: '',
@@ -33,15 +35,30 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
       rememberMe: true
     },
     validationSchema: validationSchema,
-    onSubmit: async (values, { setSubmitting }) => {
-      const result = await userContext.login({
-        email: values.email,
-        password: values.password,
-        rememberMe: true
-      });
-      console.log({ result });
+    onSubmit: async (values, { setSubmitting, setFieldError, setErrors }) => {
+      setPageError(null);
+      try {
+        const result = await userContext.login({
+          email: values.email,
+          password: values.password,
+          rememberMe: true
+        });
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            setFieldError('email', 'Invalid email or password');
+            setFieldError('password', 'Invalid email or password');
+          } else {
+            console.log('axios error', error.response?.data);
+            setPageError(`Authentication request responded with code ${error.response?.status}`);
+          }
+        } else {
+          console.log("Totally unknown error");
+          setPageError(`Sorry, we're having issues with logging in, please try again later.`);
+        }
+      }
       setSubmitting(false);
-    },
+    }
   });
 
   const submitButtonProps: ButtonProps = {
@@ -56,6 +73,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
 
   return (
     <form onSubmit={formik.handleSubmit} action="/api/users/register" method="POST">
+      {pageError ? <Alert sx={{ my: 2 }} severity="error"><AlertTitle>Unexpected Server Error</AlertTitle>{pageError}</Alert> : null}
       <FormikTextField<LoginValidationType>
         fullWidth
         formik={formik as any} // TODO: these are giving me some ridiculous problem about FormikValues that I can't solve

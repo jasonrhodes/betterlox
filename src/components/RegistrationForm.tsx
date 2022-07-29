@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
-import { Avatar, Button, ButtonProps, CircularProgress, Tooltip } from '@mui/material';
+import { Alert, AlertTitle, Avatar, Button, ButtonProps, CircularProgress, Tooltip } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import api from '../lib/callApi';
 import { getUserDetails } from '../lib/letterboxd';
-import { CheckCircle, Error as ErrorIcon } from '@mui/icons-material';
+import { CheckCircle, Details, Error as ErrorIcon } from '@mui/icons-material';
 import { FormikTextField } from "./formControls/FormikTextField";
 import { useRouter } from 'next/router';
+import { AxiosError } from 'axios';
 
 const validationSchema = yup.object({
   email: yup
@@ -31,6 +32,7 @@ interface LetterboxdDetailState {
 }
 
 export const RegistrationForm = () => {
+  const [pageError, setPageError] = useState<string | null>(null);
   const [letterboxdDetails, setLetterboxdDetails] = useState<LetterboxdDetailState>({
     retrieved: false
   });
@@ -43,21 +45,30 @@ export const RegistrationForm = () => {
       username: ''
     },
     validationSchema: validationSchema,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting, setFieldError }) => {
+      setPageError(null);
       const { details } = letterboxdDetails;
       if (!details) {
         throw new Error('Account registration blew up because no info has been retrieved from letterboxd, boooooo');
       }
-      await api.register({
-        email: values.email,
-        password: values.password,
-        avatarUrl: details.avatarUrl,
-        username: values.username,
-        name: details.name,
-        letterboxdAccountLevel: details.isPatron ? 'patron' : details.isPro ? 'pro' : 'basic'
-      });
-      setSubmitting(false);
-      router.push("/login");
+      try {
+        await api.register({
+          email: values.email,
+          password: values.password,
+          avatarUrl: details.avatarUrl,
+          username: values.username,
+          name: details.name,
+          letterboxdAccountLevel: details.isPatron ? 'patron' : details.isPro ? 'pro' : 'basic'
+        });
+        setSubmitting(false);
+        router.push("/login");
+      } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 409) {
+          setFieldError("email", "Email already exists, log in instead?");
+        } else {
+          setPageError("We're having problems with registration right now, please try again later.");
+        }
+      }
     },
   });
 
@@ -91,6 +102,7 @@ export const RegistrationForm = () => {
 
   return (
     <form onSubmit={formik.handleSubmit} action="/api/users/register" method="POST">
+      {pageError ? <Alert sx={{ my: 2 }} severity="warning"><AlertTitle>Unexpected Server Error</AlertTitle>{pageError}</Alert> : null}
       <FormikTextField<RegisterValidationType>
         fullWidth
         formik={formik as any} // TODO: these are giving me some ridiculous problem about FormikValues that I can't solve
@@ -133,7 +145,7 @@ export const RegistrationForm = () => {
       />
       {formik.isSubmitting
         ? <LoadingButton loading {...submitButtonProps}>Creating Account ...</LoadingButton>
-        : <Button {...submitButtonProps}>Create Account</Button>}
+        : <Button {...submitButtonProps} disabled={!letterboxdDetails?.details?.avatarUrl || !letterboxdDetails?.details?.name}>Create Account</Button>}
     </form>
   )
 }

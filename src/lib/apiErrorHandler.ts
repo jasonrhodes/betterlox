@@ -8,5 +8,7 @@ export function handleGenericError(error: unknown, res: NextApiResponse) {
       ? error
       : "An unknown error occurred";
   
-  res.json({ success: false, errorMessage: message });
+  console.log(message);
+  
+  res.json({ success: false, code: 500, errorMessage: "An unexpected error occurred" });
 }
