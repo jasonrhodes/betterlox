@@ -45,7 +45,7 @@ export function createApiRoute<T>({
         throw message;
       }
       if (req.method) {
-        if (methods.includes(req.method.toUpperCase())) {
+        if (!methods.includes(req.method.toUpperCase())) {
           const message = `${req.method} not allowed, only ${methods.join(' | ')}`;
           respondWithError(res, 500, message);
           throw message;
