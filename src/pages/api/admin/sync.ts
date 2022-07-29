@@ -14,7 +14,9 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
       const SyncRepo = await getSyncRepository();
       const { started, sync } = await SyncRepo.queueSync();
 
-      if (started.length > 0) {
+      const force = req.query.force;
+
+      if (started.length > 0 && !force) {
         // sync already pending or in progress
         await SyncRepo.skipSync(sync);
         return res.status(200).json({ success: false, type: 'none', synced: [], message: 'Sync already pending or in progress' });

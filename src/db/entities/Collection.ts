@@ -15,7 +15,7 @@ export class Collection {
   @Column({ nullable: true })
   backdropPath: string;
 
-  @ManyToMany(() => Movie)
+  @ManyToMany(() => Movie, movie => movie.collections)
   @JoinTable()
   movies: Relation<Movie[]>
 }

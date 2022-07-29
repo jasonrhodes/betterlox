@@ -91,7 +91,7 @@ export class Movie extends BaseEntity {
   })
   productionCompanies: Relation<ProductionCompany[]>;
 
-  @ManyToMany(() => Collection)
+  @ManyToMany(() => Collection, collection => collection.movies)
   collections: Relation<Collection[]>;
 
   // OneToMany because we use a join table entity,
