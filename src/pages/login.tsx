@@ -5,13 +5,13 @@ import { UserContextConsumer } from '../hooks/UserContext';
 import { useRouter } from 'next/router';
 import { LoginForm } from '../components/LoginForm';
 import { Typography } from '@mui/material';
-import Link from 'next/link';
+import { AppLink } from '../components/AppLink';
 
 const LoginPage: NextPage = () => {
   const router = useRouter();
   return (
     <PageTemplate title="Log In" maxWidth='sm'>
-      <Typography>Don&apos;t have an account? <Link href="/register">Register instead.</Link></Typography>
+      <Typography>Don&apos;t have an account? <AppLink href="/register" color="primary">Register instead.</AppLink></Typography>
       <UserContextConsumer>
         {context => {
           if (!context) {

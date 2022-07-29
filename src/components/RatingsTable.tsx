@@ -16,7 +16,9 @@ function LetterboxdLink({ username, slug }: { username?: string, slug?: string }
   if (!username || !slug) {
     return (
       <Tooltip title="Movie data is still loading..." arrow>
-        <Image height={ICON_SIZE} width={ICON_SIZE} style={{ opacity: 0.4 }} src="/img/letterboxd-icon-2.webp" alt="Letterboxd.com logo" />
+        <Box>
+          <Image height={ICON_SIZE} width={ICON_SIZE} style={{ opacity: 0.4 }} src="/img/letterboxd-icon-2.webp" alt="Letterboxd.com logo" />
+        </Box>
       </Tooltip>
     )
   }
@@ -31,7 +33,9 @@ function ImdbLink({ id }: { id?: string }) {
   if (!id) {
     return (
       <Tooltip title="Movie data is still loading..." arrow>
-        <Image height={ICON_SIZE} width={ICON_SIZE} style={{ opacity: 0.4 }} src="/img/imdb-icon.png" alt="Letterboxd.com logo" />
+        <Box>
+          <Image height={ICON_SIZE} width={ICON_SIZE} style={{ opacity: 0.4 }} src="/img/imdb-icon.png" alt="Letterboxd.com logo" />
+        </Box>
       </Tooltip>
     )
   }
@@ -61,7 +65,7 @@ function RatingCard({ rating }: { rating: Rating }) {
   const slug = rating.movie?.letterboxdSlug;
   return (
     <Box className="ratingCard" sx={{ display: "flex", paddingBottom: "15px" }}>
-      <Box width="80px" sx={{ paddingRight: "10px" }}>
+      <Box width="80px" sx={{ paddingRight: "15px" }}>
         {poster}
       </Box>
       <Box>

@@ -34,7 +34,9 @@ export const getUserRepository = async () => (await getDataSource()).getReposito
     });
 
     if (user === null) {
-      throw new LoginError(`User ${email} not found`);
+      const message = `User ${email} not found`;
+      console.log('Login Error:', message)
+      throw new LoginError();
     }
 
     const hashed = hash(password, user.salt);

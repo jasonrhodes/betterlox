@@ -13,7 +13,13 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-function applyTitleFilter(filterString: string, ratings: Rating[]) {
+function applyTitleFilter(filterString: string, ratings?: Rating[]) {
+  if (!ratings) {
+    return [];
+  }
+  if (filterString.length === 0) {
+    return ratings;
+  }
   return ratings.filter((r) => {
     const spacesReplaced = filterString.replace(' ', '.*')
     const regexp = new RegExp(`.*${spacesReplaced}.*`, 'i');
@@ -50,7 +56,6 @@ function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
 }
 
 function PageContent({ userId }: { userId: number }) {
-  const [processedRatings, updateRatings] = useState<Rating[]>([]);
   const [titleFilter, updateTitleFilter] = useState<string>('');
   const { response, errorStatus } = useApi<GetRatingsForUserResponse>(
     `/api/users/${userId}/ratings`
@@ -61,20 +66,19 @@ function PageContent({ userId }: { userId: number }) {
   const [sortDir, setSortDir] = React.useState<SortDir>("DESC");
   const [activeControls, setActiveControls] = React.useState([]);
 
-  useEffect(() => {
-    if (!response || !response.ratings) {
-      return;
-    }
-    let updated = response.ratings;
-    if (titleFilter.length > 0) {
-      updated = applyTitleFilter(titleFilter, response.ratings);
-    }
-    updated = applySort(sortBy, sortDir, updated);
-    if (show !== "all") {
-      updated = updated.slice(0, show);
-    }
-    updateRatings(updated);
-  }, [response, titleFilter, show, sortBy, sortDir]);
+  // 1. Filter, 2. Sort, 3. Slice
+  const memoFiltered = React.useMemo(
+    () => { console.log('x:filtering'); return applyTitleFilter(titleFilter, response?.ratings); },
+    [titleFilter, response?.ratings]
+  );
+  const memoFilteredSorted = React.useMemo(
+    () => { console.log('x:sorting'); return applySort(sortBy, sortDir, memoFiltered); },
+    [sortBy, sortDir, memoFiltered]
+  );
+  const processedRatings = React.useMemo(
+    () => { console.log('x:slicing'); return show === "all" ? memoFilteredSorted : memoFilteredSorted.slice(0, show); },
+    [show, memoFilteredSorted]
+  );
 
   const handleTitleFilterChange = React.useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateTitleFilter(escapeRegExp(event.target.value));
@@ -82,7 +86,6 @@ function PageContent({ userId }: { userId: number }) {
 
   const handleShowChange = React.useCallback((event) => {
     const { value } = event.target;
-    console.log('handle show change', value);
     if (value === "all") {
       setShow("all");
     } else {

@@ -8,7 +8,7 @@ const instance = axios.create({
 
 async function main() {
   try {
-    const response = await instance.post('/admin/sync?limit=5');
+    const response = await instance.post('/admin/sync?limit=250');
     if (!response || !response.data) {
       throw new Error("Error occurred: no response or response.data");
     }

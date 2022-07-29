@@ -4,14 +4,14 @@ import { PageTemplate } from '../components/PageTemplate';
 import { UserContextConsumer } from '../hooks/UserContext';
 import { useRouter } from 'next/router';
 import { RegistrationForm } from '../components/RegistrationForm';
-import Link from 'next/link';
 import { Typography } from '@mui/material';
+import { AppLink } from '../components/AppLink';
 
 const RegisterPage: NextPage = () => {
   const router = useRouter();
   return (
     <PageTemplate title="Create Account" maxWidth='sm'>
-      <Typography>Already have an account? <Link href="/login">Log in instead.</Link></Typography>
+      <Typography>Already have an account? <AppLink href="/login">Log in instead.</AppLink></Typography>
       <UserContextConsumer>
         {context => {
           if (!context) {

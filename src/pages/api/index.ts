@@ -1,7 +1,11 @@
-import { NextApiHandler } from "next";
+import { createApiRoute } from "../../lib/routes";
 
-const HomeRoute: NextApiHandler = async (req, res) => {
-  res.json({ message: "Welcome to the BetterLox API" });
-}
+const HomeRoute = createApiRoute({
+  handlers: {
+    get: async (req, res) => {
+      res.json({ message: "Welcome to the BetterLox API" });
+    }
+  }
+});
 
 export default HomeRoute;

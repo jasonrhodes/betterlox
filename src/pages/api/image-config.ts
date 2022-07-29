@@ -1,5 +1,5 @@
 import { ConfigurationResponse } from "moviedb-promise/dist/request-types";
-import { NextApiHandler } from "next";
+import { createApiRoute } from "../../lib/routes";
 import { tmdb } from "../../lib/tmdb";
 
 // TODO: Not sure if this is worth looking up ever, or if it always stays the same.
@@ -17,14 +17,16 @@ async function getConfig() {
   }
 }
 
-const ImageConfigRoute: NextApiHandler = async (req, res) => {
-  const config = cachedConfig ? cachedConfig : await getConfig();
-  if (!cachedConfig) {
-    cachedConfig = config;
+const ImageConfigRoute = createApiRoute({
+  handlers: {
+    get: async (req, res) => {
+      const config = cachedConfig ? cachedConfig : await getConfig();
+      if (!cachedConfig) {
+        cachedConfig = config;
+      }
+      res.json({ ...config });
+    }
   }
-  res.json({ ...config });
-}
-
-
+});
 
 export default ImageConfigRoute;

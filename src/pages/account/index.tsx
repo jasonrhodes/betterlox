@@ -1,14 +1,12 @@
 import React from 'react';
 import type { NextPage } from 'next';
-import { PageTemplate, UserPageTemplate } from '../../components/PageTemplate';
-import { UserContextConsumer } from '../../hooks/UserContext';
-import { Avatar, Grid, Paper, Typography } from '@mui/material';
+import { UserPageTemplate } from '../../components/PageTemplate';
+import { Avatar, Grid, Typography } from '@mui/material';
 
 const LoginPage: NextPage = () => {
   return (
     <UserPageTemplate title="My Account" maxWidth='lg'>
       {({ user }) => (
-        <Paper elevation={0} sx={{ p: 3 }}>
         <Grid container spacing={2}>
           <Grid item xs={3}>
             <Avatar src={user.avatarUrl} sx={{ height: 'auto', width: '80%', boxShadow: '0 0 1px rgba(0,0,0,0.8)' }} />
@@ -22,7 +20,6 @@ const LoginPage: NextPage = () => {
             <Typography gutterBottom>{user.username}</Typography> 
           </Grid>
         </Grid>
-      </Paper>
       )}
     </UserPageTemplate>
   )

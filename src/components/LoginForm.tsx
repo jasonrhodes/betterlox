@@ -26,7 +26,6 @@ interface LoginFormProps {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
-
   const formik = useFormik<LoginValidationType>({
     initialValues: {
       email: '',
@@ -83,7 +82,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
           />}
           label="Remember me?"
         />
-        <Box sx={{ paddingTop: '12px' }}>
+        <Box sx={{ verticalAlign: 'middle', paddingTop: '9px' }}>
           <Link href="/forgot-password" passHref>
             <MuiLink>I forgot my password</MuiLink>
           </Link>
