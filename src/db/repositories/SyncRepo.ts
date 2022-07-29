@@ -57,5 +57,12 @@ export const getSyncRepository = async () => (await getDataSource()).getReposito
     sync.status = status;
     sync.finished = new Date();
     return this.save(sync);
+  },
+
+  async clearUnfinished() {
+    return Promise.all([
+      this.delete({ status: SyncStatus.IN_PROGRESS }),
+      this.delete({ status: SyncStatus.PENDING })
+    ]);
   }
 });

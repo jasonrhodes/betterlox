@@ -22,9 +22,7 @@ export const getCastRepository = async () => (await getDataSource()).getReposito
       .where("actor.name IS NULL")
       .orderBy("castRole.personId", "ASC")
       .limit(limit);
-    
-    console.log(query.getSql());
-  
+      
     const result = await query.getRawMany<{ personId: number }>();
     return result.map(({ personId }) => personId);
   }

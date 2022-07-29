@@ -30,19 +30,13 @@ export async function getMovieInfoSafely(id: number): Promise<null | TmdbMovie> 
   try {
     return await tmdb.movieInfo(id);
   } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      try {
-        const tv = await tmdb.tvInfo(id);
-        console.log(`${tv.name} appears to be a TV show and not a movie, ignoring and moving on`);
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-          console.log(
-            `The requested resource could not be found in the TMDB API, for id: ${id} - ignoring this error and moving on`
-          );
-          console.log(error);
-        } else {
-          throw error;
-        }
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        console.log(
+          `The requested resource (Movie ID: ${id}) could not be found in the TMDB API (ignoring this error and moving on)`
+        );
+      } else {
+        console.log(`TMDB API error while fetching movie ID ${id} | ${error.response?.status} | ${error.cause} | ${error.message}}`);
       }
       return null;
     } else {

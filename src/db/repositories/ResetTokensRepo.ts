@@ -9,9 +9,7 @@ export const getResetTokensRepository = async () => (await getDataSource()).getR
 
   async generateForUser(user: User) {
     const token = getResetToken();
-    console.log('have token, creating now');
     const created = this.create({ token, user });
-    console.log('created, about to save');
     return this.save(created);
   }
 });

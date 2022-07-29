@@ -21,7 +21,7 @@ export async function syncRatingsMovies(sync: Sync, limit?: number) {
       numSynced: synced.length
     });
   } else {
-    console.log(`Attempted to sync ${missingMovies.length} movies, but 0 were synced. Attempted IDs: ${missingMovies.join(', ')}`);
+    console.log(`Attempted to sync ${missingMovies.length} movies, but 0 were synced.\n${JSON.stringify(missingMovies)}`);
   }
   return synced;
 }

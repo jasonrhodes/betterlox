@@ -1,10 +1,10 @@
-import { getSyncRepository } from "../../../db/repositories";
-import { createApiRoute } from "../../../lib/routes";
-import { SyncResponse } from "../../../common/types/api";
-import { SyncStatus } from "../../../common/types/db";
-import { numericQueryParam } from "../../../lib/queryParams";
-import { syncRatingsMovies } from "../../../lib/managedSyncs/syncRatingsMovies";
-import { syncCastPeople, syncCrewPeople } from "../../../lib/managedSyncs/syncPeople";
+import { getSyncRepository } from "../../../../db/repositories";
+import { createApiRoute } from "../../../../lib/routes";
+import { SyncResponse } from "../../../../common/types/api";
+import { SyncStatus } from "../../../../common/types/db";
+import { numericQueryParam } from "../../../../lib/queryParams";
+import { syncRatingsMovies } from "../../../../lib/managedSyncs/syncRatingsMovies";
+import { syncCastPeople, syncCrewPeople } from "../../../../lib/managedSyncs/syncPeople";
 
 const SyncRatingsRoute = createApiRoute<SyncResponse>({
   isAdmin: true,
