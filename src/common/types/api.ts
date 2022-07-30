@@ -1,4 +1,4 @@
-import { Rating, Person, Movie } from "../../db/entities";
+import { Rating, Person, Movie, Sync, CastRole, CrewRole } from "../../db/entities";
 import { TmdbConfigurationResponse } from "../../lib/tmdb";
 import { RatedMovie, RatedTmdbCast } from "./db";
 
@@ -97,4 +97,16 @@ export interface RatingsFilters {
   collections?: number[];
   writers?: number[];
   directors?: number[];
+  editors?: number[];
+  actors?: number[];
+}
+
+export interface SyncsManagementGetResponse {
+  success: true,
+  syncs: Sync[]
+}
+
+export interface UnsyncedGetResponse {
+  success: true;
+  unsynced: Movie[] | Person[] | CastRole[] | CrewRole[];
 }

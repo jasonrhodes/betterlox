@@ -1,3 +1,5 @@
+import axios from "axios";
+
 type Callback<T = unknown> = () => T;
 
 export class BackoffRetryError extends Error {
@@ -24,18 +26,27 @@ async function wait(ms: number) {
 export async function backoff<T>(
   fn: Callback<T>,
   max_retries: number,
+  messageOnFail: string = 'Backoff failed',
   retries: number = 0
-): Promise<T> {
+): Promise<T | null> {
   try {
-    return fn();
+    const result = await fn();
+    return result;
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.log("Axios 404 error in backoff, exiting early");
+      return null;
+    }
+
     if (retries === max_retries) {
       throw new BackoffRetryError(
-        `Exceeded max retries (${max_retries})`,
+        `${messageOnFail}: Exceeded max retries (${max_retries})`,
         error
       );
     }
+
     await wait(Math.pow(2, retries));
-    return backoff<T>(fn, max_retries, retries + 1);
+    const result = await backoff<T>(fn, max_retries, messageOnFail, retries + 1);
+    return result;
   }
 }

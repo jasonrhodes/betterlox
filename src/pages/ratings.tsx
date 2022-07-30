@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
-import { Box, Chip, FormControl, TextField, InputLabel, LinearProgress, MenuItem, Select } from '@mui/material';
+import { Box, Chip, FormControl, TextField, InputLabel, LinearProgress, MenuItem, Select, Grid, Typography, Button } from '@mui/material';
 import { GetRatingsForUserResponse, RatingsFilters } from '../common/types/api';
 import { callApi, useApi } from '../hooks/useApi';
 import { UserPageTemplate } from '../components/PageTemplate';
@@ -60,6 +60,24 @@ function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
   return sorted;
 }
 
+function convertFiltersToQueryString(filters: RatingsFilters) {
+  const keys = Object.keys(filters) as Array<keyof RatingsFilters>;
+  const queries = keys.reduce<string[]>((queries, key) => {
+    const values = filters[key];
+    if (!values) {
+      return queries;
+    }
+    if (Array.isArray(values)) {
+      queries.push(`${key}=${values.join(',')}`);
+    } else {
+      queries.push(`${key}=${values}`);
+    }
+    return queries;
+  }, []);
+
+  return queries.join('&');
+}
+
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedRatings, updateUnprocessedRatings] = useState<Rating[]>([]);
   const [processedRatings, updateRatings] = useState<Rating[]>([]);
@@ -68,13 +86,12 @@ function PageContent({ userId }: { userId: number }) {
   const [show, setShow] = React.useState<"all" | number>(100);
   const [sortBy, setSortBy] = React.useState<SortBy>("date");
   const [sortDir, setSortDir] = React.useState<SortDir>("DESC");
-  const [activeControls, setActiveControls] = React.useState([]);
 
   useEffect(() => {
     async function retrieve() {
       let url = `/api/users/${userId}/ratings`;
       if (filters) {
-        url += `?filters=${JSON.stringify(filters)}`;
+        url += `?${convertFiltersToQueryString(filters)}`;
       }
       const response = await callApi<{ ratings: Rating[] }>(url);
       updateUnprocessedRatings(response.data.ratings);
@@ -113,10 +130,6 @@ function PageContent({ userId }: { userId: number }) {
   const handleSortDirClick = React.useCallback(() => {
     setSortDir(sortDir === "ASC" ? "DESC" : "ASC");
   }, [sortDir]);
-
-  const handleOpenControls = React.useCallback(() => {
-    console.log("Tried to open controls ha ha ha");
-  }, []);
 
   return (
     <Box sx={{ height: 600 }}>
@@ -160,15 +173,36 @@ function PageContent({ userId }: { userId: number }) {
           <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
         </Box>
         <TextField size="small" value={titleFilter} sx={{ display: { xs: 'none', md: 'inline-flex' }, marginRight: '10px' }} placeholder="Filter by title" onChange={handleTitleFilterChange} />
-        <Box sx={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle', marginRight: '10px' }} onClick={handleOpenControls}>
-          <Tune color={activeControls.length > 0 ? "secondary" : "disabled"} />
+        <Box sx={{ cursor: 'pointer', display: { xs: 'inline-flex', md: 'none' }, verticalAlign: 'middle', marginRight: '10px' }}>
+          <Tune color="disabled" />
         </Box>
       </Box>
-      <Box>
-        <RatingsTable ratings={processedRatings} />
-      </Box>
+      <Grid container spacing={2} alignItems="flex-start">
+        <Grid item xs={12} md={6} lg={5}>
+          <RatingsTable ratings={processedRatings} />
+        </Grid>
+        <Grid item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
+          <RatingsFilterControls onChange={updateFilters} />
+        </Grid>
+      </Grid>
     </Box>
   );
+}
+
+function RatingsFilterControls({ onChange }: { onChange: (filters: RatingsFilters) => void }) {
+  return (
+    <Grid item container spacing={2} sx={{ paddingBottom: 5 }}>
+      <Grid item xs={12}>
+        <Typography variant="subtitle1">Filters</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Button variant="contained" onClick={() => onChange({ actors: [3] })}>Filter for Harrison Ford (actor) Movies</Button>
+      </Grid>
+      <Grid item xs={12}>
+        <Button variant="outlined" onClick={() => onChange({})}>Clear Filters</Button>
+      </Grid>
+    </Grid>
+  )
 }
 
 const RatingsPage: NextPage = () => {

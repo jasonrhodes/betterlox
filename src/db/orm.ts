@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { DataSource, DataSourceOptions } from "typeorm";
+import { DataSource, DataSourceOptions, LoggerOptions } from "typeorm";
 import * as entities from "./entities";
 
 type Mutable<T> = { -readonly [P in keyof T ]: T[P] };
@@ -66,10 +66,16 @@ async function init() {
       break;
   }
 
+  const { DB_LOGGING = false } = process.env;
+
+  const logging: LoggerOptions = DB_LOGGING === "all" ? "all" :
+    DB_LOGGING === "query" ? ["query", "error"] :
+    DB_LOGGING === "error" ? ["error"] : false;
+
   const ds = new DataSource({
     ...dbOptions,
     entities,
-    logging: false,
+    logging,
     synchronize: true
   });
 

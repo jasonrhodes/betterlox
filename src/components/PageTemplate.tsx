@@ -23,6 +23,7 @@ export interface PublicPageTemplateProps {
 }
 export interface UserPageTemplateProps extends PublicPageTemplateProps {
   children: ChildrenFunction;
+  isAdmin?: boolean;
 }
 
 const BackLink: React.FC<BackLinkProps> = ({ url, text = 'Go Back' }) => {
@@ -37,7 +38,7 @@ const Loading: React.FC = () => (
   <Box><CircularProgress /></Box>
 );
 
-export const UserPageTemplate: React.FC<UserPageTemplateProps> = ({ children: Children, ...rest }) => {
+export const UserPageTemplate: React.FC<UserPageTemplateProps> = ({ children: Children, isAdmin, ...rest }) => {
   const router = useRouter();
   const userContext = useContext(UserContext);
   const [ready, setReady] = useState(false);
@@ -53,6 +54,8 @@ export const UserPageTemplate: React.FC<UserPageTemplateProps> = ({ children: Ch
       } else {
         router.push('/login');
       }
+    } else if (isAdmin && userContext.user.id !== 1) {
+      router.replace('/ratings');
     } else {
       setReady(true);
     }
@@ -66,7 +69,7 @@ export const UserPageTemplate: React.FC<UserPageTemplateProps> = ({ children: Ch
     );
   }
 
-  // we've guaranteed the user to exist now
+  // we've guaranteed the user will exist now
   const validUserContext = userContext as ValidUserContextValue;
 
   return (

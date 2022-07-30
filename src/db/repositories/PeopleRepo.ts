@@ -1,5 +1,6 @@
+import axios from "axios";
 import { backoff } from "../../lib/backoff";
-import { tmdb } from "../../lib/tmdb";
+import { tmdb, TmdbPerson } from "../../lib/tmdb";
 import { Person } from "../entities";
 import { getDataSource } from "../orm";
 
@@ -11,7 +12,14 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
   async syncPeople(ids: number[]) {
     return Promise.all(
       ids.map(async (id) => {
-        const tmdbPerson = await backoff(() => tmdb.personInfo(id), 5);
+        const tmdbPerson = await backoff<Promise<TmdbPerson | null>>(
+          async () => tmdb.personInfo(id), 
+          5, 
+          `Problem while retrieving ${id} from TMDB person info API`
+        );
+        if (!tmdbPerson) {
+          return null;
+        }
         const created = this.create({
           id: tmdbPerson.id,
           name: tmdbPerson.name,
