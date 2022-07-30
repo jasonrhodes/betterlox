@@ -65,10 +65,6 @@ function PageContent({ userId }: { userId: number }) {
   const [processedRatings, updateRatings] = useState<Rating[]>([]);
   const [titleFilter, updateTitleFilter] = useState<string>('');
   const [filters, updateFilters] = useState<RatingsFilters>({});
-  // const { response, errorStatus } = useApi<GetRatingsForUserResponse>(
-  //   `/api/users/${userId}/ratings`
-  // );
-  const errorContent = <p>An error occurred while loading ratings</p>;
   const [show, setShow] = React.useState<"all" | number>(100);
   const [sortBy, setSortBy] = React.useState<SortBy>("date");
   const [sortDir, setSortDir] = React.useState<SortDir>("DESC");

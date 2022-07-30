@@ -36,6 +36,7 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
     const index = (size === "smallest") ? 0 : (size === "largest") ? sizes.length - 1 : indexedSizes.indexOf(size);
     
     if (!config.secure_base_url) {
+      console.log(config.errorStatus);
       throw new Error("No secure_base_url provided from TMDB oh noes " + config.errorStatus + '\n' + Object.keys(config).join(', '));
       return null;
     }

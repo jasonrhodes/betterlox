@@ -14,7 +14,7 @@ const ActorsPage: NextPage = () => {
   const [castOrderThreshold, setCastOrderThreshold] = useState(15);
   const url = `/api/users/1/actors/${singleActorId}?castOrderThreshold=${castOrderThreshold}`;
 
-  const { response, errorStatus } = useApi<GetMoviesForActorAndUserResponse>(url, [castOrderThreshold, actorId]);
+  const response = useApi<GetMoviesForActorAndUserResponse>(url, [castOrderThreshold, actorId]);
 
   let title = "";
   let content: React.ReactElement;
@@ -24,25 +24,26 @@ const ActorsPage: NextPage = () => {
     content = <LinearProgress />;
   }
 
-  else if (errorStatus) {
+  else if (!response.success) {
     title = "Actor: Error";
-    content = <p>An error ({errorStatus}) occurred. Please try again.</p>;
+    content = <p>An error ({response.status}) occurred. Please try again.</p>;
   }
 
   else {
-    title = `${response.actor.name}`;
+    const { data } = response;
+    title = `${data.actor.name}`;
     content = (
       <MoviesForActorTable
         castOrderThreshold={castOrderThreshold}
         setCastOrderThreshold={setCastOrderThreshold}
-        credits={response!.cast_credits}
-        ratings={response!.ratings}
+        credits={data.cast_credits}
+        ratings={data.ratings}
       />
     );
   }
 
   return (
-    <PageTemplate title={title} avatarUrl={response?.actor.profilePath} backLink={{ url: "/stats/actors", text: "Back to actors" }}>  
+    <PageTemplate title={title} avatarUrl={response?.data?.actor.profilePath} backLink={{ url: "/stats/actors", text: "Back to actors" }}>  
       {content}
     </PageTemplate>
   );
