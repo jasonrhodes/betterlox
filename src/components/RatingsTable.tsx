@@ -61,7 +61,6 @@ function RatingCard({ rating }: { rating: Rating }) {
     /> :
     <Image {...sharedProps} src="/img/no-poster.png" alt="" />;
   
-  
   const slug = rating.movie?.letterboxdSlug;
   return (
     <Box className="ratingCard" sx={{ display: "flex", paddingBottom: "15px" }}>

@@ -6,9 +6,14 @@ const ImageContext = React.createContext<ImageConfig & { errorStatus?: number }>
 const ImageContextConsumer = ImageContext.Consumer;
 
 const ImageContextProvider: React.FC<{}> = ({ children }) => {
-  const { response = {}, errorStatus } = useApi<ImageConfig>('/api/image-config');
+  const response = useApi<ImageConfig>('/api/image-config');
+  if (!response) {
+    return null;
+  }
+  const { success, status } = response;
+  const errorStatus = success ? undefined : status;
   return (
-    <ImageContext.Provider value={{ errorStatus, ...response }}>
+    <ImageContext.Provider value={{ errorStatus, ...response.data }}>
       {children}
     </ImageContext.Provider>
   )
