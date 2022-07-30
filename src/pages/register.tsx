@@ -11,7 +11,7 @@ const RegisterPage: NextPage = () => {
   const router = useRouter();
   return (
     <PageTemplate title="Create Account" maxWidth='sm'>
-      <Typography>Already have an account? <AppLink href="/login">Log in instead.</AppLink></Typography>
+      <Typography>Already have an account? <AppLink color="secondary" href="/login">Log in instead.</AppLink></Typography>
       <UserContextConsumer>
         {context => {
           if (!context) {

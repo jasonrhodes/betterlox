@@ -44,7 +44,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
 
   const submitButtonProps: ButtonProps = {
     variant: 'contained',
-    color: 'primary',
+    color: 'secondary',
     type: 'submit',
     sx: {
       my: 2

@@ -11,7 +11,7 @@ const LoginPage: NextPage = () => {
   const router = useRouter();
   return (
     <PageTemplate title="Log In" maxWidth='sm'>
-      <Typography>Don&apos;t have an account? <AppLink href="/register" color="primary">Register instead.</AppLink></Typography>
+      <Typography>Don&apos;t have an account? <AppLink href="/register" color="secondary">Register instead.</AppLink></Typography>
       <UserContextConsumer>
         {context => {
           if (!context) {

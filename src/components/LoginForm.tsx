@@ -63,7 +63,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
 
   const submitButtonProps: ButtonProps = {
     variant: 'contained',
-    color: 'primary',
+    color: 'secondary',
     type: 'submit',
     sx: {
       my: 2,
@@ -109,7 +109,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ userContext }) => {
           <Box sx={{ verticalAlign: 'middle', paddingTop: '9px' }}>
             <Button {...submitButtonProps}>Log In</Button>
             <Link href="/forgot-password" passHref>
-              <MuiLink>I forgot my password</MuiLink>
+              <MuiLink color="secondary">I forgot my password</MuiLink>
             </Link>
           </Box>
         )}
