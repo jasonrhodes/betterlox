@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
 import { UserPublic } from '../common/types/db';
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 const pages = [
   { label: 'Ratings', route: '/ratings' },
@@ -146,6 +147,8 @@ export function MainNav() {
     setAnchorElNav(null);
   };
 
+  const router = useRouter();
+
   return (
     <UserContextConsumer>
       {context => (
@@ -153,7 +156,7 @@ export function MainNav() {
           <Container maxWidth="lg">
             <Toolbar disableGutters>
               <Link href="/" passHref>
-                <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
+                <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2, pt: '2px' }}>
                   <Logo />
                 </Box>
               </Link>
@@ -206,8 +209,9 @@ export function MainNav() {
                   <Link key={page.label} href={page.route} passHref>
                     <Button
                       onClick={handleCloseNavMenu}
+                      variant={router.pathname.startsWith(page.route) ? "outlined" : "text"}
                       color="secondary"
-                      sx={{ my: 2, display: 'block', textAlign: 'center' }}
+                      sx={{ my: 2, mx: 0.6, display: 'block', textAlign: 'center' }}
                     >
                       {page.label}
                     </Button>

@@ -2,6 +2,15 @@ const { config } = require('process')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/ratings',
+        permanent: true,
+      },
+    ]
+  },
   reactStrictMode: true,
   images: {
     domains: ['image.tmdb.org'],

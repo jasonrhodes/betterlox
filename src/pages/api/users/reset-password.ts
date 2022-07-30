@@ -24,6 +24,7 @@ const ResetPasswordRoute: NextApiHandler = async (req, res) => {
     return res.status(401).json({ message: 'Invalid token' });
   }
   retrieved.user.password = updatedPassword;
+  retrieved.user.hashUserPassword();
   await UserRepo.save(retrieved.user);
   return res.status(200).json({});
 }

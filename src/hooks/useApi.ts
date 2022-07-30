@@ -1,24 +1,26 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
+import axios, { AxiosResponse } from "axios";
 
-interface ApiResponse<T> {
-  response?: T;
-  errorStatus?: number;
+export async function callApi<T>(endpoint: string) {
+  const response = await axios.get<T>(endpoint);
+  if (response.status !== 200) {
+    return {
+      success: false,
+      ...response
+    };
+  }
+
+  return { success: true, ...response };
 }
 
 export function useApi<T>(endpoint: string, dependencies: any[] = []) {
-  const [results, setResults] = useState<ApiResponse<T>>({});
+  const [results, setResults] = useState<AxiosResponse<T> | {}>({});
   
   useEffect(() => {
     async function retrieve() {
-      const result = await fetch(endpoint);
-      if (result.status !== 200) {
-        setResults({
-          errorStatus: result.status
-        })
-      }
-      const json = await result.json() as T;
-      setResults({ response: json });
+      const results = await callApi<T>(endpoint);
+      setResults(results);
     }
 
     retrieve();

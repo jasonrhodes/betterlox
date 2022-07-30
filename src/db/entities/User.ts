@@ -39,15 +39,19 @@ export class User {
   ratings: Relation<Rating[]>;
 
   @BeforeInsert()
-  @BeforeUpdate()
-  prepareUser() {
+  hashUserPassword() {
     const salt = getSalt();
     const hashedPassword = hash(this.password, salt);
+
     this.password = hashedPassword;
     this.salt = salt;
 
     if (this.rememberMe) {
       this.rememberMeToken = getRememberMeToken();
     }
+  }
+
+  checkPassword(password: string) {
+    return this.password === hash(password, this.salt);
   }
 }

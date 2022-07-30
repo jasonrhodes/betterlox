@@ -91,3 +91,10 @@ export interface SyncNone {
 }
 
 export type SyncResponse = SyncRatingsMoviesResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
+
+export interface RatingsFilters {
+  title?: string;
+  collections?: number[];
+  writers?: number[];
+  directors?: number[];
+}

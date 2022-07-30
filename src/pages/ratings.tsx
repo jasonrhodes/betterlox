@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { Box, Chip, FormControl, TextField, InputLabel, LinearProgress, MenuItem, Select } from '@mui/material';
-import { GetRatingsForUserResponse } from '../common/types/api';
-import { useApi } from '../hooks/useApi';
+import { GetRatingsForUserResponse, RatingsFilters } from '../common/types/api';
+import { callApi, useApi } from '../hooks/useApi';
 import { UserPageTemplate } from '../components/PageTemplate';
 import { RatingsTable } from '../components/RatingsTable';
 import { Rating } from '../db/entities';
@@ -31,6 +31,10 @@ type SortBy = 'date' | 'stars' | 'movie.title';
 type SortDir = 'ASC' | 'DESC';
 
 function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
+  if (!Array.isArray(ratings)) {
+    console.log("oh no", typeof ratings);
+    return [];
+  }
   const sorted = ratings.sort((a, b) => {
     switch (sortBy) {
       case 'date':
@@ -57,26 +61,40 @@ function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
 }
 
 function PageContent({ userId }: { userId: number }) {
+  const [unprocessedRatings, updateUnprocessedRatings] = useState<Rating[]>([]);
   const [processedRatings, updateRatings] = useState<Rating[]>([]);
   const [titleFilter, updateTitleFilter] = useState<string>('');
-  const { response, errorStatus } = useApi<GetRatingsForUserResponse>(
-    `/api/users/${userId}/ratings`
-  );
-  const errorContent = <p>An error occurred while loading ratings ({errorStatus})</p>;
+  const [filters, updateFilters] = useState<RatingsFilters>({});
+  // const { response, errorStatus } = useApi<GetRatingsForUserResponse>(
+  //   `/api/users/${userId}/ratings`
+  // );
+  const errorContent = <p>An error occurred while loading ratings</p>;
   const [show, setShow] = React.useState<"all" | number>(100);
   const [sortBy, setSortBy] = React.useState<SortBy>("date");
   const [sortDir, setSortDir] = React.useState<SortDir>("DESC");
   const [activeControls, setActiveControls] = React.useState([]);
 
   useEffect(() => {
+    async function retrieve() {
+      let url = `/api/users/${userId}/ratings`;
+      if (filters) {
+        url += `?filters=${JSON.stringify(filters)}`;
+      }
+      const response = await callApi<{ ratings: Rating[] }>(url);
+      updateUnprocessedRatings(response.data.ratings);
+    }
+    retrieve();
+  }, [filters]);
+
+  useEffect(() => {
     // TODO: Look into how to avoid re-filtering the same data with the same filter
-    const filtered = applyTitleFilter(titleFilter, response?.ratings);
+    const filtered = applyTitleFilter(titleFilter, unprocessedRatings);
     // TODO: Look into how to avoid re-sorting the same data over and over
     const filteredSorted = applySort(sortBy, sortDir, filtered);
     const filteredSortedSliced = show === "all" ? filteredSorted : filteredSorted.slice(0, show);
 
     updateRatings(filteredSortedSliced);
-  }, [titleFilter, response?.ratings, sortBy, sortDir, show])
+  }, [titleFilter, unprocessedRatings, sortBy, sortDir, show])
 
   const handleTitleFilterChange = React.useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateTitleFilter(escapeRegExp(event.target.value));
@@ -107,7 +125,7 @@ function PageContent({ userId }: { userId: number }) {
   return (
     <Box sx={{ height: 600 }}>
       <Box sx={{ marginBottom: '20px' }}>
-        <Chip color="secondary" label={`${processedRatings.length} of ${response?.ratings.length}`} sx={{ marginRight: '10px' }} />
+        <Chip color="secondary" label={`${processedRatings.length} of ${unprocessedRatings.length}`} sx={{ marginRight: '10px' }} />
         <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
           <InputLabel id="select-show-per-page-label">Show</InputLabel>
           <Select
@@ -142,8 +160,8 @@ function PageContent({ userId }: { userId: number }) {
           </Select>
         </FormControl>
         <Box sx={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: "middle", marginRight: '10px' }} onClick={handleSortDirClick}>
-          <ArrowUpward color={sortDir === "ASC" ? "secondary" : "disabled"} />
-          <ArrowDownward color={sortDir === "DESC" ? "secondary" : "disabled"} />
+          <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
+          <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
         </Box>
         <TextField size="small" value={titleFilter} sx={{ display: { xs: 'none', md: 'inline-flex' }, marginRight: '10px' }} placeholder="Filter by title" onChange={handleTitleFilterChange} />
         <Box sx={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle', marginRight: '10px' }} onClick={handleOpenControls}>
@@ -151,11 +169,7 @@ function PageContent({ userId }: { userId: number }) {
         </Box>
       </Box>
       <Box>
-        {response ? 
-          <RatingsTable ratings={processedRatings} /> : 
-          errorStatus ? 
-            errorContent : <LinearProgress />
-        }
+        <RatingsTable ratings={processedRatings} />
       </Box>
     </Box>
   );
