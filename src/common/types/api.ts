@@ -83,7 +83,7 @@ export interface SyncMoviesPeopleResponse extends ApiSuccessResponse {
 
 export interface SyncMoviesCreditsResponse extends ApiSuccessResponse {
   type: 'movies_credits';
-  synced: { cast: CastRole[], crew: CrewRole[] }
+  synced: { cast: CastRole[], crew: CrewRole[], length: number }
 }
 
 export interface SyncNone {

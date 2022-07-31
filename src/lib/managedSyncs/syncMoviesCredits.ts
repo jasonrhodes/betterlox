@@ -11,13 +11,11 @@ export async function syncMoviesCredits(sync: Sync, limit?: number) {
   const MoviesRepo = await getMoviesRepository();
   const moviesWithMissingCredits = await MoviesRepo.getMissingCredits(limit);
   if (moviesWithMissingCredits.length === 0) {
-    return { cast: [], crew: [] };
+    return { cast: [], crew: [], length: 0 };
   }
 
   const syncedCastRoles: CastRole[] = [];
   const syncedCrewRoles: CrewRole[] = [];
-
-  console.log("We've retrieved the missing credits! Time to fix it");
 
   for (let i = 0; i < moviesWithMissingCredits.length; i++) {
     const movie = moviesWithMissingCredits[i];
@@ -48,14 +46,16 @@ export async function syncMoviesCredits(sync: Sync, limit?: number) {
     }
   }
 
+  const numSynced = syncedCastRoles.length + syncedCrewRoles.length;
+
   if (syncedCastRoles.length > 0 || syncedCrewRoles.length > 0) {
     await SyncRepo.endSync(sync, {
       status: SyncStatus.COMPLETE,
-      numSynced: syncedCastRoles.length + syncedCrewRoles.length
+      numSynced
     });
   } else {
     console.log(`Attempted to sync ${moviesWithMissingCredits.length} movies, but 0 credits were synced.\n${JSON.stringify(moviesWithMissingCredits)}`);
   }
 
-  return { cast: syncedCastRoles, crew: syncedCrewRoles };
+  return { cast: syncedCastRoles, crew: syncedCrewRoles, length: numSynced };
 }
