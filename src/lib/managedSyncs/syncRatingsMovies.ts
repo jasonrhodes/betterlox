@@ -7,7 +7,7 @@ export async function syncRatingsMovies(sync: Sync, limit?: number) {
   // Check for ratings with missing movies
   sync.type = SyncType.RATINGS_MOVIES;
   const RatingsRepo = await getRatingsRepository();
-  const missingMovies = (await RatingsRepo.getRatingsWithMissingMovies(limit));
+  const missingMovies = await RatingsRepo.getRatingsWithMissingMovies(limit);
 
   if (missingMovies.length === 0) {
     return [];

@@ -5,6 +5,7 @@ import { SyncStatus } from "../../../../common/types/db";
 import { numericQueryParam } from "../../../../lib/queryParams";
 import { syncRatingsMovies } from "../../../../lib/managedSyncs/syncRatingsMovies";
 import { syncCastPeople, syncCrewPeople } from "../../../../lib/managedSyncs/syncPeople";
+import { syncMoviesCredits } from "../../../../lib/managedSyncs/syncMoviesCredits";
 
 const SyncRatingsRoute = createApiRoute<SyncResponse>({
   isAdmin: true,
@@ -28,10 +29,16 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
         const numericLimit = numericQueryParam(req.query.limit);
 
         // Check for ratings with missing movie records
-        console.log('Syncing movies');
+        console.log('Syncing ratings -> movies...');
         const syncedMovies = await syncRatingsMovies(sync, numericLimit);
         if (syncedMovies.length > 0) {
           return res.status(200).json({ success: true, type: 'ratings_movies', synced: syncedMovies });
+        }
+
+        console.log('Syncing movies -> credits (cast and crew)...')
+        const syncedCredits = await syncMoviesCredits(sync, numericLimit);
+        if (syncedCredits.cast.length > 0 || syncedCredits.crew.length > 0) {
+          return res.status(200).json({ success: true, type: 'movies_credits', synced: syncedCredits })
         }
 
         // Check for cast roles with missing people records

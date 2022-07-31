@@ -17,5 +17,6 @@ export enum SyncType {
   UNKNOWN = "Unknown",
   RATINGS_MOVIES = "Ratings:Movies",
   MOVIES_CAST = "Movies:Cast",
-  MOVIES_CREW = "Movies:Crew"
+  MOVIES_CREW = "Movies:Crew",
+  MOVIES_CREDITS = "Movies:Credits"
 }

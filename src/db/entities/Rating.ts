@@ -25,6 +25,9 @@ export class Rating extends BaseEntity {
   @Column({ nullable: true })
   letterboxdSlug: string;
 
+  @Column({ default: false })
+  unsyncable: boolean;
+
   @ManyToOne(() => Movie, {
     createForeignKeyConstraints: false
   })

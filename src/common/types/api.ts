@@ -72,15 +72,18 @@ export interface ApiErrorResponse {
 }
 
 export interface SyncRatingsMoviesResponse extends ApiSuccessResponse {
-  success: true;
   type: 'ratings_movies';
   synced: Array<Movie | null>;
 }
 
 export interface SyncMoviesPeopleResponse extends ApiSuccessResponse {
-  success: true;
   type: 'movies_people' | 'movies_cast' | 'movies_crew';
   synced: Array<Person | null>;
+}
+
+export interface SyncMoviesCreditsResponse extends ApiSuccessResponse {
+  type: 'movies_credits';
+  synced: { cast: CastRole[], crew: CrewRole[] }
 }
 
 export interface SyncNone {
@@ -90,7 +93,7 @@ export interface SyncNone {
   message?: string;
 }
 
-export type SyncResponse = SyncRatingsMoviesResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
+export type SyncResponse = SyncRatingsMoviesResponse | SyncMoviesCreditsResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
 
 export interface RatingsFilters {
   title?: string;

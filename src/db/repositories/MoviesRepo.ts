@@ -2,7 +2,8 @@ import { JOB_ALLOW_LIST } from "../../common/constants";
 import { tmdb, TmdbMovie, getMovieInfoSafely } from "../../lib/tmdb";
 import { Movie } from "../entities";
 import { getDataSource } from "../orm";
-import { getCastRepository, getCollectionsRepository, getCrewRepository, getGenresRepository, getProductionCompaniesRepository } from ".";
+import { getCollectionsRepository, getGenresRepository, getProductionCompaniesRepository, getRatingsRepository } from ".";
+import { addCast, addCrew } from "../../lib/addCredits";
 
 export const getMoviesRepository = async () => (await getDataSource()).getRepository(Movie).extend({
   async createFromTmdb(movie: TmdbMovie, slug?: string | null) {
@@ -42,44 +43,51 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
     return this.save(created);
   },
 
-  async syncMovies(movies: Array<{ movieId: number; letterboxdSlug: string | null }>) {
-    const retrievedMovies = await Promise.all(movies.map(async ({ movieId, letterboxdSlug }) => ({ 
+  async syncMovies(movies: Array<{ movieId: number; userId: number; letterboxdSlug: string | null }>) {
+    const retrievedMovies = await Promise.all(movies.map(async ({ movieId, userId, letterboxdSlug }) => ({ 
       tmdbMovie: await getMovieInfoSafely(movieId), 
-      slug: letterboxdSlug 
+      slug: letterboxdSlug,
+      userId,
+      movieId
     })));
 
-    const saved = await Promise.all(retrievedMovies.map(async ({ tmdbMovie, slug }) => {
+    const RatingsRepo = await getRatingsRepository();
+    const saved = await Promise.all(retrievedMovies.map(async ({ tmdbMovie, userId, movieId, slug }) => {
       if (tmdbMovie === null || typeof tmdbMovie.id === "undefined") {
+        await RatingsRepo.update({ movieId, userId }, { unsyncable: true });
         return null;
       }
 
-      const credits = await tmdb.movieCredits(tmdbMovie.id);
       const savedMovie = await this.createFromTmdb(tmdbMovie, slug);
+      const credits = await tmdb.movieCredits(tmdbMovie.id);
 
-      const CastRepo = await getCastRepository();
-      const CrewRepo = await getCrewRepository();
+      const added = [];
 
-      if (credits.cast) {
-        const filtered = credits.cast.filter((role) => role.order && role.order > 50);
-        savedMovie.cast = await Promise.all(
-          filtered.map(
-            role => CastRepo.createFromTmdb(savedMovie.id, role)
-          )
-        );
+      const addedCast = await addCast({ cast: credits.cast, movie: savedMovie });
+      if (addedCast) {
+        added.push('cast');
       }
 
-      if (credits.crew) {
-        const filtered = credits.crew.filter((role) => role.job && JOB_ALLOW_LIST.includes(role.job));
-        savedMovie.crew = await Promise.all(
-          filtered.map(
-            role => CrewRepo.createFromTmdb(savedMovie.id, role)
-          )
-        );
+      const addedCrew = await addCrew({ crew: credits.crew, movie: savedMovie });
+      if (addedCrew) {
+        added.push('crew');
       }
-    
+
+      if (added.length === 2) {
+        savedMovie.syncedCredits = true;
+      }
+
       return savedMovie;
     }));
 
     return saved.filter((m) => m !== null);
+  },
+  async getMissingCredits(limit?: number) {
+    return this.find({
+      where: {
+        syncedCredits: false
+      },
+      take: limit
+    });
   }
 });
