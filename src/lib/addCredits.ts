@@ -8,7 +8,7 @@ export async function addCast({ cast, movie }: { cast: CreditsResponse['cast'], 
     return [];
   }
   const CastRepo = await getCastRepository();
-  const filtered = cast.filter((role) => role.order && role.order > 50);
+  const filtered = cast.filter((role) => role.order && role.order <= 50);
   const synced = await Promise.all(
     filtered.map(
       role => CastRepo.createFromTmdb(movie.id, role)
