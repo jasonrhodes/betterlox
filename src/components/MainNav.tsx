@@ -185,9 +185,9 @@ function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
           ))}
           <Divider />
           {loggedIn ? accountMenuItems.map((item) => (
-            <AccountMenuItem item={item} />
+            <AccountMenuItem key={item.label} item={item} />
           )) : loggedOutMenuItems.map((item) => (
-            <AccountMenuItem item={item} />
+            <AccountMenuItem key={item.label} item={item} />
           ))}
         </Menu>
       </Box>
