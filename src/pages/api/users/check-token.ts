@@ -31,7 +31,7 @@ const CheckTokenRoute = createApiRoute<CheckTokenApiResponse>({
         res.json({ success: true, user });
       } catch (error: unknown) {
         if (error instanceof UserRepoError) {
-          res.statusCode = 404;
+          res.statusCode = 200; // return 200 with success: false
           res.json({ success: false, errorMessage: error.message });
         } else {
           handleGenericError(error, res);

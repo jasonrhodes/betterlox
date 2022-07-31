@@ -20,7 +20,7 @@ type RegisterApiResponse = RegisterApiResponseSuccess | RegisterApiResponseFailu
 
 const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
   const userOptions: Record<string, string | boolean | undefined> = {};
-  userOptions.email = singleQueryParam(req.body.email);
+  userOptions.email = (singleQueryParam(req.body.email) || '').toLowerCase(); // lowercase ALL emails
   userOptions.password = singleQueryParam(req.body.password);
   userOptions.avatarUrl = singleQueryParam(req.body.avatarUrl);
   userOptions.username = singleQueryParam(req.body.username);
@@ -43,7 +43,7 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
 
   const UserRepository = await getUserRepository();
   
-  // validate lb account level? use enum column type in entity ...
+  // TODO: validate lb account level? use enum column type in entity ...
 
   try {
     const user = UserRepository.create(userOptions);
@@ -53,7 +53,6 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     // after responding to the request, kick off a ratings sync for this user
     syncAllRatingsForUser(user.id, user.username);
   } catch (error: unknown) {
-    // TODO: Need to inspect error that comes back if email already exists
     if (error instanceof TypeORMError) {
       if (error.message.startsWith("duplicate key value violates unique constraint")) {
         res.statusCode = 409;

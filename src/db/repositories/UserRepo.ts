@@ -28,7 +28,8 @@ function removeCredentials(user: User) {
 
 export const getUserRepository = async () => (await getDataSource()).getRepository(User).extend({
   // formerly checkLogin
-  async login(email: string, password: string, rememberMe?: boolean) {
+  async login(_email: string, password: string, rememberMe?: boolean) {
+    const email = _email.toLowerCase();
     const user = await this.findOne({
       where: { email }
     });

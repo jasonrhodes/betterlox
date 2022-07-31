@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Container, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Button, Tooltip, Avatar } from "@mui/material";
+import { AppBar, Container, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Button, Tooltip, Avatar, Divider } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
@@ -137,18 +137,71 @@ const Logo: React.FC = () => (
   </>
 );
 
-export function MainNav() {
+function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
   const [anchorElNav, setAnchorElNav] = React.useState<Element | null>(null);
-  
-  const handleOpenNavMenu: React.MouseEventHandler = (event) => {
+  const handleOpenNavMenu: React.MouseEventHandler = React.useCallback((event) => {
     setAnchorElNav(event.currentTarget);
-  };
-  const handleCloseNavMenu = () => {
+  }, [setAnchorElNav]);
+  const handleCloseNavMenu = React.useCallback(() => {
     setAnchorElNav(null);
-  };
+  }, [setAnchorElNav]);
+  return (
+    <>
+      <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+        <IconButton
+          size="large"
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleOpenNavMenu}
+          color="primary"
+        >
+          <MenuIcon />
+        </IconButton>
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorElNav}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          open={Boolean(anchorElNav)}
+          onClose={handleCloseNavMenu}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+          }}
+        >
+          {pages.map((page) => (
+            <Link href={page.route} key={page.label} passHref>
+              <MenuItem onClick={handleCloseNavMenu}>
+                <Typography textAlign="center">{page.label}</Typography>
+              </MenuItem>
+            </Link>
+          ))}
+          <Divider />
+          {loggedIn ? accountMenuItems.map((item) => (
+            <AccountMenuItem item={item} />
+          )) : loggedOutMenuItems.map((item) => (
+            <AccountMenuItem item={item} />
+          ))}
+        </Menu>
+      </Box>
+      <Link href="/" passHref>
+      <Box sx={{ paddingTop: '10px', cursor: "pointer", flexGrow: 1, display: { xs: 'flex', md: 'none' }}}>
+        <Logo />
+      </Box>
+    </Link>
+  </>
+  )
+}
 
+export function MainNav() {
   const router = useRouter();
-
   return (
     <UserContextConsumer>
       {context => (
@@ -160,55 +213,11 @@ export function MainNav() {
                   <Logo />
                 </Box>
               </Link>
-
-              <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-                <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  onClick={handleOpenNavMenu}
-                  color="primary"
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorElNav}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                  }}
-                  open={Boolean(anchorElNav)}
-                  onClose={handleCloseNavMenu}
-                  sx={{
-                    display: { xs: 'block', md: 'none' },
-                  }}
-                >
-                  {pages.map((page) => (
-                    <Link href={page.route} key={page.label} passHref>
-                      <MenuItem onClick={handleCloseNavMenu}>
-                        <Typography textAlign="center">{page.label}</Typography>
-                      </MenuItem>
-                    </Link>
-                  ))}
-                </Menu>
-              </Box>
-              <Link href="/" passHref>
-                <Box sx={{ cursor: "pointer", flexGrow: 1, display: { xs: 'flex', md: 'none' }}}>
-                  <Logo />
-                </Box>
-              </Link>
+              <MobileMenu loggedIn={Boolean(context?.user)} />
               <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 {pages.map((page) => (
                   <Link key={page.label} href={page.route} passHref>
                     <Button
-                      onClick={handleCloseNavMenu}
                       variant={router.pathname.startsWith(page.route) ? "outlined" : "text"}
                       color="secondary"
                       sx={{ my: 2, mx: 0.6, display: 'block', textAlign: 'center' }}
@@ -218,9 +227,9 @@ export function MainNav() {
                   </Link>
                 ))}
               </Box>
-              
-              {context?.user ? <UserMenu user={context.user} /> : <LoggedOutMenu />}
-              
+              <Box sx={{ display: { xs: 'none', md: 'flex' }}}>
+                {context?.user ? <UserMenu user={context.user} /> : <LoggedOutMenu />}
+              </Box>
             </Toolbar>
           </Container>
         </AppBar>

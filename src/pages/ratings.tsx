@@ -7,6 +7,7 @@ import { UserPageTemplate } from '../components/PageTemplate';
 import { RatingsTable } from '../components/RatingsTable';
 import { Rating } from '../db/entities';
 import { ArrowDownward, ArrowUpward, Close, Tune } from '@mui/icons-material';
+import { useRouter } from 'next/router';
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 function escapeRegExp(string: string) {
@@ -206,10 +207,12 @@ function RatingsFilterControls({ onChange }: { onChange: (filters: RatingsFilter
 }
 
 const RatingsPage: NextPage = () => {
+  const router = useRouter();
   return (
     <UserPageTemplate title="My Ratings">
       {(userContext) => {
         if (!userContext.user) {
+          router.replace('/login');
           return null;
         }
         return <PageContent userId={userContext.user.id} />
