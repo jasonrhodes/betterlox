@@ -113,3 +113,8 @@ export interface UnsyncedGetResponse {
   success: true;
   unsynced: Movie[] | Person[] | CastRole[] | CrewRole[];
 }
+
+export interface UserRatingsSyncApiResponse extends ApiSuccessResponse {
+  synced: Rating[];
+  count: number;
+}

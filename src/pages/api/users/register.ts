@@ -51,7 +51,7 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     res.json({ success: true, created: user });
 
     // after responding to the request, kick off a ratings sync for this user
-    syncAllRatingsForUser(user.id, user.username);
+    syncAllRatingsForUser({ userId: user.id, username: user.username, order: "DESC" });
   } catch (error: unknown) {
     if (error instanceof TypeORMError) {
       if (error.message.startsWith("duplicate key value violates unique constraint")) {

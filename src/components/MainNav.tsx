@@ -13,6 +13,10 @@ const pages = [
   { label: 'Lists', route: '/lists' },
 ];
 
+const adminPages = [
+  { label: 'Manage Syncs', route: '/admin/syncs' }
+];
+
 const loggedOutMenuItems = [
   { label: 'Log In', route: '/login' },
   { label: 'Register', route: '/register' }
@@ -137,7 +141,7 @@ const Logo: React.FC = () => (
   </Box>
 );
 
-function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
+function MobileMenu({ loggedIn, user }: { loggedIn: boolean, user?: UserPublic }) {
   const [anchorElNav, setAnchorElNav] = React.useState<Element | null>(null);
   const handleOpenNavMenu: React.MouseEventHandler = React.useCallback((event) => {
     setAnchorElNav(event.currentTarget);
@@ -183,6 +187,7 @@ function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
               </MenuItem>
             </Link>
           ))}
+          <AdminMenuItems user={user} />
           <Divider />
           {loggedIn ? accountMenuItems.map((item) => (
             <AccountMenuItem key={item.label} item={item} />
@@ -203,6 +208,29 @@ function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
   )
 }
 
+function AdminMenuItems({ user }: { user?: UserPublic }) {
+  const router = useRouter();
+  if (!user || !user.isAdmin) {
+    return null;
+  }
+  return (
+    <>
+      <Divider />
+      {adminPages.map((page) => (
+        <Link key={page.label} href={page.route} passHref>
+          <Button
+            variant={router.pathname.startsWith(page.route) ? "outlined" : "text"}
+            color="secondary"
+            sx={{ my: 2, mx: 0.6, display: 'block', textAlign: 'center' }}
+          >
+            {page.label}
+          </Button>
+        </Link>
+      ))}
+    </>
+  )
+}
+
 export function MainNav() {
   const router = useRouter();
   return (
@@ -216,7 +244,7 @@ export function MainNav() {
                   <Logo />
                 </Box>
               </Link>
-              <MobileMenu loggedIn={Boolean(context?.user)} />
+              <MobileMenu loggedIn={Boolean(context?.user)} user={context.user} />
               <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 {pages.map((page) => (
                   <Link key={page.label} href={page.route} passHref>
@@ -229,6 +257,7 @@ export function MainNav() {
                     </Button>
                   </Link>
                 ))}
+                <AdminMenuItems user={context.user} />
               </Box>
               <Box sx={{ display: { xs: 'none', md: 'flex' }}}>
                 {context?.user ? <UserMenu user={context.user} /> : <LoggedOutMenu />}

@@ -1,5 +1,5 @@
 import { MoreThan, Not } from "typeorm";
-import { SyncStatus, SyncType } from "../../common/types/db";
+import { SyncStatus, SyncTrigger, SyncType } from "../../common/types/db";
 import { Sync } from "../entities";
 import { getDataSource } from "../orm";
 
@@ -8,14 +8,20 @@ function minutesAgo(min: number, date: Date = new Date()) {
 }
 
 export const getSyncRepository = async () => (await getDataSource()).getRepository(Sync).extend({
-  async queueSync() {
-    const created = this.create();
+  async queueSync({ trigger = SyncTrigger.SYSTEM, username }: { trigger: SyncTrigger, username?: string }) {
+    const created = this.create({ username });
     const sync = await this.save(created);
     const minStart = minutesAgo(15); // wait 15 min for a rogue sync before we close that and start a new one
+    const systemWhere = {
+      trigger,
+      username,
+      id: Not(sync.id),
+      started: MoreThan(minStart)
+    };
     const started = await this.find({
       where: [
-        { id: Not(sync.id), status: SyncStatus.PENDING, started: MoreThan(minStart) },
-        { id: Not(sync.id), status: SyncStatus.IN_PROGRESS, started: MoreThan(minStart) }
+        { ...systemWhere, status: SyncStatus.PENDING },
+        { ...systemWhere, status: SyncStatus.IN_PROGRESS }
       ]
     });
 
@@ -59,10 +65,10 @@ export const getSyncRepository = async () => (await getDataSource()).getReposito
     return this.save(sync);
   },
 
-  async clearUnfinished() {
+  async clearUnfinished({ trigger }: { trigger: SyncTrigger }) {
     return Promise.all([
-      this.delete({ status: SyncStatus.IN_PROGRESS }),
-      this.delete({ status: SyncStatus.PENDING })
+      this.delete({ trigger, status: SyncStatus.IN_PROGRESS }),
+      this.delete({ trigger, status: SyncStatus.PENDING })
     ]);
   }
 });

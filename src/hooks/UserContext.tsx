@@ -4,6 +4,12 @@ import api from '../lib/callApi';
 import { useCookies } from 'react-cookie';
 import { useRouter } from 'next/router';
 
+const ADMIN_USER_IDS = [1];
+
+function isAdmin(user?: UserPublic) {
+  return Boolean(user && user.id && ADMIN_USER_IDS.includes(user.id));
+}
+
 interface User {
   id: number;
   letterboxd: string;
@@ -46,7 +52,8 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     async function validateToken(token: string) {
       const { data } = await api.checkRememberMeToken(token);
       if (data.success) {
-        await setUser(data.user);
+        const publicUser: UserPublic = { ...data.user, isAdmin: isAdmin(data.user) }
+        await setUser(publicUser);
       } else {
         removeCookie('rememberMe');
       }
@@ -61,6 +68,7 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
 
   async function login({ email, password, rememberMe }: LoginOptions) {
     const response = await api.login({ email, password, rememberMe });
+    const publicUser = { ...response.data.user, isAdmin: isAdmin(response.data.user) }
     setUser(response.data.user);
     if (response.data.user.rememberMeToken) {
       try {

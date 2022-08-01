@@ -1,7 +1,7 @@
 import { getSyncRepository } from "../../../../db/repositories";
 import { createApiRoute } from "../../../../lib/routes";
 import { SyncResponse } from "../../../../common/types/api";
-import { SyncStatus } from "../../../../common/types/db";
+import { SyncStatus, SyncTrigger } from "../../../../common/types/db";
 import { numericQueryParam } from "../../../../lib/queryParams";
 import { syncRatingsMovies } from "../../../../lib/managedSyncs/syncRatingsMovies";
 import { syncCastPeople, syncCrewPeople } from "../../../../lib/managedSyncs/syncPeople";
@@ -13,7 +13,7 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
     post: async (req, res) => {
       // get sync status
       const SyncRepo = await getSyncRepository();
-      const { started, sync } = await SyncRepo.queueSync();
+      const { started, sync } = await SyncRepo.queueSync({ trigger: SyncTrigger.SYSTEM });
 
       const force = req.query.force;
 

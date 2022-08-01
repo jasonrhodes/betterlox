@@ -1,3 +1,4 @@
+import { SyncTrigger } from "../../../../common/types/db";
 import { getSyncRepository } from "../../../../db/repositories";
 import { createApiRoute } from "../../../../lib/routes";
 
@@ -6,7 +7,7 @@ const ClearSyncsRoute = createApiRoute({
   handlers: {
     post: async (req, res) => {
       const SyncRepo = await getSyncRepository();
-      await SyncRepo.clearUnfinished();
+      await SyncRepo.clearUnfinished({ trigger: SyncTrigger.SYSTEM });
       res.json({ success: true });
     }
   }

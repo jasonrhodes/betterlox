@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
-import { Box, Grid, MenuItem, MenuList, Paper, Typography } from '@mui/material';
+import { Box, Grid, MenuItem, MenuList, Paper, Tooltip, Typography } from '@mui/material';
 import { DataGrid, GridValueFormatterParams } from '@mui/x-data-grid';
 import { Sync } from '../../db/entities';
 import { callApi } from '../../hooks/useApi';
@@ -34,6 +34,11 @@ function SyncHistoryTable() {
           {
             field: 'type',
             headerName: 'Type',
+            width: 120
+          },
+          {
+            field: 'username',
+            headerName: 'Username',
             width: 120
           },
           {
@@ -72,6 +77,7 @@ function SyncHistoryTable() {
           {
             field: 'errorMessage',
             headerName: 'Error Message',
+            minWidth: 1000,
             flex: 1
           }
         ]}

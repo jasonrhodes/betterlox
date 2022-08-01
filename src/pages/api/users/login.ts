@@ -28,7 +28,7 @@ const LoginRoute: NextApiHandler<LoginApiResponse> = async (req, res) => {
     res.json({ success: true, user });
 
     // after responding to the request, kick off a ratings sync for this user
-    syncAllRatingsForUser(user.id, user.username);
+    syncAllRatingsForUser({ userId: user.id, username: user.username, order: "ASC" });
   } catch (error: unknown) {
     if (error instanceof UserRepoError) {
       res.statusCode = 401;

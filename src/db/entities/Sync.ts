@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
-import { SyncStatus, SyncType } from "../../common/types/db";
+import { SyncStatus, SyncType, SyncTrigger } from "../../common/types/db";
 
 @Entity('syncs')
 export class Sync {
@@ -11,7 +11,18 @@ export class Sync {
     enum: SyncType,
     default: SyncType.UNKNOWN
   })
-  type: string;
+  type: SyncType;
+
+  @Column({
+    type: "enum",
+    enum: SyncTrigger,
+    default: SyncTrigger.SYSTEM
+  })
+  trigger: SyncTrigger;
+
+  // letterboxd username for user syncs
+  @Column({ nullable: true })
+  username: string;
 
   @Column({
     type: "enum",
