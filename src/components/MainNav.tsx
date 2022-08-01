@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Container, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Button, Tooltip, Avatar, Divider } from "@mui/material";
+import { AppBar, Container, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Button, Tooltip, Avatar, Divider, Grid } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
@@ -116,8 +116,8 @@ const LoggedOutMenu: React.FC = () => {
 }
 
 const Logo: React.FC = () => (
-  <>
-    <Box sx={{ padding: '5px 15px 5px 0', cursor: "pointer" }}>
+  <Box sx={{ display: 'flex', justifyContent: 'center', cursor: 'pointer' }}>
+    <Box sx={{ padding: '5px 15px 5px 0' }}>
       <Image
         alt="BETTERLOX"
         src="/img/salmon-logo-pinks.png"
@@ -134,7 +134,7 @@ const Logo: React.FC = () => (
       color: 'primary.main',
       cursor: 'pointer'
     }}>Betterlox</Typography>
-  </>
+  </Box>
 );
 
 function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
@@ -146,8 +146,8 @@ function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
     setAnchorElNav(null);
   }, [setAnchorElNav]);
   return (
-    <>
-      <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+    <Grid container spacing={0} sx={{ display: { xs: 'inherit', md: 'none', paddingTop: '5px' }}}>
+      <Grid width={48} item>
         <IconButton
           size="large"
           aria-label="account of current user"
@@ -178,7 +178,7 @@ function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
         >
           {pages.map((page) => (
             <Link href={page.route} key={page.label} passHref>
-              <MenuItem onClick={handleCloseNavMenu}>
+              <MenuItem sx={{ minWidth: '200px' }} onClick={handleCloseNavMenu}>
                 <Typography textAlign="center">{page.label}</Typography>
               </MenuItem>
             </Link>
@@ -190,13 +190,16 @@ function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
             <AccountMenuItem key={item.label} item={item} />
           ))}
         </Menu>
-      </Box>
-      <Link href="/" passHref>
-      <Box sx={{ paddingTop: '10px', cursor: "pointer", flexGrow: 1, display: { xs: 'flex', md: 'none' }}}>
-        <Logo />
-      </Box>
-    </Link>
-  </>
+      </Grid>
+      <Grid item flexGrow={1} sx={{ display: { paddingTop: '7px' }}}>
+        <Link href="/" passHref>
+          <Box>
+            <Logo />
+          </Box>
+        </Link>
+      </Grid>
+      <Grid item width={48}></Grid>
+    </Grid>
   )
 }
 
