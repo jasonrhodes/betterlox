@@ -4,6 +4,21 @@ import { Rating } from "../db/entities";
 import { getDataImageTagFromUrl } from "./dataImageUtils";
 const MAX_TRIES = 5;
 
+interface FoundLetterboxdAccount {
+  found: true;
+  avatar: string | null | undefined;
+  avatarUrl: string;
+  name: string;
+  isPro: boolean;
+  isPatron: boolean;
+}
+
+interface UnfoundLetterboxdAccount {
+  found: false;
+}
+
+export type LetterboxdDetails = FoundLetterboxdAccount | UnfoundLetterboxdAccount;
+
 async function wait(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -52,14 +67,16 @@ export async function getTmdbIdFromShortUrl(shortUrl: string) {
   return Number(id);
 }
 
-export async function getUserDetails(username: string) {
+export async function getUserDetails(username: string): Promise<LetterboxdDetails> {
   let html = '';
   try {
     const response = await tryLetterboxd(`https://letterboxd.com/${username}`);
     html = response.data;
   } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
-      html = '';
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return {
+        found: false
+      };
     } else {
       throw error;
     }
@@ -80,6 +97,7 @@ export async function getUserDetails(username: string) {
   }
 
   return {
+    found: true,
     avatar: avatarSrc,
     avatarUrl: avatarDataSrc,
     name: name.length === 1 ? name.text() : '',

@@ -48,8 +48,9 @@ export const RegistrationForm = () => {
     onSubmit: async (values, { setSubmitting, setFieldError }) => {
       setPageError(null);
       const { details } = letterboxdDetails;
-      if (!details) {
-        throw new Error('Account registration blew up because no info has been retrieved from letterboxd, boooooo');
+      if (!details || !details.found) {
+        setFieldError('username', 'Invalid Letterboxd username');
+        return;
       }
       try {
         await api.register({
@@ -73,18 +74,19 @@ export const RegistrationForm = () => {
   });
 
   let letterboxdStatus = null;
+  const { details } = letterboxdDetails;
   
   if (letterboxdLookupLoading) {
     letterboxdStatus = <CircularProgress />;
-  } else if (letterboxdDetails.retrieved && letterboxdDetails.details && letterboxdDetails.details.avatarUrl) {
+  } else if (letterboxdDetails.retrieved && details?.found && details?.avatarUrl) {
     letterboxdStatus = (
-      <Avatar src={letterboxdDetails.details.avatarUrl} sx={{ boxShadow: "0 0 1px rgba(0,0,0,0.8)"}} />
+      <Avatar src={details.avatarUrl} sx={{ boxShadow: "0 0 1px rgba(0,0,0,0.8)"}} />
     );
   } else if (
     letterboxdDetails.retrieved && 
-    letterboxdDetails.details && 
-    letterboxdDetails.details.name.length > 0 && 
-    letterboxdDetails.details.avatarUrl.length > 0
+    details?.found && 
+    details.name.length > 0 && 
+    details.avatarUrl.length > 0
   ) {
     letterboxdStatus = <CheckCircle color='success' />
   } else if (letterboxdDetails.retrieved) {
@@ -145,7 +147,7 @@ export const RegistrationForm = () => {
       />
       {formik.isSubmitting
         ? <LoadingButton loading {...submitButtonProps}>Creating Account ...</LoadingButton>
-        : <Button {...submitButtonProps} disabled={!letterboxdDetails?.details?.avatarUrl || !letterboxdDetails?.details?.name}>Create Account</Button>}
+        : <Button {...submitButtonProps}>Create Account</Button>}
     </form>
   )
 }

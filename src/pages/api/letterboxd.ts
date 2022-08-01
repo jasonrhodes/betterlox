@@ -1,10 +1,9 @@
-import { NextApiHandler } from "next";
 import { ApiErrorResponse } from "../../common/types/api";
-import { getUserDetails } from "../../lib/letterboxd";
+import { getUserDetails, LetterboxdDetails } from "../../lib/letterboxd";
 import { singleQueryParam } from "../../lib/queryParams";
 import { createApiRoute } from "../../lib/routes";
 
-export type ApiGetLetterboxdDetailsResponse = { details: Awaited<ReturnType<typeof getUserDetails>> } | ApiErrorResponse;
+export type ApiGetLetterboxdDetailsResponse = { success: true, details: LetterboxdDetails } | ApiErrorResponse;
 
 const LetterboxdDetails = createApiRoute<ApiGetLetterboxdDetailsResponse>({
   handlers: {
@@ -20,7 +19,7 @@ const LetterboxdDetails = createApiRoute<ApiGetLetterboxdDetailsResponse>({
       const singleUsername = singleQueryParam(username) || '';
       try {
         const details = await getUserDetails(singleUsername);
-        res.json({ details });
+        res.json({ success: true, details });
       } catch (err: unknown) {
         console.log('error', err);
       }
