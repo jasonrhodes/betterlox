@@ -4,8 +4,20 @@ import { tmdb, TmdbPerson } from "../../lib/tmdb";
 import { Person } from "../entities";
 import { getDataSource } from "../orm";
 
-function denullify(value: string | undefined | null) {
-  return value === null ? undefined : value;
+function forceUndefined(value: string | undefined | null) {
+  return (!value || value.length === 0) ? undefined : value;
+}
+
+function isValidDate(value: string | null | undefined) {
+  if (!value || value.length === 0) {
+    return false;
+  }
+  const d = new Date(value);
+  return d.toString() !== 'Invalid Date';
+}
+
+function safeDate(dateValue: string | undefined | null) {
+  return isValidDate(dateValue) ? dateValue as string : undefined;
 }
 
 export const getPeopleRepository = async () => (await getDataSource()).getRepository(Person).extend({
@@ -24,14 +36,14 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
           id: tmdbPerson.id,
           name: tmdbPerson.name,
           biography: tmdbPerson.biography,
-          birthday: denullify(tmdbPerson.birthday),
-          deathday: denullify(tmdbPerson.deathday),
+          birthday: safeDate(tmdbPerson.birthday),
+          // deathday: safeDate(tmdbPerson.deathday), // undefined value here still causing error: invalid input syntax for type timestamp: \"0NaN-NaN-NaNTNaN:NaN:NaN.NaN+NaN:NaN\" -- not storing deathday for now, who cares
           gender: tmdbPerson.gender,
           imdbId: tmdbPerson.imdb_id,
           knownForDepartment: tmdbPerson.known_for_department,
-          placeOfBirth: denullify(tmdbPerson.place_of_birth),
+          placeOfBirth: forceUndefined(tmdbPerson.place_of_birth),
           popularity: tmdbPerson.popularity,
-          profilePath: denullify(tmdbPerson.profile_path)
+          profilePath: forceUndefined(tmdbPerson.profile_path)
         });
         return this.save(created);
       })
