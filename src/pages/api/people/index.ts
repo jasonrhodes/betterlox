@@ -26,7 +26,6 @@ const UserStatsActorsRoute = createApiRoute<GetPeopleResponse>({
       }
       const namePattern = singleQueryParam(req.query.name);
       if (namePattern) {
-        console.log('name pattern hello', `%${namePattern.replace(' ', '%')}%`);
         where.name = ILike(`%${namePattern.replace(' ', '%')}%`);
       }
       const exactName = singleQueryParam(req.query.exactName);
@@ -40,8 +39,6 @@ const UserStatsActorsRoute = createApiRoute<GetPeopleResponse>({
       };
 
       const people = await PeopleRepository.find(options);
-
-      console.log(namePattern, "RESULTS", JSON.stringify(people.map(p => p.name)));
 
       res.json({ success: true, people });
     }

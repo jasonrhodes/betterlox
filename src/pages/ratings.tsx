@@ -219,7 +219,13 @@ function RatingsFilterControls({ filters, onChange }: { filters: RatingsFilters,
 function ActorLookUp({ filters, onChange }: { filters: RatingsFilters, onChange: (filters: RatingsFilters) => void }) {
   const [searchValue, updateSearchValue] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
+  const [actorOptions, setActorOptions] = useState<Person[]>([]);
   const response = useApi<GetPeopleResponse>(`/api/people?name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
+
+  useEffect(() => {
+    const filtered = response?.data.people.filter((p) => !filters.actors?.includes(p.id));
+    setActorOptions(filtered || []);
+  }, [response, filters]);
 
   return (
     <Autocomplete
@@ -247,7 +253,7 @@ function ActorLookUp({ filters, onChange }: { filters: RatingsFilters, onChange:
         updateSearchValue(value);
       }}
       getOptionLabel={(option) => option.name}
-      options={response?.data.people || []}
+      options={actorOptions}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -289,7 +295,13 @@ function CurrentFilters({
   const { actors = [] } = filters;
   return (
     <Box>
-      {searchedActors.map(person => <Chip key={person.name} icon={<FilterAlt />} label={person.name} onDelete={() => onChange({ ...filters, actors: actors.filter(a => a !== person.id) })} />)}
+      {searchedActors.map(person => <Chip 
+        key={person.name} 
+        icon={<FilterAlt />} 
+        label={'Actor: ' + person.name} 
+        onDelete={() => onChange({ ...filters, actors: actors.filter(a => a !== person.id) })} 
+        sx={{ marginRight: 1, marginBottom: 1 }}
+      />)}
     </Box>
   )
 }
@@ -310,6 +322,9 @@ function MobileRatingsFilterControls({
   const handleCancel = () => {
     setIsOpen(false);
   }
+
+  useEffect(() => setUpdatedFilters(currentFilters), [currentFilters]);
+
   return (
     <>
       <Box sx={{ cursor: 'pointer', display: { xs: 'inline-flex', md: 'none' }, verticalAlign: 'middle', marginRight: '10px' }}>

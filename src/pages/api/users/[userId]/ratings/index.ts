@@ -26,10 +26,14 @@ function whereJob(jobs: string[], ids: string[]): FindOptionsWhere<Rating> {
 const UserRatingsRoute = createApiRoute({
   handlers: {
     get: async (req, res) => {
+      // start with an array of where clauses that will
+      // be reduced back into a single where clause, so
+      // that all options will be "AND" joined (not "OR")
       const wheres: FindOptionsWhere<Rating>[] = [];
 
       wheres.push({
-        userId: numericQueryParam(req.query.userId)
+        userId: numericQueryParam(req.query.userId),
+        unsyncable: false
       });
 
       if (req.query.actors) {
@@ -88,6 +92,8 @@ const UserRatingsRoute = createApiRoute({
         ));
       }
       
+      // reduce array of where clauses into a single "AND" clause
+      // otherwise the array would be treated as "OR"
       const where = wheres.reduce((a, b) => merge(a, b), {});
       
       try {
