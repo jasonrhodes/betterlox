@@ -118,3 +118,7 @@ export interface UserRatingsSyncApiResponse extends ApiSuccessResponse {
   synced: Rating[];
   count: number;
 }
+
+export interface GetPeopleResponse extends ApiSuccessResponse {
+  people: Person[];
+}
