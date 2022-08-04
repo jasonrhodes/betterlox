@@ -17,6 +17,9 @@ function SyncHistoryTable() {
     }
     retrieve();
   }, [refreshes]);
+  useEffect(() => {
+    setTimeout(() => setRefreshes(refreshes + 1), 5000);
+  }, [refreshes])
   return (
     <Box>
       <Typography variant="h6" sx={{ py: 2 }}>Sync History</Typography>

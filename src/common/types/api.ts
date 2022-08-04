@@ -122,3 +122,11 @@ export interface UserRatingsSyncApiResponse extends ApiSuccessResponse {
 export interface GetPeopleResponse extends ApiSuccessResponse {
   people: Person[];
 }
+
+export interface SyncOneMovieCredits extends ApiSuccessResponse {
+  movie: Movie;
+  syncedCredits: {
+    crew: CrewRole[],
+    cast: CastRole[]
+  }
+}
