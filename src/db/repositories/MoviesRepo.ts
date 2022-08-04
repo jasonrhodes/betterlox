@@ -2,7 +2,7 @@ import { JOB_ALLOW_LIST } from "../../common/constants";
 import { tmdb, TmdbMovie, getMovieInfoSafely } from "../../lib/tmdb";
 import { Movie } from "../entities";
 import { getDataSource } from "../orm";
-import { getCollectionsRepository, getGenresRepository, getProductionCompaniesRepository, getRatingsRepository } from ".";
+import { getCollectionsRepository, getGenresRepository, getProductionCompaniesRepository, getRatingsRepository, getCrewRepository, getCastRepository } from ".";
 import { addCast, addCrew } from "../../lib/addCredits";
 
 export const getMoviesRepository = async () => (await getDataSource()).getRepository(Movie).extend({
@@ -61,19 +61,19 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
       const savedMovie = await this.createFromTmdb(tmdbMovie, slug);
       const credits = await tmdb.movieCredits(tmdbMovie.id);
 
-      const added = [];
-
       const addedCast = await addCast({ cast: credits.cast, movie: savedMovie });
-      if (addedCast) {
-        added.push('cast');
-      }
-
       const addedCrew = await addCrew({ crew: credits.crew, movie: savedMovie });
-      if (addedCrew) {
-        added.push('crew');
-      }
 
-      if (added.length === 2) {
+      const savedCastCount = await (await getCastRepository()).countBy({
+        movieId: tmdbMovie.id, 
+        personUnsyncable: false 
+      });
+      const savedCrewCount = await (await getCrewRepository()).countBy({ 
+        movieId: tmdbMovie.id, 
+        personUnsyncable: false 
+      });
+
+      if (addedCast.length === savedCastCount && addedCrew.length === savedCrewCount) {
         savedMovie.syncedCredits = true;
       }
 

@@ -6,7 +6,11 @@ const instance = axios.create({
   headers: {'X-Betterlox-API-Token': token}
 });
 
-const { SYNC_LIMIT = 250 } = process.env;
+console.log((new Date()).toISOString(), 'Kicking off the Betterlox Sync task');
+
+const { SYNC_LIMIT = 1000 } = process.env;
+
+console.log(`Limit: ${SYNC_LIMIT}`);
 
 async function main() {
   try {
@@ -18,8 +22,9 @@ async function main() {
     if (!response.data.success) {
       throw new Error(response.data.message || "Error occurred: success false");
     }
-    console.log(`[${now.toLocaleDateString()}] Successfully completed sync (${response.data.synced.length} ${response.data.type})`);
+    console.log(`[${now.toLocaleDateString()} ${now.toLocaleTimeString()}] Successfully completed sync (${response.data.synced.length} ${response.data.type})`);
   } catch (error) {
+    const now = new Date();
     const message = error && error.message ? error.message : error;
     console.error(`[${now.toLocaleDateString()}] An error was caught: ${message}`);
   }
