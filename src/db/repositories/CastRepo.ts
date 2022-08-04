@@ -20,6 +20,7 @@ export const getCastRepository = async () => (await getDataSource()).getReposito
       .select("castRole.personId", "personId")
       .distinctOn(["castRole.personId"])
       .where("actor.name IS NULL")
+      .andWhere("castRole.personUnsyncable = false")
       .orderBy("castRole.personId", "ASC")
       .limit(limit);
       

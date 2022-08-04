@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getCastRepository, getCrewRepository } from ".";
 import { backoff } from "../../lib/backoff";
 import { tmdb, TmdbPerson } from "../../lib/tmdb";
 import { Person } from "../entities";
@@ -30,6 +31,19 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
           `Problem while retrieving ${id} from TMDB person info API`
         );
         if (!tmdbPerson) {
+          console.log(`Person not found in TMDB (ID: ${id})`);
+          const CastRepo = await getCastRepository();
+          const CrewRepo = await getCrewRepository();
+          const castRoles = await CastRepo.find({ where: { personId: id }});
+          const crewRoles = await CrewRepo.find({ where: { personId: id }});
+          castRoles.forEach((role => {
+            role.personUnsyncable = true;
+            CastRepo.save(role);
+          }));
+          crewRoles.forEach((role => {
+            role.personUnsyncable = true;
+            CrewRepo.save(role);
+          }))
           return null;
         }
         const created = this.create({

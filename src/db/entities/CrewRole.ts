@@ -13,6 +13,9 @@ export class CrewRole extends BaseEntity {
   @Column()
   personId: number;
 
+  @Column({ default: false })
+  personUnsyncable: boolean;
+
   @Column({ nullable: true })
   job: string;
 

@@ -13,6 +13,9 @@ export class CastRole {
   @Column()
   personId: number;
 
+  @Column({ default: false })
+  personUnsyncable: boolean;
+
   @Column()
   castId: number;
 

@@ -20,6 +20,7 @@ export const getCrewRepository = async () => (await getDataSource()).getReposito
       .select("crewRole.personId", "personId")
       .distinctOn(["crewRole.personId"])
       .where("person.name IS NULL")
+      .andWhere("crewRole.personUnsyncable = false")
       .orderBy("crewRole.personId", "ASC")
       .limit(limit);
   
