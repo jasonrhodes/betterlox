@@ -179,7 +179,6 @@ function PageContent({ userId }: { userId: number }) {
           <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
           <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
         </Box>
-        <TextField size="small" value={titleFilter} sx={{ display: { xs: 'none', md: 'inline-flex' }, marginRight: '10px' }} placeholder="Filter by title" onChange={handleTitleFilterChange} />
         <MobileRatingsFilterControls
           currentFilters={filters}
           onChange={updateFilters} 
@@ -187,6 +186,9 @@ function PageContent({ userId }: { userId: number }) {
       </Box>
       <Grid container spacing={2} alignItems="flex-start">
         <Grid item xs={12} md={6} lg={5}>
+          <FormControl sx={{ marginBottom: 2 }}>
+            <TextField size="small" label="Quick Title Filter" value={titleFilter} onChange={handleTitleFilterChange} />
+          </FormControl>
           <RatingsTable ratings={processedRatings} />
         </Grid>
         <Grid item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
