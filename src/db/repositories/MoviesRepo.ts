@@ -89,5 +89,14 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
       },
       take: limit
     });
+  },
+  async getMissingCollections(limit?: number) {
+    return this.find({
+      where: {
+        syncedCollections: false
+      },
+      take: limit
+    });
   }
 });
+

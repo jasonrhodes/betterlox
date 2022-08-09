@@ -4,7 +4,7 @@ import { getSyncRepository, getMoviesRepository } from "../../db/repositories";
 import { addCast, addCrew } from "../addCredits";
 import { tmdb } from "../tmdb";
 
-export async function syncOneMovie(movie: Movie) {
+export async function syncOneMovieCredits(movie: Movie) {
   const syncedCastRoles: CastRole[] = [];
   const syncedCrewRoles: CrewRole[] = [];
   const { cast, crew } = await tmdb.movieCredits(movie.id);
@@ -26,7 +26,7 @@ export async function syncOneMovie(movie: Movie) {
   return { syncedCastRoles, syncedCrewRoles };
 }
 
-export async function syncMoviesCredits(sync: Sync, limit?: number) {
+export async function syncAllMoviesCredits(sync: Sync, limit?: number) {
   const SyncRepo = await getSyncRepository();
   // Check for ratings with missing movies
   sync.type = SyncType.MOVIES_CREDITS;
@@ -41,7 +41,7 @@ export async function syncMoviesCredits(sync: Sync, limit?: number) {
 
   for (let i = 0; i < moviesWithMissingCredits.length; i++) {
     const movie = moviesWithMissingCredits[i];
-    const { syncedCastRoles, syncedCrewRoles } = await syncOneMovie(movie);
+    const { syncedCastRoles, syncedCrewRoles } = await syncOneMovieCredits(movie);
     allSyncedCastRoles = allSyncedCastRoles.concat(syncedCastRoles);
     allSyncedCrewRoles = allSyncedCrewRoles.concat(syncedCrewRoles);
     movie.syncedCredits = true;

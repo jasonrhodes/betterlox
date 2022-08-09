@@ -1,5 +1,5 @@
 import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from "typeorm";
-import { GetPeopleResponse } from "../../../common/types/api";
+import { PeopleApiResponse } from "../../../common/types/api";
 import { Person } from "../../../db/entities";
 import { getPeopleRepository } from "../../../db/repositories";
 import { singleQueryParam } from "../../../lib/queryParams";
@@ -10,7 +10,7 @@ function forceArray(value: string | string[] | undefined) {
   return (Array.isArray(value) ? value.map(v => v.split(',')) : value.split(',')).flat();
 }
 
-const UserStatsActorsRoute = createApiRoute<GetPeopleResponse>({
+const PeopleApiRoute = createApiRoute<PeopleApiResponse>({
   handlers: {
     get: async (req, res) => {
       const PeopleRepository = await getPeopleRepository();
@@ -45,4 +45,4 @@ const UserStatsActorsRoute = createApiRoute<GetPeopleResponse>({
   }
 });
 
-export default UserStatsActorsRoute;
+export default PeopleApiRoute;

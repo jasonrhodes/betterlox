@@ -1,4 +1,4 @@
-import { Rating, Person, Movie, Sync, CastRole, CrewRole } from "../../db/entities";
+import { Rating, Person, Movie, Sync, CastRole, CrewRole, Collection } from "../../db/entities";
 import { TmdbConfigurationResponse } from "../../lib/tmdb";
 import { RatedMovie, RatedTmdbCast } from "./db";
 
@@ -86,6 +86,12 @@ export interface SyncMoviesCreditsResponse extends ApiSuccessResponse {
   synced: { cast: CastRole[], crew: CrewRole[], length: number }
 }
 
+export interface SyncAllMovieCollectionsResponse extends ApiSuccessResponse {
+  type: 'movies_collections';
+  synced: Movie[];
+  count: number;
+}
+
 export interface SyncNone {
   success: boolean;
   type: 'none';
@@ -93,7 +99,7 @@ export interface SyncNone {
   message?: string;
 }
 
-export type SyncResponse = SyncRatingsMoviesResponse | SyncMoviesCreditsResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
+export type SyncResponse = SyncAllMovieCollectionsResponse | SyncRatingsMoviesResponse | SyncMoviesCreditsResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
 
 export interface RatingsFilters {
   title?: string;
@@ -119,8 +125,12 @@ export interface UserRatingsSyncApiResponse extends ApiSuccessResponse {
   count: number;
 }
 
-export interface GetPeopleResponse extends ApiSuccessResponse {
+export interface PeopleApiResponse extends ApiSuccessResponse {
   people: Person[];
+}
+
+export interface CollectionsApiResponse extends ApiSuccessResponse {
+  collections: Pick<Collection, 'id' | 'name'>[];
 }
 
 export interface SyncOneMovieCredits extends ApiSuccessResponse {
@@ -129,4 +139,9 @@ export interface SyncOneMovieCredits extends ApiSuccessResponse {
     crew: CrewRole[],
     cast: CastRole[]
   }
+}
+
+export interface SyncOneMovieCollections extends ApiSuccessResponse {
+  movie: Movie;
+  syncedCollections: Collection[];
 }

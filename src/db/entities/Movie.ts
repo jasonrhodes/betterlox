@@ -63,6 +63,9 @@ export class Movie extends BaseEntity {
   @Column({ default: false })
   syncedCredits: boolean;
 
+  @Column({ default: false })
+  syncedCollections: boolean;
+
   @Column({ nullable: true })
   letterboxdSlug: string;
 

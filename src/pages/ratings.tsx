@@ -1,82 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
-import { Box, Chip, FormControl, TextField, InputLabel, LinearProgress, MenuItem, Select, Grid, Typography, Button, Dialog, Paper, Autocomplete } from '@mui/material';
-import { GetPeopleResponse, GetRatingsForUserResponse, RatingsFilters } from '../common/types/api';
-import { callApi, useApi } from '../hooks/useApi';
+import { Box, Chip, FormControl, TextField, InputLabel, MenuItem, Select, Grid } from '@mui/material';
+import { RatingsFilters } from '../common/types/api';
+import { callApi } from '../hooks/useApi';
 import { UserPageTemplate } from '../components/PageTemplate';
 import { RatingsTable } from '../components/RatingsTable';
-import { Person, Rating } from '../db/entities';
-import { ArrowDownward, ArrowUpward, Close, FilterAlt, Tune } from '@mui/icons-material';
+import { Rating } from '../db/entities';
+import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
 import { useRouter } from 'next/router';
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
-function escapeRegExp(string: string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
-
-function applyTitleFilter(filterString: string, ratings?: Rating[]) {
-  if (!ratings) {
-    return [];
-  }
-  if (filterString.length === 0) {
-    return ratings;
-  }
-  return ratings.filter((r) => {
-    const spacesReplaced = filterString.replace(' ', '.*')
-    const regexp = new RegExp(`.*${spacesReplaced}.*`, 'i');
-    return regexp.test(r.name);
-  });
-}
-
-type SortBy = 'date' | 'stars' | 'movie.title';
-type SortDir = 'ASC' | 'DESC';
-
-function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
-  if (!Array.isArray(ratings)) {
-    return [];
-  }
-  const sorted = ratings.sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        if (sortDir === 'ASC') {
-          return a.date < b.date ? -1 : 1;
-        } else {
-          return a.date > b.date ? -1 : 1;
-        }
-      case 'stars':
-        if (sortDir === 'ASC') {
-          return a.stars < b.stars ? -1 : 1;
-        } else {
-          return a.stars > b.stars ? -1 : 1;
-        }
-      case 'movie.title':
-        if (sortDir === 'ASC') {
-          return a.movie?.title.localeCompare(b.movie?.title);
-        } else {
-          return a.movie?.title.localeCompare(b.movie?.title) * -1;
-        }
-    }
-  });
-  return sorted;
-}
-
-function convertFiltersToQueryString(filters: RatingsFilters) {
-  const keys = Object.keys(filters) as Array<keyof RatingsFilters>;
-  const queries = keys.reduce<string[]>((queries, key) => {
-    const values = filters[key];
-    if (!values) {
-      return queries;
-    }
-    if (Array.isArray(values)) {
-      queries.push(`${key}=${values.join(',')}`);
-    } else {
-      queries.push(`${key}=${values}`);
-    }
-    return queries;
-  }, []);
-
-  return queries.join('&');
-}
+import { escapeRegExp } from '../lib/escapeRegex';
+import { applySort, applyTitleFilter, convertFiltersToQueryString, SortBy, SortDir } from '../components/ratings/helpers';
+import { RatingsFilterControls } from '../components/ratings/RatingsFilterControls';
+import { MobileRatingsFilterControls } from '../components/ratings/MobileRatingsFilterControls';
 
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedRatings, updateUnprocessedRatings] = useState<Rating[]>([]);
@@ -86,7 +21,6 @@ function PageContent({ userId }: { userId: number }) {
   const [show, setShow] = React.useState<"all" | number>(100);
   const [sortBy, setSortBy] = React.useState<SortBy>("date");
   const [sortDir, setSortDir] = React.useState<SortDir>("DESC");
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState<boolean>(true);
 
   useEffect(() => {
     async function retrieve() {
@@ -197,158 +131,6 @@ function PageContent({ userId }: { userId: number }) {
       </Grid>
     </Box>
   );
-}
-
-function RatingsFilterControls({ filters, onChange }: { filters: RatingsFilters, onChange: (filters: RatingsFilters) => void }) {
-  return (
-    <Grid item container spacing={2} sx={{ paddingBottom: 5 }}>
-      <Grid item xs={12}>
-        <Typography variant="body1"><b>Advanced Filters</b></Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <CurrentFilters filters={filters} onChange={onChange} />
-      </Grid>
-      <Grid item xs={12}>
-        <ActorLookUp filters={filters} onChange={onChange} />
-      </Grid>
-      <Grid item xs={12}>
-        <Button variant="outlined" onClick={() => onChange({})}>Clear Filters</Button>
-      </Grid>
-    </Grid>
-  )
-}
-
-function ActorLookUp({ filters, onChange }: { filters: RatingsFilters, onChange: (filters: RatingsFilters) => void }) {
-  const [searchValue, updateSearchValue] = useState<string>('');
-  const [open, setOpen] = useState<boolean>(false);
-  const [actorOptions, setActorOptions] = useState<Person[]>([]);
-  const response = useApi<GetPeopleResponse>(`/api/people?name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
-
-  useEffect(() => {
-    const filtered = response?.data.people.filter((p) => !filters.actors?.includes(p.id));
-    setActorOptions(filtered || []);
-  }, [response, filters]);
-
-  return (
-    <Autocomplete
-      id="actor-search"
-      sx={{ width: 300 }}
-      open={open}
-      value={null}
-      inputValue={searchValue}
-      clearOnBlur={true}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={() => {
-        setOpen(false);
-      }}
-      isOptionEqualToValue={(option, value) => option.name === value.name}
-      onChange={(e, person) => {
-        const { actors = [] } = filters;
-        if (person) {
-          onChange({ ...filters, actors: [...actors, person.id ]})
-        }
-        updateSearchValue('');
-      }}
-      onInputChange={(e, value) => {
-        updateSearchValue(value);
-      }}
-      getOptionLabel={(option) => option.name}
-      options={actorOptions}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Search for an actor by name"
-        />
-      )}
-      filterOptions={(x) => x}
-    />
-  )
-}
-
-function useGetPeople(ids?: number[]) {
-  const [people, setPeople] = useState<Person[]>([]);
-
-  useEffect(() => {
-    async function retrieve() {
-      if (typeof ids === "undefined" || ids.length === 0) {
-        setPeople([]);
-      } else {
-        const response = await callApi<GetPeopleResponse>(`/api/people?ids=${ids.join(',')}`);
-        setPeople(response?.data?.people || []);
-      }
-    }
-    retrieve();
-  }, [ids]);
-  
-  
-  return people;
-}
-
-function CurrentFilters({
-  filters,
-  onChange
-}: {
-  filters: RatingsFilters;
-  onChange: (filters: RatingsFilters) => void;
-}) {
-  const searchedActors = useGetPeople(filters.actors);
-  const { actors = [] } = filters;
-  return (
-    <Box>
-      {searchedActors.map(person => <Chip 
-        key={person.name} 
-        icon={<FilterAlt />} 
-        label={'Actor: ' + person.name} 
-        onDelete={() => onChange({ ...filters, actors: actors.filter(a => a !== person.id) })} 
-        sx={{ marginRight: 1, marginBottom: 1 }}
-      />)}
-    </Box>
-  )
-}
-
-function MobileRatingsFilterControls({
-  currentFilters,
-  onChange
-}: {
-  currentFilters: RatingsFilters;
-  onChange: (filters: RatingsFilters) => void;
-}) {
-  const [updatedFilters, setUpdatedFilters] = useState<RatingsFilters>(currentFilters);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const handleUpdate = () => {
-    onChange(updatedFilters);
-    setIsOpen(false);
-  }
-  const handleCancel = () => {
-    setIsOpen(false);
-  }
-
-  useEffect(() => setUpdatedFilters(currentFilters), [currentFilters]);
-
-  return (
-    <>
-      <Box sx={{ cursor: 'pointer', display: { xs: 'inline-flex', md: 'none' }, verticalAlign: 'middle', marginRight: '10px' }}>
-        <Tune onClick={() => setIsOpen(true) } />
-      </Box>
-      <Dialog
-        fullScreen
-        open={isOpen}
-        PaperProps={{ sx: { backgroundColor: 'background.default', backgroundImage: 'none', px: 5, py: 3 }}}
-      >
-        <Grid container spacing={4}>
-          <RatingsFilterControls filters={updatedFilters} onChange={setUpdatedFilters} />
-          {
-            (currentFilters !== updatedFilters) ?
-              <Grid item><Button onClick={() => handleUpdate()}>Apply Filters</Button></Grid> :
-              null
-          }
-          <Grid item><Button onClick={() => handleCancel()}>Cancel</Button></Grid>
-        </Grid>
-      </Dialog>
-    </>
-  )
 }
 
 const RatingsPage: NextPage = () => {

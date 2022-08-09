@@ -5,7 +5,8 @@ import { SyncStatus, SyncTrigger } from "../../../../common/types/db";
 import { numericQueryParam } from "../../../../lib/queryParams";
 import { syncRatingsMovies } from "../../../../lib/managedSyncs/syncRatingsMovies";
 import { syncCastPeople, syncCrewPeople } from "../../../../lib/managedSyncs/syncPeople";
-import { syncMoviesCredits } from "../../../../lib/managedSyncs/syncMoviesCredits";
+import { syncAllMoviesCredits } from "../../../../lib/managedSyncs/syncMoviesCredits";
+import { syncAllMoviesCollections } from "../../../../lib/managedSyncs/syncMoviesCollections";
 
 const SyncRatingsRoute = createApiRoute<SyncResponse>({
   isAdmin: true,
@@ -36,7 +37,7 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
         }
 
         console.log('Syncing movies -> credits (cast and crew)...')
-        const syncedCredits = await syncMoviesCredits(sync, numericLimit);
+        const syncedCredits = await syncAllMoviesCredits(sync, numericLimit);
         if (syncedCredits.cast.length > 0 || syncedCredits.crew.length > 0) {
           return res.status(200).json({ success: true, type: 'movies_credits', synced: syncedCredits })
         }
@@ -53,6 +54,13 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
         const syncedCrew = await syncCrewPeople(sync, numericLimit);
         if (syncedCrew.length > 0) {
           return res.status(200).json({ success: true, type: 'movies_crew', synced: syncedCrew });
+        }
+
+        // Check for movies with missing collections
+        console.log('Syncing movies -> collections');
+        const { synced: syncedCollections, count } = await syncAllMoviesCollections(sync, numericLimit);
+        if (syncedCollections.length > 0) {
+          return res.status(200).json({ success: true, type: 'movies_collections', synced: syncedCollections, count });
         }
 
         console.log('Nothing was synced');
