@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
-import { Box, Chip, FormControl, TextField, InputLabel, MenuItem, Select, Grid } from '@mui/material';
+import { Box, Chip, FormControl, TextField, InputLabel, MenuItem, Select, Grid, Typography, Button } from '@mui/material';
 import { RatingsFilters } from '../common/types/api';
 import { callApi } from '../hooks/useApi';
 import { UserPageTemplate } from '../components/PageTemplate';
@@ -12,6 +12,7 @@ import { escapeRegExp } from '../lib/escapeRegex';
 import { applySort, applyTitleFilter, convertFiltersToQueryString, SortBy, SortDir } from '../components/ratings/helpers';
 import { RatingsFilterControls } from '../components/ratings/RatingsFilterControls';
 import { MobileRatingsFilterControls } from '../components/ratings/MobileRatingsFilterControls';
+import { UserMissingMovies } from '../components/UserMissingMovies';
 
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedRatings, updateUnprocessedRatings] = useState<Rating[]>([]);
@@ -125,8 +126,13 @@ function PageContent({ userId }: { userId: number }) {
           </FormControl>
           <RatingsTable ratings={processedRatings} />
         </Grid>
-        <Grid item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
-          <RatingsFilterControls filters={filters} onChange={updateFilters} />
+        <Grid container item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
+          <Grid item xs={12}>
+            <RatingsFilterControls filters={filters} onChange={updateFilters} />
+          </Grid>
+          <Grid item xs={12}>
+            <UserMissingMovies ratings={processedRatings} filters={filters} />
+          </Grid>
         </Grid>
       </Grid>
     </Box>

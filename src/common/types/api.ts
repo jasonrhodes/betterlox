@@ -1,5 +1,5 @@
 import { Rating, Person, Movie, Sync, CastRole, CrewRole, Collection } from "../../db/entities";
-import { TmdbConfigurationResponse } from "../../lib/tmdb";
+import { TmdbCollection, TmdbConfigurationResponse, TmdbPersonWithMovieCredits } from "../../lib/tmdb";
 import { RatedMovie, RatedTmdbCast } from "./db";
 
 export type OrderDirection = "ASC" | "DESC";
@@ -144,4 +144,12 @@ export interface SyncOneMovieCredits extends ApiSuccessResponse {
 export interface SyncOneMovieCollections extends ApiSuccessResponse {
   movie: Movie;
   syncedCollections: Collection[];
+}
+
+export interface TmdbActorByIdResponse extends ApiSuccessResponse {
+  actor: TmdbPersonWithMovieCredits
+}
+
+export interface TmdbCollectionByIdResponse extends ApiSuccessResponse {
+  collection: TmdbCollection 
 }

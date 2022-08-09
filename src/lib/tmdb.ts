@@ -6,7 +6,8 @@ import {
   Cast,
   Crew,
   CreditsResponse,
-  ConfigurationResponse
+  ConfigurationResponse,
+  CollectionInfoResponse
 } from "moviedb-promise/dist/request-types";
 
 import {
@@ -47,9 +48,16 @@ export async function getMovieInfoSafely(id: number): Promise<null | TmdbMovie> 
 
 export type TmdbMovie = MovieResponse;
 export type TmdbPerson = Person;
+export type TmdbPersonWithMovieCredits = Person & {
+  movie_credits: {
+    cast: Array<Cast & Partial<MovieResponse>>;
+    crew: Array<Crew & Partial<MovieResponse>>;
+  };
+};
 export type TmdbCast = Cast;
 export type TmdbCrew = Crew;
 export type TmdbCredits = CreditsResponse;
 export type TmdbConfigurationResponse = ConfigurationResponse;
 export type TmdbGenre = Genre;
 export type TmdbProductionCompany = ProductionCompany;
+export type TmdbCollection = CollectionInfoResponse;

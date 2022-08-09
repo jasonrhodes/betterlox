@@ -29,7 +29,7 @@ export function CurrentFilters({
       {searchedCollections.map(collection => <Chip 
         key={collection.name} 
         icon={<FilterAlt />} 
-        label={'Collection: ' + collection.name} 
+        label={'Collection: ' + collection.name.replace(/ ?Collection$/, '')} 
         onDelete={() => onChange({ ...filters, collections: collections.filter(a => a !== collection.id) })} 
         sx={{ marginRight: 1, marginBottom: 1 }}
       />)}

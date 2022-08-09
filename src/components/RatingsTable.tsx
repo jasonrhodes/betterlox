@@ -6,45 +6,14 @@ import Image, { ImageProps } from 'next/image';
 import { DisplayTable } from './DisplayTable';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { useCurrentUser } from '../hooks/UserContext';
+import { ImdbLink, LetterboxdLink } from './externalServiceLinks';
 
-const ICON_SIZE = 20;
+
 interface RatingsTableProps {
   ratings: Rating[] | undefined;
 }
 
-function LetterboxdLink({ username, slug }: { username?: string, slug?: string }) {
-  if (!username || !slug) {
-    return (
-      <Tooltip title="Movie data is still loading..." arrow>
-        <Box>
-          <Image height={ICON_SIZE} width={ICON_SIZE} style={{ opacity: 0.4 }} src="/img/letterboxd-icon-2.webp" alt="Letterboxd.com logo" />
-        </Box>
-      </Tooltip>
-    )
-  }
-  return (
-    <a target="_blank" rel="noreferrer" href={`https://letterboxd.com/${username}${slug}`}>
-      <Image height={ICON_SIZE} width={ICON_SIZE} src="/img/letterboxd-icon-2.webp" alt="Letterboxd.com logo" />
-    </a>
-  );
-}
 
-function ImdbLink({ id }: { id?: string }) {
-  if (!id) {
-    return (
-      <Tooltip title="Movie data is still loading..." arrow>
-        <Box>
-          <Image height={ICON_SIZE} width={ICON_SIZE} style={{ opacity: 0.4 }} src="/img/imdb-icon.png" alt="Letterboxd.com logo" />
-        </Box>
-      </Tooltip>
-    )
-  }
-  return (
-    <a target="_blank" rel="noreferrer" href={`https://www.imdb.com/title/${id}`}>
-      <Image height={ICON_SIZE} width={ICON_SIZE} src="/img/imdb-icon.png" alt="IMDb.com logo" />
-    </a>
-  );
-}
 
 function RatingCard({ rating }: { rating: Rating }) {
   const { user } = useCurrentUser();
