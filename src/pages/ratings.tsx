@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
-import { Box, Chip, FormControl, TextField, InputLabel, MenuItem, Select, Grid, Typography, Button } from '@mui/material';
+import { Box, FormControl, TextField, InputLabel, MenuItem, Select, Grid, Tabs, Tab, SelectChangeEvent, Typography } from '@mui/material';
 import { RatingsFilters } from '../common/types/api';
 import { callApi } from '../hooks/useApi';
 import { UserPageTemplate } from '../components/PageTemplate';
@@ -11,8 +11,8 @@ import { useRouter } from 'next/router';
 import { escapeRegExp } from '../lib/escapeRegex';
 import { applySort, applyTitleFilter, convertFiltersToQueryString, SortBy, SortDir } from '../components/ratings/helpers';
 import { RatingsFilterControls } from '../components/ratings/RatingsFilterControls';
-import { MobileRatingsFilterControls } from '../components/ratings/MobileRatingsFilterControls';
-import { UserMissingMovies } from '../components/UserMissingMovies';
+import { MissingMovie, getMissingMoviesForFilters, MissingMovieList } from '../components/UserMissingMovies';
+import { TabPanel, a11yTabProps } from "../components/TabPanel";
 
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedRatings, updateUnprocessedRatings] = useState<Rating[]>([]);
@@ -69,14 +69,65 @@ function PageContent({ userId }: { userId: number }) {
 
   return (
     <Box sx={{ height: 600 }}>
-      <Box sx={{ marginBottom: '20px' }}>
-        <Box sx={{ display: { xs: 'none', md: 'inline-block' }}}>
+      <Grid container spacing={2} alignItems="flex-start">
+        <Grid item xs={12} md={6} lg={5}>
+          <RatingsTabs 
+            processedRatings={processedRatings} 
+            unprocessedRatings={unprocessedRatings} 
+            filters={filters}
+            show={show}
+            handleShowChange={handleShowChange}
+            sortBy={sortBy}
+            handleSortByChange={handleSortByChange}
+            sortDir={sortDir}
+            handleSortDirClick={handleSortDirClick}
+            quickTitleSearch={titleFilter}
+            handleQuickTitleSearchChange={handleTitleFilterChange}
+          />
+        </Grid>
+        <Grid container item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
+          <Grid item xs={12}>
+            <RatingsFilterControls filters={filters} onChange={updateFilters} />
+          </Grid>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  // <MobileRatingsFilterControls
+  //         currentFilters={filters}
+  //         onChange={updateFilters} 
+  //       />
+}
+
+type StateChanger<T> = (value: T) => void;
+
+interface RatingsShowAndSortControlsOptions {
+  show: number | "all";
+  handleShowChange: StateChanger<SelectChangeEvent<number | "all">>;
+  sortBy: SortBy;
+  handleSortByChange: StateChanger<SelectChangeEvent<SortBy>>;
+  sortDir: SortDir;
+  handleSortDirClick: () => void;
+}
+
+function RatingsShowAndSortControls({
+  show,
+  handleShowChange,
+  sortBy,
+  handleSortByChange,
+  sortDir,
+  handleSortDirClick
+}: RatingsShowAndSortControlsOptions) {
+  return (
+    <Box sx={{ marginBottom: '20px' }}>
+        {/* <Box sx={{ display: { xs: 'none', md: 'inline-block' }}}>
           <Chip 
             color="secondary" 
             label={`${processedRatings.length} of ${unprocessedRatings.length}`} 
             sx={{ marginRight: '10px' }} 
           />
-        </Box>
+        </Box> */}
         <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
           <InputLabel id="select-show-per-page-label">Show</InputLabel>
           <Select
@@ -114,27 +165,81 @@ function PageContent({ userId }: { userId: number }) {
           <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
           <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
         </Box>
-        <MobileRatingsFilterControls
-          currentFilters={filters}
-          onChange={updateFilters} 
-        />
       </Box>
-      <Grid container spacing={2} alignItems="flex-start">
-        <Grid item xs={12} md={6} lg={5}>
-          <FormControl sx={{ marginBottom: 2 }}>
-            <TextField size="small" label="Quick Title Filter" value={titleFilter} onChange={handleTitleFilterChange} />
-          </FormControl>
-          <RatingsTable ratings={processedRatings} />
-        </Grid>
-        <Grid container item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
-          <Grid item xs={12}>
-            <RatingsFilterControls filters={filters} onChange={updateFilters} />
-          </Grid>
-          <Grid item xs={12}>
-            <UserMissingMovies ratings={processedRatings} filters={filters} />
-          </Grid>
-        </Grid>
-      </Grid>
+  )
+}
+
+interface RatingsTabsOptions extends RatingsShowAndSortControlsOptions {
+  processedRatings: Rating[]; 
+  unprocessedRatings: Rating[];
+  filters: RatingsFilters;
+  quickTitleSearch: string;
+  handleQuickTitleSearchChange: React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>;
+}
+
+function RatingsTabs({
+  processedRatings,
+  unprocessedRatings, 
+  filters,
+  show,
+  handleShowChange,
+  sortBy,
+  handleSortByChange,
+  sortDir,
+  handleSortDirClick,
+  quickTitleSearch,
+  handleQuickTitleSearchChange
+}: RatingsTabsOptions) {
+  const [value, setValue] = React.useState<number>(0);
+  const [activeFilterCount, setActiveFilterCount] = React.useState<number>(0);
+  const [missing, setMissing] = useState<MissingMovie[]>([]);
+
+  useEffect(() => {
+    async function retrieve() {
+      const missing = await getMissingMoviesForFilters({ ratings: unprocessedRatings, filters });
+      setMissing(missing);
+    }
+    const filterKeys = Object.keys(filters) as Array<keyof RatingsFilters>;
+    const activeFilterCount = filterKeys.reduce((count, key) => {
+      return count + (filters[key]?.length || 0);
+    }, 0);
+    setActiveFilterCount(activeFilterCount);
+    if (activeFilterCount === 0) {
+      setMissing([]);
+    } else {
+      retrieve();
+    }
+  }, [unprocessedRatings, filters]);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={handleChange} aria-label="ratings tabs">
+          <Tab label="Rated" {...a11yTabProps(0)} />
+          <Tab label="Blindspots" {...a11yTabProps(1)} />
+        </Tabs>
+      </Box>
+      <TabPanel value={value} index={0}>
+        <RatingsShowAndSortControls
+          show={show}
+          handleShowChange={handleShowChange}
+          sortBy={sortBy}
+          handleSortByChange={handleSortByChange}
+          sortDir={sortDir}
+          handleSortDirClick={handleSortDirClick}
+        />
+        <FormControl sx={{ marginBottom: 2 }}>
+          <TextField size="small" label="Quick Title Filter" value={quickTitleSearch} onChange={handleQuickTitleSearchChange} />
+        </FormControl>
+        <RatingsTable ratings={processedRatings} />
+      </TabPanel>
+      <TabPanel value={value} index={1}>
+        {activeFilterCount === 0 ? <Typography>No blindspots for these filters.</Typography> : <MissingMovieList movies={missing} />}
+      </TabPanel>
     </Box>
   );
 }

@@ -45,7 +45,7 @@ export function CollectionLookUp({ filters, onChange }: { filters: RatingsFilter
       renderInput={(params) => (
         <TextField
           {...params}
-          label="Search for a collection"
+          label="Filter by collection"
         />
       )}
       filterOptions={(x) => x}

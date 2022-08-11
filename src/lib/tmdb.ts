@@ -15,13 +15,11 @@ import {
   ProductionCompany
 } from "moviedb-promise/dist/types";
 
-const { TMDB_API_KEY } = process.env;
-
-if (!TMDB_API_KEY) {
+if (typeof process.env.TMDB_API_KEY === "undefined") {
   throw new Error("TMDB API key required to be set using TMDB_API_KEY=yourkey");
 }
 
-export const tmdb = new MovieDb(TMDB_API_KEY);
+export const tmdb = new MovieDb(process.env.TMDB_API_KEY);
 
 export async function getMovieInfoSafely(id: number): Promise<null | TmdbMovie> {
   if (id === 0) {
@@ -61,3 +59,13 @@ export type TmdbConfigurationResponse = ConfigurationResponse;
 export type TmdbGenre = Genre;
 export type TmdbProductionCompany = ProductionCompany;
 export type TmdbCollection = CollectionInfoResponse;
+
+type CollectionMovieParts = Required<CollectionInfoResponse>['parts'];
+type CollectionMovie = CollectionMovieParts[number];
+type EnhancedCollectionMovie = CollectionMovie & {
+  imdb_id: string;
+};
+
+export interface TmdbEnhancedCollection extends CollectionInfoResponse {
+  parts: EnhancedCollectionMovie[];
+}

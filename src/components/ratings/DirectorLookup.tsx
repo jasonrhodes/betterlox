@@ -4,20 +4,20 @@ import { PeopleApiResponse, RatingsFilters } from '../../common/types/api';
 import { Person } from '../../db/entities';
 import { useApi } from '../../hooks/useApi';
 
-export function ActorLookUp({ filters, onChange }: { filters: RatingsFilters, onChange: (filters: RatingsFilters) => void }) {
+export function DirectorLookUp({ filters, onChange }: { filters: RatingsFilters, onChange: (filters: RatingsFilters) => void }) {
   const [searchValue, updateSearchValue] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
-  const [actorOptions, setActorOptions] = useState<Person[]>([]);
-  const response = useApi<PeopleApiResponse>(`/api/people?role=actor&name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
+  const [directorOptions, setDirectorOptions] = useState<Person[]>([]);
+  const response = useApi<PeopleApiResponse>(`/api/people?role=Director&name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
 
   useEffect(() => {
-    const filtered = response?.data.people.filter((p) => !filters.actors?.includes(p.id));
-    setActorOptions(filtered || []);
+    const filtered = response?.data.people.filter((p) => !filters.directors?.includes(p.id));
+    setDirectorOptions(filtered || []);
   }, [response, filters]);
 
   return (
     <Autocomplete
-      id="actor-search"
+      id="director-search"
       sx={{ width: 300 }}
       open={open}
       value={null}
@@ -31,9 +31,9 @@ export function ActorLookUp({ filters, onChange }: { filters: RatingsFilters, on
       }}
       isOptionEqualToValue={(option, value) => option.name === value.name}
       onChange={(e, person) => {
-        const { actors = [] } = filters;
+        const { directors = [] } = filters;
         if (person) {
-          onChange({ ...filters, actors: [...actors, person.id ]})
+          onChange({ ...filters, directors: [...directors, person.id ]})
         }
         updateSearchValue('');
       }}
@@ -41,11 +41,11 @@ export function ActorLookUp({ filters, onChange }: { filters: RatingsFilters, on
         updateSearchValue(value);
       }}
       getOptionLabel={(option) => option.name}
-      options={actorOptions}
+      options={directorOptions}
       renderInput={(params) => (
         <TextField
           {...params}
-          label="Filter by actor"
+          label="Filter by director"
         />
       )}
       filterOptions={(x) => x}

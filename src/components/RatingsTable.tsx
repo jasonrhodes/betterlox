@@ -13,8 +13,6 @@ interface RatingsTableProps {
   ratings: Rating[] | undefined;
 }
 
-
-
 function RatingCard({ rating }: { rating: Rating }) {
   const { user } = useCurrentUser();
   const sharedProps: Partial<ImageProps> = {

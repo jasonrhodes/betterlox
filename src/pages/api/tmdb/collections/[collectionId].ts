@@ -19,7 +19,19 @@ const TMDBCollectionByIdRoute = createApiRoute<TmdbCollectionByIdResponse | ApiE
       
       try {
         const collection = await tmdb.collectionInfo(cid);
-        res.json({ success: true, collection });
+        if (typeof collection.parts === "undefined") {
+          throw new Error(`Collection ${cid} does not include any movie parts`);
+        }
+        const enhanced = await Promise.all(collection.parts.map(async (part) => {
+          let imdbId = "";
+          // this lookup seems to add TONS of time to the request, commenting out for now
+          // if (part.id) {
+          //   const movie = await tmdb.movieInfo(part.id);
+          //   imdbId = movie.imdb_id || "";
+          // }
+          return { ...part, imdb_id: imdbId };
+        }));
+        res.json({ success: true, collection: { ...collection, parts: enhanced || [] } });
       } catch (err: unknown) {
         console.log('error', err);
         res.status(500).json({ success: false, code: 500, message: err instanceof Error ? err.message : "Unknown error while retrieving collection info from TMDB API" });

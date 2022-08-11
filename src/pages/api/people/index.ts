@@ -15,19 +15,32 @@ const PeopleApiRoute = createApiRoute<PeopleApiResponse>({
     get: async (req, res) => {
       const PeopleRepository = await getPeopleRepository();
       const options: FindManyOptions<Person> = {};
+
       const limit = singleQueryParam(req.query.limit);
       if (limit) {
         options.take = Number(limit);
       }
+
       const where: FindOptionsWhere<Person> = {};
       const ids = forceArray(req.query.ids);
       if (ids) {
         where.id = In(ids);
       }
+
+      const type = singleQueryParam(req.query.role);
+      if (type === "actor") {
+        where.castRoles = true;
+      } else if (type) {
+        where.crewRoles = {
+          job: type
+        }
+      }
+
       const namePattern = singleQueryParam(req.query.name);
       if (namePattern) {
         where.name = ILike(`%${namePattern.replace(' ', '%')}%`);
       }
+
       const exactName = singleQueryParam(req.query.exactName);
       if (exactName) {
         where.name = exactName;
