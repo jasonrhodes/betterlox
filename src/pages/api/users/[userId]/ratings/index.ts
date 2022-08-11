@@ -96,12 +96,16 @@ const UserRatingsRoute = createApiRoute({
       // otherwise the array would be treated as "OR"
       // const where = wheres.reduce((a, b) => merge(a, b), {});
 
-      // add baseline criteria to every where condition so that
-      // they are treated as "OR", which is actually what we want
-      const where = wheres.map((condition) => ({
-        ...condition,
+      const baselineConditions = {
         userId: numericQueryParam(req.query.userId),
         unsyncable: false
+      };
+
+      // add baseline criteria to every where condition so that
+      // they are treated as "OR", which is actually what we want
+      const where = wheres.length === 0 ? baselineConditions : wheres.map((condition) => ({
+        ...condition,
+        ...baselineConditions
       }));
       
       try {
