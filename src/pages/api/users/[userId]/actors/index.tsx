@@ -7,30 +7,7 @@ const UserStatsActorsRoute: NextApiHandler = async (req, res) => {
   const numericUserId = Number(userId);
   const numericCastOrderThreshold = Number(castOrderThreshold);
 
-  // const actors = await getActorsForUser({
-  //   userId: numericUserId,
-  //   castOrderThreshold: !isNaN(numericCastOrderThreshold) ? numericCastOrderThreshold : undefined
-  // });
-
   const PeopleRepository = await getPeopleRepository();
-  // const actors = await ActorsRepository.find({
-  //   where: {
-  //     castRoles: {
-  //       movie: {
-  //         ratings: {
-  //           userId: numericUserId
-  //         }
-  //       }
-  //     }
-  //   },
-  //   relations: {
-  //     castRoles: {
-  //       movie: {
-  //         ratings: true
-  //       }
-  //     }
-  //   }
-  // });
 
   const query = PeopleRepository
     .createQueryBuilder("actor")

@@ -31,10 +31,10 @@ const UserRatingsRoute = createApiRoute({
       // that all options will be "AND" joined (not "OR")
       const wheres: FindOptionsWhere<Rating>[] = [];
 
-      wheres.push({
-        userId: numericQueryParam(req.query.userId),
-        unsyncable: false
-      });
+      // wheres.push({
+      //   userId: numericQueryParam(req.query.userId),
+      //   unsyncable: false
+      // });
 
       if (req.query.actors) {
         const actors = first(req.query.actors);
@@ -92,9 +92,17 @@ const UserRatingsRoute = createApiRoute({
         ));
       }
       
-      // reduce array of where clauses into a single "AND" clause
+      // (Update: Oops) reduce array of where clauses into a single "AND" clause
       // otherwise the array would be treated as "OR"
-      const where = wheres.reduce((a, b) => merge(a, b), {});
+      // const where = wheres.reduce((a, b) => merge(a, b), {});
+
+      // add baseline criteria to every where condition so that
+      // they are treated as "OR", which is actually what we want
+      const where = wheres.map((condition) => ({
+        ...condition,
+        userId: numericQueryParam(req.query.userId),
+        unsyncable: false
+      }));
       
       try {
         const RatingsRepository = await getRatingsRepository();
