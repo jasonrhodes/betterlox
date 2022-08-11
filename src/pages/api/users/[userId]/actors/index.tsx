@@ -48,11 +48,7 @@ const UserStatsActorsRoute: NextApiHandler = async (req, res) => {
     .having("countMoviesSeen > :minMovies", { minMovies: 1 })
     .orderBy("avgRating", "DESC");
 
-  console.log(query.getSql());
-
   const actors = await query.getRawMany();
-
-  // console.log({ actors });
 
   res.json({ actors });
 }

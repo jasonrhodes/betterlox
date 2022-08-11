@@ -41,8 +41,6 @@ const TMDBPersonByIdRoute = createApiRoute<TmdbPersonByIdResponse | ApiErrorResp
           return { ...role, imdb_id };
         }));
 
-        console.log(JSON.stringify(person.movie_credits.cast[0], null, 2));
-
         res.json({ success: true, person });
       } catch (err: unknown) {
         console.log('error', err);
