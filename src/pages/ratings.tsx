@@ -13,6 +13,7 @@ import { applySort, applyTitleFilter, convertFiltersToQueryString, SortBy, SortD
 import { RatingsFilterControls } from '../components/ratings/RatingsFilterControls';
 import { MissingMovie, getMissingMoviesForFilters, MissingMovieList } from '../components/UserMissingMovies';
 import { TabPanel, a11yTabProps } from "../components/TabPanel";
+import { MobileRatingsFilterControls } from '../components/ratings/MobileRatingsFilterControls';
 
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedRatings, updateUnprocessedRatings] = useState<Rating[]>([]);
@@ -68,36 +69,39 @@ function PageContent({ userId }: { userId: number }) {
   }, [sortDir]);
 
   return (
-    <Box sx={{ height: 600 }}>
-      <Grid container spacing={2} alignItems="flex-start">
-        <Grid item xs={12} md={6} lg={5}>
-          <RatingsTabs 
-            processedRatings={processedRatings} 
-            unprocessedRatings={unprocessedRatings} 
-            filters={filters}
-            show={show}
-            handleShowChange={handleShowChange}
-            sortBy={sortBy}
-            handleSortByChange={handleSortByChange}
-            sortDir={sortDir}
-            handleSortDirClick={handleSortDirClick}
-            quickTitleSearch={titleFilter}
-            handleQuickTitleSearchChange={handleTitleFilterChange}
-          />
-        </Grid>
-        <Grid container item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
-          <Grid item xs={12}>
-            <RatingsFilterControls filters={filters} onChange={updateFilters} />
+    <>
+      <Box sx={{ position: "absolute", top: 15, right: 15 }}>
+        <MobileRatingsFilterControls
+          currentFilters={filters}
+          onChange={updateFilters} 
+        />
+      </Box>
+      <Box sx={{ height: 600 }}>
+        <Grid container spacing={2} alignItems="flex-start">
+          <Grid item xs={12} md={6} lg={5}>
+            <RatingsTabs 
+              processedRatings={processedRatings} 
+              unprocessedRatings={unprocessedRatings} 
+              filters={filters}
+              show={show}
+              handleShowChange={handleShowChange}
+              sortBy={sortBy}
+              handleSortByChange={handleSortByChange}
+              sortDir={sortDir}
+              handleSortDirClick={handleSortDirClick}
+              quickTitleSearch={titleFilter}
+              handleQuickTitleSearchChange={handleTitleFilterChange}
+            />
+          </Grid>
+          <Grid container item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
+            <Grid item xs={12}>
+              <RatingsFilterControls filters={filters} onChange={updateFilters} />
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </>
   );
-
-  // <MobileRatingsFilterControls
-  //         currentFilters={filters}
-  //         onChange={updateFilters} 
-  //       />
 }
 
 type StateChanger<T> = (value: T) => void;
@@ -121,51 +125,54 @@ function RatingsShowAndSortControls({
 }: RatingsShowAndSortControlsOptions) {
   return (
     <Box sx={{ marginBottom: '20px' }}>
-        {/* <Box sx={{ display: { xs: 'none', md: 'inline-block' }}}>
-          <Chip 
-            color="secondary" 
-            label={`${processedRatings.length} of ${unprocessedRatings.length}`} 
-            sx={{ marginRight: '10px' }} 
-          />
-        </Box> */}
-        <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
-          <InputLabel id="select-show-per-page-label">Show</InputLabel>
-          <Select
-            labelId="select-show-per-page"
-            id="select-show-per-page"
-            value={show}
-            label="Show Per Page"
-            autoWidth
-            onChange={handleShowChange}
-          >
-            <MenuItem selected={show === 10} value={10}>{10}</MenuItem>
-            <MenuItem selected={show === 50} value={50}>{50}</MenuItem>
-            <MenuItem selected={show === 100} value={100}>{100}</MenuItem>
-            <MenuItem selected={show === 250} value={250}>{250}</MenuItem>
-            <MenuItem selected={show === 500} value={500}>{500}</MenuItem>
-            <MenuItem selected={show === "all"} value={"all"}>{"all"}</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
-          <InputLabel id="select-sort-by-label">Sort By</InputLabel>
-          <Select
-            labelId="select-sort-by"
-            id="select-sort-by"
-            value={sortBy}
-            label="Sort By"
-            autoWidth
-            onChange={handleSortByChange}
-          >
-            <MenuItem selected={sortBy === "date"} value="date">Date Rated</MenuItem>
-            <MenuItem selected={sortBy === "stars"} value="stars">Your Rating</MenuItem>
-            <MenuItem selected={sortBy === "movie.title"} value="movie.title">Movie Title</MenuItem>
-          </Select>
-        </FormControl>
-        <Box sx={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: "middle", marginRight: '10px' }} onClick={handleSortDirClick}>
-          <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
-          <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
-        </Box>
+      {/* <Box sx={{ display: { xs: 'none', md: 'inline-block' }}}>
+        <Chip 
+          color="secondary" 
+          label={`${processedRatings.length} of ${unprocessedRatings.length}`} 
+          sx={{ marginRight: '10px' }} 
+        />
+      </Box> */}
+      <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
+        <InputLabel id="select-show-per-page-label">Show</InputLabel>
+        <Select
+          labelId="select-show-per-page"
+          id="select-show-per-page"
+          value={show}
+          label="Show Per Page"
+          autoWidth
+          onChange={handleShowChange}
+        >
+          <MenuItem selected={show === 10} value={10}>{10}</MenuItem>
+          <MenuItem selected={show === 50} value={50}>{50}</MenuItem>
+          <MenuItem selected={show === 100} value={100}>{100}</MenuItem>
+          <MenuItem selected={show === 250} value={250}>{250}</MenuItem>
+          <MenuItem selected={show === 500} value={500}>{500}</MenuItem>
+          <MenuItem selected={show === "all"} value={"all"}>{"all"}</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
+        <InputLabel id="select-sort-by-label">Sort By</InputLabel>
+        <Select
+          labelId="select-sort-by"
+          id="select-sort-by"
+          value={sortBy}
+          label="Sort By"
+          autoWidth
+          onChange={handleSortByChange}
+        >
+          <MenuItem selected={sortBy === "date"} value="date">Date Rated</MenuItem>
+          <MenuItem selected={sortBy === "stars"} value="stars">Your Rating</MenuItem>
+          <MenuItem selected={sortBy === "movie.title"} value="movie.title">Movie Title</MenuItem>
+        </Select>
+      </FormControl>
+      <Box 
+        sx={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: "middle", marginRight: '10px' }} 
+        onClick={handleSortDirClick}
+      >
+        <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
+        <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
       </Box>
+    </Box>
   )
 }
 

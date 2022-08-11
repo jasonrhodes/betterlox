@@ -1,4 +1,4 @@
-import { Tune } from '@mui/icons-material';
+import { Close, Tune } from '@mui/icons-material';
 import { Box, Button, Dialog, Grid } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { RatingsFilters } from '../../common/types/api';
@@ -33,6 +33,10 @@ export function MobileRatingsFilterControls({
         open={isOpen}
         PaperProps={{ sx: { backgroundColor: 'background.default', backgroundImage: 'none', px: 5, py: 3 }}}
       >
+        <Close 
+          onClick={() => setIsOpen(false)} 
+          sx={{ cursor: "pointer", position: "absolute", top: 18, right: 25 }} 
+        />
         <Grid container spacing={4}>
           <RatingsFilterControls filters={updatedFilters} onChange={setUpdatedFilters} />
           {
