@@ -1,5 +1,6 @@
-import axios from "axios";
 import { getCastRepository, getCrewRepository } from ".";
+import { CREW_JOB_MAP } from "../../common/constants";
+import { PeopleStatsType, PersonStats } from "../../common/types/api";
 import { backoff } from "../../lib/backoff";
 import { tmdb, TmdbPerson } from "../../lib/tmdb";
 import { Person } from "../entities";
@@ -62,5 +63,91 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
         return this.save(created);
       })
     );
+  },
+  async getHighestRated({ type, userId }: { type: PeopleStatsType; userId: number }) {
+    if (type === "actors") {
+      const query = this.createQueryBuilder('person')
+        .innerJoin("person.castRoles", "castRole")
+        .innerJoin("castRole.movie", "movie")
+        .innerJoin((sub) => {
+          return sub.select(["stars", `"rating"."movieId"`])
+            .from("ratings", "rating")
+            .distinctOn(["rating.movieId"])
+            .where("rating.userId = :userId", { userId })
+            .orderBy("rating.movieId", "ASC")
+            .addOrderBy("rating.date", "DESC");
+        }, "rating", `"rating"."movieId" = movie.id`)
+        .addSelect('AVG(rating.stars) as average_rating')
+        .addSelect('COUNT(movie.id) as count_rated')
+        .where('castRole.castOrder <= :maxCastOrder', { maxCastOrder: 10 }) // TODO: Make this configurable
+        .groupBy("person.id")
+        .having("COUNT(movie.id) >= :minSeen", { minSeen: 3 })
+        .orderBy("AVG(rating.stars)", "DESC")
+        .limit(150); // TODO: Configurable?
+            
+      return mapPersonStats(await query.getRawMany<RawPersonStatResult>());
+
+    } else if (Object.keys(CREW_JOB_MAP).includes(type)) {
+      const jobs = CREW_JOB_MAP[type].map(j => `'${j}'`).join(',');
+      const query = this.createQueryBuilder('person')
+        .innerJoin("person.crewRoles", "crewRole")
+        .innerJoin("crewRole.movie", "movie")
+        .innerJoin((sub) => {
+          return sub.select(["stars", `"rating"."movieId"`])
+            .from("ratings", "rating")
+            .distinctOn(["rating.movieId"])
+            .where("rating.userId = :userId", { userId })
+            .orderBy("rating.movieId", "ASC")
+            .addOrderBy("rating.date", "DESC");
+        }, "rating", `"rating"."movieId" = movie.id`)
+        .addSelect('AVG(rating.stars) as average_rating')
+        .addSelect('COUNT(movie.id) as count_rated')
+        .where(`crewRole.job IN (${jobs})`)
+        .groupBy("person.id")
+        .having("COUNT(movie.id) >= :minSeen", { minSeen: 3 })
+        .orderBy("AVG(rating.stars)", "DESC")
+        .limit(150); // TODO: Configurable?
+      
+      return mapPersonStats(await query.getRawMany<RawPersonStatResult>());
+    }
   }
 });
+
+interface RawPersonResult {
+  person_biography: Person['biography'];
+  person_birthday: Person['birthday'];
+  person_deathday: Person['deathday'];
+  person_gender: Person['gender'];
+  person_id: Person['id'];
+  person_imdbId: Person['imdbId'];
+  person_knownForDepartment: Person['knownForDepartment'];
+  person_name: Person['name'];
+  person_placeOfBirth: Person['placeOfBirth'];
+  person_popularity: Person['popularity'];
+  person_profilePath: Person['profilePath'];
+}
+
+interface RawPersonStatResult extends RawPersonResult {
+  average_rating: number;
+  count_rated: number;
+}
+
+function mapPersonStats(stats: RawPersonStatResult[]): PersonStats[] {
+  return stats.map((raw) => ({
+    biography: raw.person_biography,
+    birthday: raw.person_birthday,
+    deathday: raw.person_deathday,
+    gender: raw.person_gender,
+    id: raw.person_id,
+    imdbId: raw.person_imdbId,
+    knownForDepartment: raw.person_knownForDepartment,
+    name: raw.person_name,
+    placeOfBirth: raw.person_placeOfBirth,
+    popularity: raw.person_popularity,
+    profilePath: raw.person_profilePath,
+    averageRating: raw.average_rating,
+    countRated: Number(raw.count_rated),
+    castRoles: [],
+    crewRoles: []
+  }));
+}

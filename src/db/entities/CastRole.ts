@@ -25,7 +25,7 @@ export class CastRole {
   @Column()
   castOrder: number;
 
-  @Column()
+  @Column({ unique: true })
   creditId: string;
 
   @ManyToOne(() => Person, {

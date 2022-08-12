@@ -22,7 +22,7 @@ export class CrewRole extends BaseEntity {
   @Column({ nullable: true })
   department: string;
 
-  @Column()
+  @Column({ unique: true })
   creditId: string;
 
   @ManyToOne(() => Person, {

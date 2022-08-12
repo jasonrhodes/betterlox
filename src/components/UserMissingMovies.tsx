@@ -19,30 +19,6 @@ interface MissingMovieExtras {
 
 export type MissingMovie = Pick<Movie, 'id' | 'title' | 'imdbId' | 'posterPath' | 'popularity' | 'releaseDate'> & MissingMovieExtras;
 
-// export function UserMissingMovies({ ratings, filters }: GetMissingOptions) {
-//   const [activeCount, setActiveCount] = useState<number>(0);
-//   const [missing, setMissing] = useState<MissingMovie[]>([]);
-
-//   useEffect(() => {
-//     async function retrieve() {
-//       const missing = await getMissingMoviesForFilters({ ratings, filters });
-//       setMissing(missing);
-//     }
-//     const filterKeys = Object.keys(filters) as Array<keyof RatingsFilters>;
-//     const activeFilterCount = filterKeys.reduce((count, key) => {
-//       return count + (filters[key]?.length || 0);
-//     }, 0);
-//     setActiveCount(activeFilterCount);
-//     retrieve();
-//   }, [ratings, filters]);
-
-//   if (activeCount === 0) {
-//     return null;
-//   }
-
-//   return <MissingMovieList movies={missing} />;
-// }
-
 export function MissingMovieList({ movies }: { movies: MissingMovie[] }) {
   return (
     <Box>
@@ -64,7 +40,7 @@ function MissingMovieListItem({ movie }: { movie: MissingMovie }) {
           height={50}
           sx={{ marginRight: 1 }}
         />
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', marginBottom: 4 }}>
           <Box sx={{ marginBottom: 0.3 }}>
             <Typography variant="body1"><b>{movie.title}</b> ({movie.releaseDate.substring(0, 4)})</Typography>
           </Box>

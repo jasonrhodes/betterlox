@@ -1,5 +1,6 @@
 import { Rating, Person, Movie, Sync, CastRole, CrewRole, Collection } from "../../db/entities";
 import { TmdbCollection, TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "../../lib/tmdb";
+import { CREW_JOB_MAP } from "../constants";
 import { RatedMovie, RatedTmdbCast } from "./db";
 
 export type OrderDirection = "ASC" | "DESC";
@@ -153,3 +154,16 @@ export interface TmdbPersonByIdResponse extends ApiSuccessResponse {
 export interface TmdbCollectionByIdResponse extends ApiSuccessResponse {
   collection: TmdbEnhancedCollection 
 }
+
+export interface PersonStats extends Person {
+  averageRating: number;
+  countRated: number;
+}
+
+export interface UserStatsResponse extends ApiSuccessResponse {
+  stats: PersonStats[] | Collection[];
+}
+
+export type OtherStatsType = "collections";
+export type PeopleStatsType = "actors" | keyof typeof CREW_JOB_MAP;
+export type AllStatsType = OtherStatsType | PeopleStatsType;

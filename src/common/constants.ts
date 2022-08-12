@@ -27,3 +27,10 @@ export const JOB_ALLOW_LIST: string[] = [
 ];
 
 export const LOG_LEVELS = ["error", "warning", "info", "debug", "verbose"];
+
+export const CREW_JOB_MAP = {
+  "directors": ["Director"],
+  "editors": ["Editor"],
+  "cinematographers": ["Director of Photography", "Cinematography"],
+  "writers": ["Writer", "Screenplay", "Novel", "Story"]
+};

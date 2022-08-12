@@ -65,6 +65,7 @@ export function createApiRoute<T>({
       // global error handler for all API routes
       const message = error instanceof Error ? error.message : typeof error === "string" ? error : "Unknown error occurred";
       console.error(`[Global Error Handler] [${req.url}] ${message}`);
+      res.status(500).json({ success: false, code: 500, message });
     }
   }
 }
