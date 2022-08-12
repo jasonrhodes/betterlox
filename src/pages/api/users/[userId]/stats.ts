@@ -1,4 +1,4 @@
-import { ApiErrorResponse, UserStatsResponse } from "../../../../common/types/api";
+import { ApiErrorResponse, StatMode, UserStatsResponse } from "../../../../common/types/api";
 import { getCollectionsRepository, getPeopleRepository } from "../../../../db/repositories";
 import { numericQueryParam, singleQueryParam } from "../../../../lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
@@ -9,6 +9,7 @@ const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
       let stats: UserStatsResponse['stats'] = [];
       const userId = numericQueryParam(req.query.userId);
       const type = singleQueryParam(req.query.type);
+      const mode = singleQueryParam<StatMode>(req.query.mode) || 'favorite';
 
       if (typeof userId !== "number") {
         return res.status(400).json({ success: false, code: 400, message: 'userId is required also how could this happen?!?' });
@@ -24,14 +25,14 @@ const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
         case 'cinematographers': 
         case 'editors': {
           const PeopleRepo = await getPeopleRepository();
-          const stats = await PeopleRepo.getHighestRated({ type, userId });
+          const stats = await PeopleRepo.getStats({ type, userId, orderBy: mode });
           res.json({ success: true, stats: stats || [] });
           break;
         }
 
         // case 'collections': {
         //   const CollectionsRepo = await getCollectionsRepository();
-        //   const stats = [];//await CollectionsRepo.getHighestRated({ userId });
+        //   const stats = [];//await CollectionsRepo.getStats({ userId, orderBy: mode });
         //   res.json({ success: true, stats });
         //   break;
         // }

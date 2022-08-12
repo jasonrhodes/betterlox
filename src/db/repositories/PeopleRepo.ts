@@ -1,6 +1,7 @@
+import { SelectQueryBuilder } from "typeorm";
 import { getCastRepository, getCrewRepository } from ".";
 import { CREW_JOB_MAP } from "../../common/constants";
-import { PeopleStatsType, PersonStats } from "../../common/types/api";
+import { PeopleStatsType, PersonStats, StatMode } from "../../common/types/api";
 import { backoff } from "../../lib/backoff";
 import { tmdb, TmdbPerson } from "../../lib/tmdb";
 import { Person } from "../entities";
@@ -20,6 +21,18 @@ function isValidDate(value: string | null | undefined) {
 
 function safeDate(dateValue: string | undefined | null) {
   return isValidDate(dateValue) ? dateValue as string : undefined;
+}
+
+function applyOrderBy(orderBy: StatMode, query: SelectQueryBuilder<Person>) {
+  if (orderBy === "favorite") {
+    return query.orderBy("AVG(rating.stars)", "DESC");
+  } else if (orderBy === "most") {
+    return query
+      .orderBy('COUNT(movie.id)', "DESC")
+      .addOrderBy("AVG(rating.stars)", "DESC");
+  } else {
+    return query;
+  }
 }
 
 export const getPeopleRepository = async () => (await getDataSource()).getRepository(Person).extend({
@@ -64,7 +77,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
       })
     );
   },
-  async getHighestRated({ type, userId }: { type: PeopleStatsType; userId: number }) {
+  async getStats({ type, userId, orderBy }: { type: PeopleStatsType; userId: number; orderBy: StatMode }) {
     if (type === "actors") {
       const query = this.createQueryBuilder('person')
         .innerJoin("person.castRoles", "castRole")
@@ -82,10 +95,12 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
         .where('castRole.castOrder <= :maxCastOrder', { maxCastOrder: 10 }) // TODO: Make this configurable
         .groupBy("person.id")
         .having("COUNT(movie.id) >= :minSeen", { minSeen: 3 })
-        .orderBy("AVG(rating.stars)", "DESC")
         .limit(150); // TODO: Configurable?
-            
-      return mapPersonStats(await query.getRawMany<RawPersonStatResult>());
+      
+      const orderedQuery = applyOrderBy(orderBy, query);
+      // console.log(orderedQuery.getSql()); // REMOVE
+ 
+      return mapPersonStats(await orderedQuery.getRawMany<RawPersonStatResult>());
 
     } else if (Object.keys(CREW_JOB_MAP).includes(type)) {
       const jobs = CREW_JOB_MAP[type].map(j => `'${j}'`).join(',');
@@ -105,10 +120,12 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
         .where(`crewRole.job IN (${jobs})`)
         .groupBy("person.id")
         .having("COUNT(movie.id) >= :minSeen", { minSeen: 3 })
-        .orderBy("AVG(rating.stars)", "DESC")
         .limit(150); // TODO: Configurable?
       
-      return mapPersonStats(await query.getRawMany<RawPersonStatResult>());
+      const orderedQuery = applyOrderBy(orderBy, query);
+      // console.log(orderedQuery.getSql()); // REMOVE
+      
+      return mapPersonStats(await orderedQuery.getRawMany<RawPersonStatResult>());
     }
   }
 });

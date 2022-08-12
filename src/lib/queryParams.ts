@@ -1,5 +1,6 @@
-export function singleQueryParam(x: string[] | string | undefined) {
-  return Array.isArray(x) ? x[0] : x;
+export function singleQueryParam<T extends string>(x: string[] | string | undefined) {
+  const single = Array.isArray(x) ? x[0] : x;
+  return single as T | undefined;
 }
 
 export function numericQueryParam(x: string[] | string | undefined, fallback?: number) {

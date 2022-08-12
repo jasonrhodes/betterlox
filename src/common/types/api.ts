@@ -167,3 +167,4 @@ export interface UserStatsResponse extends ApiSuccessResponse {
 export type OtherStatsType = "collections";
 export type PeopleStatsType = "actors" | keyof typeof CREW_JOB_MAP;
 export type AllStatsType = OtherStatsType | PeopleStatsType;
+export type StatMode = 'favorite' | 'most';

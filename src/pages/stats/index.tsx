@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { PageTemplate, UserPageTemplate } from '../../components/PageTemplate';
-import { Badge, Box, Button, Card, CardContent, CardHeader, CardMedia, Dialog, Grid, SxProps, Tab, Tabs, Typography } from '@mui/material';
+import { Badge, Box, Button, Card, CardContent, CardHeader, CardMedia, Dialog, Drawer, Grid, SxProps, Tab, Tabs, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { a11yTabProps, TabPanel } from '../../components/TabPanel';
 import Link from 'next/link';
 import { Collection, Person, Rating } from '../../db/entities';
 import { callApi } from '../../hooks/useApi';
-import { AllStatsType, PeopleStatsType, PersonStats, UserStatsResponse } from '../../common/types/api';
+import { AllStatsType, PeopleStatsType, PersonStats, StatMode, UserStatsResponse } from '../../common/types/api';
 import Image from 'next/image';
 import { TMDBImage, useTmdbImageBaseUrl } from '../../components/images';
 import { Close, Settings, Star, Visibility } from '@mui/icons-material';
@@ -14,8 +14,29 @@ import { RatingsTable } from '../../components/RatingsTable';
 import { convertFiltersToQueryString } from '../../components/ratings/helpers';
 import { capitalize } from '../../lib/capitalize';
 
+
+function StatModeToggle({ mode, toggleMode }: { mode: StatMode; toggleMode: () => void; }) {
+  return (
+    <ToggleButtonGroup
+      color="secondary"
+      value={mode}
+      exclusive
+      onChange={toggleMode}
+      size="small"
+    >
+      <ToggleButton value="favorite">Highest Rated</ToggleButton>
+      <ToggleButton value="most">Most Watched</ToggleButton>
+    </ToggleButtonGroup>
+  )
+}
+
 const StatsPage: NextPage = () => {
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState<number>(0);
+  const [mode, setMode] = useState<StatMode>('favorite');
+
+  function toggleStatMode() {
+    setMode(mode === 'favorite' ? 'most' : 'favorite');
+  }
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -35,7 +56,10 @@ const StatsPage: NextPage = () => {
   };
 
   return (
-    <UserPageTemplate title="My Stats">
+    <UserPageTemplate 
+      title="My Stats" 
+      titleLineRightContent={<StatModeToggle mode={mode} toggleMode={toggleStatMode} />}
+    >
       {({ user }) => (
         <Box
           sx={{ flexGrow: 1, bgcolor: 'transparent', display: {
@@ -64,25 +88,25 @@ const StatsPage: NextPage = () => {
             <Tab sx={tabSx} label="Directors" {...a11yTabProps(1)} />
             <Tab sx={tabSx} label="Cinematographers" {...a11yTabProps(2)} />
             <Tab sx={tabSx} label="Editors" {...a11yTabProps(3)} />
-            <Tab sx={tabSx} label="Collections" {...a11yTabProps(4)} />
+            {/* <Tab sx={tabSx} label="Collections" {...a11yTabProps(4)} /> */}
           </Tabs>
           <Box sx={{ display: { xs: 'flex', md: 'none' }, flexShrink: 0 }}>
             <MobileSwitcher value={value} setValue={setValue} sx={{ display: { xs: 'block', md: 'none' }}} />
           </Box>
           <TabPanel sx={tabPanelSx} value={value} index={0}>
-            <StatsTab userId={user.id} type="actors" />
+            <StatsTab userId={user.id} type="actors" mode={mode} />
           </TabPanel>
           <TabPanel sx={tabPanelSx} value={value} index={1}>
-            <StatsTab userId={user.id} type="directors" />
+            <StatsTab userId={user.id} type="directors" mode={mode} />
           </TabPanel>
           <TabPanel sx={tabPanelSx} value={value} index={2}>
-            <StatsTab userId={user.id} type="cinematographers" />
+            <StatsTab userId={user.id} type="cinematographers" mode={mode} />
           </TabPanel>
           <TabPanel sx={tabPanelSx} value={value} index={3}>
-            <StatsTab userId={user.id} type="editors" />
+            <StatsTab userId={user.id} type="editors" mode={mode} />
           </TabPanel>
           <TabPanel sx={tabPanelSx} value={value} index={4}>
-            <StatsTab userId={user.id} type="collections" />
+            <StatsTab userId={user.id} type="collections" mode={mode} />
           </TabPanel>
         </Box>
       )}
@@ -98,22 +122,22 @@ function isCollections(list: PersonStats[] | Collection[]): list is Collection[]
   return list && list[0] && 'posterPath' in list[0];
 }
 
-function StatsTab({ type, userId }: { type: AllStatsType; userId: number; }) {
+function StatsTab({ type, userId, mode }: { type: AllStatsType; userId: number; mode: StatMode; }) {
   const [results, setResults] = useState<(PersonStats[] | Collection[])>([]);
   useEffect(() => {
     async function retrieve() {
-      const { data } = await callApi<UserStatsResponse>(`/api/users/${userId}/stats?type=${type}`);
+      const { data } = await callApi<UserStatsResponse>(`/api/users/${userId}/stats?type=${type}&mode=${mode}`);
       setResults(data.stats);
     }
     retrieve();
   }, [type, userId]);
   
   if (isPeople(results)) {
-    return <PeopleStatsPanel userId={userId} people={results} type={type as PeopleStatsType} />
+    return <PeopleStatsPanel userId={userId} people={results} type={type as PeopleStatsType} mode={mode} />
   }
 
   if (isCollections(results)) {
-    return <CollectionsStatsPanel collections={results} />
+    return <CollectionsStatsPanel collections={results} mode={mode} />
   }
 
   return null;
@@ -143,21 +167,27 @@ function PersonImage({ path }: { path: string }) {
   );
 }
 
-function PeopleStatsPanel({ people, type, userId }: { people: PersonStats[]; type: PeopleStatsType; userId: number; }) {
-  
+function getTitleByMode(mode: StatMode, value: string) {
+  const prefix = mode === "most" ? "Most Watched" : "Highest Rated";
+  return `${prefix} ${value}`;
+}
+
+function PeopleStatsPanel({ people, type, userId, mode }: { people: PersonStats[]; type: PeopleStatsType; userId: number; mode: StatMode; }) {
   const [details, setDetails] = useState<PersonStats | null>(null);
-  const top20 = people.slice(0, 20);
-  const next30 = people.slice(20, 50);
+  const PRESENTATION_SPLIT = 24;
+  const PRESENTATION_MAX = 50;
+  const topStats = people.slice(0, PRESENTATION_SPLIT);
+  const bottomStats = people.slice(PRESENTATION_SPLIT, PRESENTATION_MAX);
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Typography variant="h5" sx={{ marginBottom: 4 }}>
-          My Favorite {capitalize(type)}
+          {getTitleByMode(mode, capitalize(type))}
         </Typography>
         <PeopleStatSettings />
       </Box>
       <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-        {top20.map((person, i) => (
+        {topStats.map((person, i) => (
           <Box 
             key={person.id} 
             sx={{ 
@@ -192,12 +222,17 @@ function PeopleStatsPanel({ people, type, userId }: { people: PersonStats[]; typ
         ))}
       </Box>
       <Box>
-        {next30.map((person, i) => (
-          <Box key={person.id} sx={{ 
-            marginBottom: 1, 
-            paddingLeft: 4, 
-            position: "relative"
-          }}>
+        {bottomStats.map((person, i) => (
+          <Box 
+            key={person.id} 
+            sx={{ 
+              marginBottom: 1, 
+              paddingLeft: 4, 
+              position: "relative",
+              cursor: "pointer"
+            }}
+            onClick={() => setDetails(person)}
+          >
             <Typography component="span">{person.name}</Typography>
             {' '}
             <Typography component="span" sx={{ opacity: 0.4 }}>({round(person.averageRating)} | {person.countRated})</Typography>
@@ -211,7 +246,7 @@ function PeopleStatsPanel({ people, type, userId }: { people: PersonStats[]; typ
               padding: "2px 4px",
               fontSize: "12px"
             }}>
-              {i + 21}
+              {i + (PRESENTATION_SPLIT + 1)}
             </Box>
           </Box>
         ))}
@@ -248,25 +283,32 @@ function PersonDetails({ userId, type, details, setDetails }: { userId: number, 
     return null;
   } 
   return (
-    <Dialog
-      fullScreen
+    // <Dialog
+    //   fullScreen
+    //   open={!(details === null)}
+    //   PaperProps={{ sx: { backgroundColor: 'background.default', backgroundImage: 'none', px: 5, py: 3 }}}
+    // >
+    <Drawer
+      anchor="right"
       open={!(details === null)}
-      PaperProps={{ sx: { backgroundColor: 'background.default', backgroundImage: 'none', px: 5, py: 3 }}}
+      onClose={() => setDetails(null)}
+      PaperProps={{ sx: { width: 540, maxWidth: "100%", backgroundColor: 'background.default', backgroundImage: 'none', px: 5, py: 3 }}}
     >
-      <Typography sx={{ marginBottom: 3 }}>Details: {details.name} ({capitalize(type)})</Typography>
+      <Typography sx={{ my: 2 }}>{capitalize(type)}{' > '}<b>{details.name}</b></Typography>
       <Close sx={{ cursor: "pointer", position: "absolute", top: 20, right: 20 }} onClick={() => setDetails(null) } />
       <RatingsTable
         ratings={ratings}
       />
-    </Dialog>
+    </Drawer>
+    // </Dialog>
   )
 }
 
-function CollectionsStatsPanel({ collections }: { collections: Collection[]; }) {
+function CollectionsStatsPanel({ collections, mode }: { collections: Collection[]; mode: StatMode; }) {
   const tmdbBasePath = useTmdbImageBaseUrl({ size: "large" });
   return (
     <Box>
-      <Typography variant="h5">My Favorite Collections</Typography>
+      <Typography variant="h5">{getTitleByMode(mode, "Collections")}</Typography>
       <Grid container>
         {collections.map((collection) => (
           <Grid item key={collection.id}>

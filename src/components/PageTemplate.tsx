@@ -20,6 +20,7 @@ export interface PublicPageTemplateProps {
   avatarUrl?: string;
   maxWidth?: false | Breakpoint;
   children: React.ReactNode;
+  titleLineRightContent?: JSX.Element;
 }
 export interface UserPageTemplateProps extends PublicPageTemplateProps {
   children: ChildrenFunction;
@@ -79,7 +80,7 @@ export const UserPageTemplate: React.FC<UserPageTemplateProps> = ({ children: Ch
   );
 }
 
-export function PageTemplate({ title, headTitle = title, maxWidth = 'lg', backLink, children }: PublicPageTemplateProps) {
+export function PageTemplate({ title, headTitle = title, maxWidth = 'lg', backLink, children, titleLineRightContent }: PublicPageTemplateProps) {
   return (
     <>
       <Head>
@@ -96,15 +97,24 @@ export function PageTemplate({ title, headTitle = title, maxWidth = 'lg', backLi
             flexDirection: 'column'
           }}
         >
-          <Box>
+          <Box sx={{ display: 'flex' }}>
             {backLink && backLink.url ? <BackLink {...backLink} /> : null}
             <Box>
               <Typography component='h1' variant='h1' gutterBottom={true}>{title}</Typography>
             </Box>
+            {titleLineRightContent ? <RightContent content={titleLineRightContent} /> : null}
           </Box>
           {children}
         </Box>
       </Container>
     </>
   );
+}
+
+function RightContent({ content }: { content: JSX.Element }) {
+  return (
+    <Box sx={{ marginLeft: "auto" }}>
+      {content}
+    </Box>
+  )
 }
