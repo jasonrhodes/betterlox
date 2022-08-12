@@ -12,6 +12,7 @@ import { TMDBImage, useTmdbImageBaseUrl } from '../../components/images';
 import { Close, Settings, Star, Visibility } from '@mui/icons-material';
 import { RatingsTable } from '../../components/RatingsTable';
 import { convertFiltersToQueryString } from '../../components/ratings/helpers';
+import { capitalize } from '../../lib/capitalize';
 
 const StatsPage: NextPage = () => {
   const [value, setValue] = React.useState(0);
@@ -87,10 +88,6 @@ const StatsPage: NextPage = () => {
       )}
     </UserPageTemplate>
   );
-}
-
-function capitalize(x: string) {
-  return `${x[0].toUpperCase()}${x.slice(1)}`;
 }
 
 function isPeople(list: PersonStats[] | Collection[]): list is PersonStats[] {
@@ -256,7 +253,7 @@ function PersonDetails({ userId, type, details, setDetails }: { userId: number, 
       open={!(details === null)}
       PaperProps={{ sx: { backgroundColor: 'background.default', backgroundImage: 'none', px: 5, py: 3 }}}
     >
-      <Typography>Details: {details.name}</Typography>
+      <Typography sx={{ marginBottom: 3 }}>Details: {details.name} ({capitalize(type)})</Typography>
       <Close sx={{ cursor: "pointer", position: "absolute", top: 20, right: 20 }} onClick={() => setDetails(null) } />
       <RatingsTable
         ratings={ratings}
