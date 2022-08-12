@@ -59,7 +59,7 @@ export const UserPageTemplate: React.FC<UserPageTemplateProps> = ({ children: Ch
     } else {
       setReady(true);
     }
-  }, [userContext, router]);
+  }, [userContext, router, isAdmin]);
 
   if (!ready || !userContext.user) {
     return (

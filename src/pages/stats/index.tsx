@@ -109,7 +109,7 @@ function StatsTab({ type, userId }: { type: AllStatsType; userId: number; }) {
       setResults(data.stats);
     }
     retrieve();
-  }, [type]);
+  }, [type, userId]);
   
   if (isPeople(results)) {
     return <PeopleStatsPanel userId={userId} people={results} type={type as PeopleStatsType} />
@@ -134,7 +134,7 @@ function PersonImage({ path }: { path: string }) {
   useEffect(() => {
     const localPath = `${tmdbBasePath}${path}`;
     setLocalPath(localPath);
-  }, [path]);
+  }, [path, tmdbBasePath]);
 
   return (
     <CardMedia
@@ -154,7 +154,7 @@ function PeopleStatsPanel({ people, type, userId }: { people: PersonStats[]; typ
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography variant="h5" sx={{ marginBottom: 2 }}>
+        <Typography variant="h5" sx={{ marginBottom: 4 }}>
           My Favorite {capitalize(type)}
         </Typography>
         <PeopleStatSettings />
@@ -167,7 +167,7 @@ function PeopleStatsPanel({ people, type, userId }: { people: PersonStats[]; typ
               width: 250, 
               display: 'flex', 
               marginRight: 2, 
-              marginBottom: 8, 
+              marginBottom: 6, 
               cursor: "pointer"
             }}
             onClick={() => setDetails(person)}
@@ -245,7 +245,7 @@ function PersonDetails({ userId, type, details, setDetails }: { userId: number, 
       setRatings(response.data.ratings);
     }
     retrieve(details.id);
-  }, [details]);
+  }, [details, type, userId]);
 
   if (details === null) {
     return null;
@@ -272,7 +272,7 @@ function CollectionsStatsPanel({ collections }: { collections: Collection[]; }) 
       <Typography variant="h5">My Favorite Collections</Typography>
       <Grid container>
         {collections.map((collection) => (
-          <Grid item>
+          <Grid item key={collection.id}>
             <Card>
               <CardHeader>{collection.name}</CardHeader>
               <CardMedia

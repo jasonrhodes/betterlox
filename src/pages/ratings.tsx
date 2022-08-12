@@ -25,7 +25,7 @@ function PageContent({ userId }: { userId: number }) {
       updateUnprocessedRatings(response.data.ratings);
     }
     retrieve();
-  }, [filters]);
+  }, [filters, userId]);
 
   return (
     <>

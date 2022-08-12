@@ -46,7 +46,7 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
   useEffect(() => {
     const url = urlOverride ? urlOverride : `${baseUrl}${tmdbPath}`;
     setSrc(url);
-  }, [urlOverride, tmdbPath])
+  }, [urlOverride, tmdbPath, baseUrl])
   
   if (src === null) {
     return null;
