@@ -193,14 +193,21 @@ function PeopleStatsPanel({ people, type, userId, mode }: { people: PersonStats[
             sx={{ 
               width: 250, 
               display: 'flex', 
-              marginRight: 2, 
-              marginBottom: 6, 
-              cursor: "pointer"
+              marginRight: 1, 
+              marginBottom: 4, 
+              padding: 2,
+              cursor: "pointer",
+              opacity: 0.9,
+              transition: 'all 0.3s ease-out',
+              '&:hover': {
+                opacity: 1,
+                backgroundColor: 'rgba(0,0,0,0.2)'
+              }
             }}
             onClick={() => setDetails(person)}
           >
             <Badge color="secondary" badgeContent={i + 1} anchorOrigin={{
-              vertical: 'bottom',
+              vertical: 'top',
               horizontal: 'left',
             }}>
               <PersonImage path={person.profilePath} />
@@ -227,9 +234,14 @@ function PeopleStatsPanel({ people, type, userId, mode }: { people: PersonStats[
             key={person.id} 
             sx={{ 
               marginBottom: 1, 
-              paddingLeft: 4, 
+              paddingLeft: 5,
+              py: 1,
               position: "relative",
-              cursor: "pointer"
+              cursor: "pointer",
+              transition: 'all 0.3s ease-out',
+              "&:hover": {
+                backgroundColor: "rgba(0,0,0,0.2)"
+              }
             }}
             onClick={() => setDetails(person)}
           >
@@ -238,8 +250,8 @@ function PeopleStatsPanel({ people, type, userId, mode }: { people: PersonStats[
             <Typography component="span" sx={{ opacity: 0.4 }}>({round(person.averageRating)} | {person.countRated})</Typography>
             <Box sx={{ 
               position: 'absolute', 
-              top: 1, 
-              left: 0,
+              top: 8, 
+              left: 8,
               backgroundColor: "secondary.main",
               color: "#000",
               borderRadius: "20px",
