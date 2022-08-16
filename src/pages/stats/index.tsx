@@ -129,10 +129,6 @@ function StatsTab({ type, mode }: { type: AllStatsType; mode: StatMode; }) {
   const [results, setResults] = useState<(PersonStats[] | Collection[])>([]);
   const { user } = useCurrentUser();
 
-  if (!user) {
-    return null;
-  }
-
   useEffect(() => {
     async function retrieve() {
       if (!user) {
@@ -276,7 +272,7 @@ function PeopleStatsPanel({ people, type, userId, mode }: { people: PersonStats[
           </Box>
         ))}
       </Box>
-      <PersonDetails userId={userId} type={type} details={details} setDetails={setDetails} />
+      <PersonDetails type={type} details={details} setDetails={setDetails} />
     </Box>
   )
 }
@@ -346,7 +342,7 @@ function PeopleStatSettings() {
   )
 }
 
-function PersonDetails({ userId, type, details, setDetails }: { userId: number, type: PeopleStatsType; details: null | PersonStats; setDetails: (d: null | PersonStats) => void }) {
+function PersonDetails({ type, details, setDetails }: { type: PeopleStatsType; details: null | PersonStats; setDetails: (d: null | PersonStats) => void }) {
   const { user } = useCurrentUser();
   const [ratings, setRatings] = useState<Rating[]>([]);
   useEffect(() => {
@@ -354,26 +350,24 @@ function PersonDetails({ userId, type, details, setDetails }: { userId: number, 
       return;
     }
     async function retrieve(id: number) {
+      if (!user) {
+        return;
+      }
       let qs = convertFiltersToQueryString({ [type]: [id] });
       if (type === "actors") {
-        qs += `&minCastOrder=${user?.settings.statsMinCastOrder}`;
+        qs += `&minCastOrder=${user.settings.statsMinCastOrder}`;
       }
-      const url = `/api/users/${userId}/ratings?${qs}`;
+      const url = `/api/users/${user.id}/ratings?${qs}`;
       const response = await callApi<{ ratings: Rating[] }>(url);
       setRatings(response.data.ratings);
     }
     retrieve(details.id);
-  }, [details, type, userId]);
+  }, [details, type, user]);
 
   if (details === null) {
     return null;
   } 
   return (
-    // <Dialog
-    //   fullScreen
-    //   open={!(details === null)}
-    //   PaperProps={{ sx: { backgroundColor: 'background.default', backgroundImage: 'none', px: 5, py: 3 }}}
-    // >
     <Drawer
       anchor="right"
       open={!(details === null)}
@@ -386,7 +380,6 @@ function PersonDetails({ userId, type, details, setDetails }: { userId: number, 
         ratings={ratings}
       />
     </Drawer>
-    // </Dialog>
   )
 }
 

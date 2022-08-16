@@ -11,7 +11,7 @@ export interface BaseSettingsFieldOptions {
 }
 
 export function UserSettingStatsMinWatched({ 
-  helperText = <>In stats, only include items (e.g. an actor, a collection, etc) where you've seen at least this number of movies for that item <b>(Note: this is not applied for 'Most Watched' stats)</b></>
+  helperText = <>In stats, only include items (e.g. an actor, a collection, etc) where you&apos;ve seen at least this number of movies for that item <b>(Note: this is not applied for &lsquo;Most Watched&rsquo; stats)</b></>
 }: { helperText?: BaseSettingsFieldOptions['helperText'] }) {
   return (
     <BaseSettingsField
