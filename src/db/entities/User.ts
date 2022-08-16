@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique, Relation, BeforeUpdate } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique, Relation, OneToOne, JoinColumn } from "typeorm";
 import { getSalt, hash, getRememberMeToken } from "../../lib/hashPassword";
 import { Rating } from "./Rating";
+import { UserSettings } from "./UserSettings";
 
 @Entity('users')
 @Unique(['email', 'username'])
@@ -34,6 +35,9 @@ export class User {
 
   @Column({ nullable: true })
   letterboxdAccountLevel: 'basic' | 'pro' | 'patron';
+
+  @OneToOne(() => UserSettings, (settings) => settings.user, { cascade: true, nullable: true })
+  settings: Relation<UserSettings>;
 
   @ManyToOne(() => Rating, rating => rating.user)
   ratings: Relation<Rating[]>;

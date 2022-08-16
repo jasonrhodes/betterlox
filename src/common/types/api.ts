@@ -1,4 +1,4 @@
-import { Rating, Person, Movie, Sync, CastRole, CrewRole, Collection } from "../../db/entities";
+import { Rating, Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings } from "../../db/entities";
 import { TmdbCollection, TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "../../lib/tmdb";
 import { CREW_JOB_MAP } from "../constants";
 import { RatedMovie, RatedTmdbCast } from "./db";
@@ -168,3 +168,7 @@ export type OtherStatsType = "collections";
 export type PeopleStatsType = "actors" | keyof typeof CREW_JOB_MAP;
 export type AllStatsType = OtherStatsType | PeopleStatsType;
 export type StatMode = 'favorite' | 'most';
+
+export interface UpdateUserSettingsResponse extends ApiSuccessResponse {
+  settings: UserSettings | undefined;
+}

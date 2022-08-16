@@ -4,7 +4,7 @@ import { CREW_JOB_MAP } from "../../common/constants";
 import { PeopleStatsType, PersonStats, StatMode } from "../../common/types/api";
 import { backoff } from "../../lib/backoff";
 import { tmdb, TmdbPerson } from "../../lib/tmdb";
-import { Person } from "../entities";
+import { Person, UserSettings } from "../entities";
 import { getDataSource } from "../orm";
 
 function forceUndefined(value: string | undefined | null) {
@@ -77,7 +77,23 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
       })
     );
   },
-  async getStats({ type, userId, orderBy }: { type: PeopleStatsType; userId: number; orderBy: StatMode }) {
+  async getStats({ 
+    type, 
+    userId, 
+    orderBy,
+    minCastOrder,
+    minWatched
+  }: { 
+    type: PeopleStatsType; 
+    userId: number; 
+    orderBy: StatMode;
+    minCastOrder: UserSettings['statsMinCastOrder'];
+    minWatched: UserSettings['statsMinWatched'];
+  }) {
+    if (orderBy === "most") {
+      minWatched = 0;
+    }
+    
     if (type === "actors") {
       const query = this.createQueryBuilder('person')
         .innerJoin("person.castRoles", "castRole")
@@ -92,9 +108,9 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
         }, "rating", `"rating"."movieId" = movie.id`)
         .addSelect('AVG(rating.stars) as average_rating')
         .addSelect('COUNT(movie.id) as count_rated')
-        .where('castRole.castOrder <= :maxCastOrder', { maxCastOrder: 10 }) // TODO: Make this configurable
+        .where('castRole.castOrder <= :maxCastOrder', { maxCastOrder: minCastOrder })
         .groupBy("person.id")
-        .having("COUNT(movie.id) >= :minSeen", { minSeen: 3 })
+        .having("COUNT(movie.id) >= :minWatched", { minWatched })
         .limit(150); // TODO: Configurable?
       
       const orderedQuery = applyOrderBy(orderBy, query);
@@ -119,7 +135,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
         .addSelect('COUNT(movie.id) as count_rated')
         .where(`crewRole.job IN (${jobs})`)
         .groupBy("person.id")
-        .having("COUNT(movie.id) >= :minSeen", { minSeen: 3 })
+        .having("COUNT(movie.id) >= :minWatched", { minWatched })
         .limit(150); // TODO: Configurable?
       
       const orderedQuery = applyOrderBy(orderBy, query);

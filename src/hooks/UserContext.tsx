@@ -3,6 +3,9 @@ import { UserPublic } from '../common/types/db';
 import api from '../lib/callApi';
 import { useCookies } from 'react-cookie';
 import { useRouter } from 'next/router';
+import { UserSettings } from '../db/entities';
+import { callApi } from './useApi';
+import { UpdateUserSettingsResponse } from '../common/types/api';
 
 const ADMIN_USER_IDS = [1];
 
@@ -26,6 +29,7 @@ export interface UserContextValue {
   validating: boolean;
   login: (options: LoginOptions) => void;
   logout: () => void;
+  updateSettings: (settings: Partial<UserSettings>) => void;
 }
 
 export interface ValidUserContextValue extends UserContextValue {
@@ -35,7 +39,8 @@ export interface ValidUserContextValue extends UserContextValue {
 const UserContext = React.createContext<UserContextValue>({
   validating: true,
   login: () => null,
-  logout: () => null
+  logout: () => null,
+  updateSettings: () => null
 });
 const UserContextConsumer = UserContext.Consumer;
 
@@ -88,6 +93,23 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     }
   }
 
+  async function updateSettings(settings: Partial<UserSettings>) {
+    if (!user) {
+      return;
+    }
+    const { data } = await callApi<UpdateUserSettingsResponse, { settings: Partial<UserSettings> }>(`/api/users/${user.id}/settings`, {
+      method: 'PATCH',
+      data: {
+        settings
+      }
+    });
+
+    // TODO: handle if success === false?
+
+    const updated = { ...user, settings: { ...user.settings, ...data.settings }};
+    setUser(updated);
+  }
+
   function logout() {
     setUser(undefined);
     removeCookie('rememberMe');
@@ -96,6 +118,7 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
   const value: UserContextValue = {
     login,
     logout,
+    updateSettings,
     errorStatus,
     validating,
     user

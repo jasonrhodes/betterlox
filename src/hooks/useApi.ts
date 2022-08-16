@@ -6,7 +6,7 @@ export interface ExternalApiResponse<T = any, K = any> extends AxiosResponse<T, 
   success: boolean;
 }
 
-export async function callApi<T>(endpoint: string, options: AxiosRequestConfig<T> = {}): Promise<ExternalApiResponse<T>> {
+export async function callApi<T, D = any>(endpoint: string, options: AxiosRequestConfig<D> = {}): Promise<ExternalApiResponse<T>> {
   const response: AxiosResponse<T> = await axios(endpoint, options);
   if (response.status !== 200) {
     return {

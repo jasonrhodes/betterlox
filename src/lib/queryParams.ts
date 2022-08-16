@@ -3,8 +3,14 @@ export function singleQueryParam<T extends string>(x: string[] | string | undefi
   return single as T | undefined;
 }
 
+export function numericQueryParam(x: string[] | string | undefined, fallback: number): number;
+export function numericQueryParam(x: string[] | string | undefined): number | undefined;
+
 export function numericQueryParam(x: string[] | string | undefined, fallback?: number) {
   const single = singleQueryParam(x);
+  if (typeof single === "undefined" && typeof fallback !== "undefined") {
+    return fallback;
+  }
   const num = Number(single);
   return isNaN(num) ? fallback : num;
 }

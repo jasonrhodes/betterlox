@@ -8,11 +8,17 @@ const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
     get: async (req, res) => {
       let stats: UserStatsResponse['stats'] = [];
       const userId = numericQueryParam(req.query.userId);
+      const minWatched = numericQueryParam(req.query.minWatched, 1);
+      const minCastOrder = numericQueryParam(req.query.minCastOrder, 25);
       const type = singleQueryParam(req.query.type);
       const mode = singleQueryParam<StatMode>(req.query.mode) || 'favorite';
 
       if (typeof userId !== "number") {
-        return res.status(400).json({ success: false, code: 400, message: 'userId is required also how could this happen?!?' });
+        return res.status(400).json({ 
+          success: false, 
+          code: 400, 
+          message: 'userId is required also how could this happen?!?' 
+        });
       }
 
       if (!type) {
@@ -25,7 +31,7 @@ const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
         case 'cinematographers': 
         case 'editors': {
           const PeopleRepo = await getPeopleRepository();
-          const stats = await PeopleRepo.getStats({ type, userId, orderBy: mode });
+          const stats = await PeopleRepo.getStats({ type, userId, orderBy: mode, minWatched, minCastOrder });
           res.json({ success: true, stats: stats || [] });
           break;
         }

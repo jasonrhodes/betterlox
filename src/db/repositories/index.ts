@@ -9,3 +9,4 @@ export * from "./RatingsRepo";
 export * from "./ResetTokensRepo";
 export * from "./SyncRepo";
 export * from "./UserRepo";
+export * from "./UserSettingsRepo";

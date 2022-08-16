@@ -9,3 +9,4 @@ export * from "./Rating";
 export * from "./ResetToken";
 export * from "./Sync";
 export * from "./User";
+export * from "./UserSettings";

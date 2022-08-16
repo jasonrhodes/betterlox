@@ -97,9 +97,9 @@ export function PageTemplate({ title, headTitle = title, maxWidth = 'lg', backLi
             flexDirection: 'column'
           }}
         >
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
             {backLink && backLink.url ? <BackLink {...backLink} /> : null}
-            <Box>
+            <Box sx={{ flexShrink: { xs: 0, md: 1 }}}>
               <Typography component='h1' variant='h1' gutterBottom={true}>{title}</Typography>
             </Box>
             {titleLineRightContent ? <RightContent content={titleLineRightContent} /> : null}

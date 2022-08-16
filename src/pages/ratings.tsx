@@ -36,7 +36,7 @@ function PageContent({ userId }: { userId: number }) {
         />
       </Box>
       <Box sx={{ height: 600 }}>
-        <Grid container spacing={2} alignItems="flex-start">
+        <Grid container spacing={10} alignItems="flex-start">
           <Grid item xs={12} md={6} lg={5}>
             <RatingsTabs 
               unprocessedRatings={unprocessedRatings} 

@@ -2,7 +2,7 @@ import { RatingsFilters } from "../../../../../common/types/api";
 import { getRatingsRepository } from "../../../../../db/repositories/RatingsRepo";
 import { numericQueryParam, singleQueryParam } from "../../../../../lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
-import { FindOptionsWhere, In } from "typeorm";
+import { FindOptionsWhere, In, LessThanOrEqual } from "typeorm";
 import { Rating } from "../../../../../db/entities";
 import merge from "lodash.merge";
 
@@ -36,17 +36,24 @@ const UserRatingsRoute = createApiRoute({
       //   unsyncable: false
       // });
 
+      const baselineConditions: FindOptionsWhere<Rating> = {
+        userId: numericQueryParam(req.query.userId),
+        unsyncable: false
+      };
+
       if (req.query.actors) {
         const actors = first(req.query.actors);
+        const minCastOrder = numericQueryParam(req.query.minCastOrder, 10000); // super high default if not provided
         wheres.push({
           movie: {
             cast: {
+              castOrder: LessThanOrEqual(minCastOrder),
               actor: {
                 id: In(actors.split(','))
               }
             }
           }
-        })
+        });
       }
 
       if (req.query.collections) {
@@ -95,11 +102,6 @@ const UserRatingsRoute = createApiRoute({
       // (Update: Oops) reduce array of where clauses into a single "AND" clause
       // otherwise the array would be treated as "OR"
       // const where = wheres.reduce((a, b) => merge(a, b), {});
-
-      const baselineConditions = {
-        userId: numericQueryParam(req.query.userId),
-        unsyncable: false
-      };
 
       // add baseline criteria to every where condition so that
       // they are treated as "OR", which is actually what we want

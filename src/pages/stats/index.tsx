@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { PageTemplate, UserPageTemplate } from '../../components/PageTemplate';
-import { Badge, Box, Button, Card, CardContent, CardHeader, CardMedia, Dialog, Drawer, Grid, SxProps, Tab, Tabs, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Badge, Box, Button, Card, CardContent, CardHeader, CardMedia, Chip, Dialog, Drawer, Grid, SxProps, Tab, Tabs, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { a11yTabProps, TabPanel } from '../../components/TabPanel';
 import Link from 'next/link';
 import { Collection, Person, Rating } from '../../db/entities';
@@ -9,10 +9,12 @@ import { callApi } from '../../hooks/useApi';
 import { AllStatsType, PeopleStatsType, PersonStats, StatMode, UserStatsResponse } from '../../common/types/api';
 import Image from 'next/image';
 import { TMDBImage, useTmdbImageBaseUrl } from '../../components/images';
-import { Close, Settings, Star, Visibility } from '@mui/icons-material';
+import { Close, CloseSharp, Settings, Star, Visibility } from '@mui/icons-material';
 import { RatingsTable } from '../../components/RatingsTable';
 import { convertFiltersToQueryString } from '../../components/ratings/helpers';
 import { capitalize } from '../../lib/capitalize';
+import { useCurrentUser } from '../../hooks/UserContext';
+import { UserSettingStatsMinCastOrder, UserSettingStatsMinWatched } from '../../components/settings/settingsFields';
 
 
 function StatModeToggle({ mode, toggleMode }: { mode: StatMode; toggleMode: () => void; }) {
@@ -48,11 +50,12 @@ const StatsPage: NextPage = () => {
   };
 
   const tabPanelSx: SxProps = {
-    px: {
+    paddingLeft: {
       xs: 0,
       md: 4
     },
-    py: 0
+    py: 0,
+    paddingRight: 0
   };
 
   return (
@@ -60,7 +63,7 @@ const StatsPage: NextPage = () => {
       title="My Stats" 
       titleLineRightContent={<StatModeToggle mode={mode} toggleMode={toggleStatMode} />}
     >
-      {({ user }) => (
+      {() => (
         <Box
           sx={{ flexGrow: 1, bgcolor: 'transparent', display: {
             xs: 'block',
@@ -94,19 +97,19 @@ const StatsPage: NextPage = () => {
             <MobileSwitcher value={value} setValue={setValue} sx={{ display: { xs: 'block', md: 'none' }}} />
           </Box>
           <TabPanel sx={tabPanelSx} value={value} index={0}>
-            <StatsTab userId={user.id} type="actors" mode={mode} />
+            <StatsTab type="actors" mode={mode} />
           </TabPanel>
           <TabPanel sx={tabPanelSx} value={value} index={1}>
-            <StatsTab userId={user.id} type="directors" mode={mode} />
+            <StatsTab type="directors" mode={mode} />
           </TabPanel>
           <TabPanel sx={tabPanelSx} value={value} index={2}>
-            <StatsTab userId={user.id} type="cinematographers" mode={mode} />
+            <StatsTab type="cinematographers" mode={mode} />
           </TabPanel>
           <TabPanel sx={tabPanelSx} value={value} index={3}>
-            <StatsTab userId={user.id} type="editors" mode={mode} />
+            <StatsTab type="editors" mode={mode} />
           </TabPanel>
           <TabPanel sx={tabPanelSx} value={value} index={4}>
-            <StatsTab userId={user.id} type="collections" mode={mode} />
+            <StatsTab type="collections" mode={mode} />
           </TabPanel>
         </Box>
       )}
@@ -122,21 +125,31 @@ function isCollections(list: PersonStats[] | Collection[]): list is Collection[]
   return list && list[0] && 'posterPath' in list[0];
 }
 
-function StatsTab({ type, userId, mode }: { type: AllStatsType; userId: number; mode: StatMode; }) {
+function StatsTab({ type, mode }: { type: AllStatsType; mode: StatMode; }) {
   const [results, setResults] = useState<(PersonStats[] | Collection[])>([]);
+  const { user } = useCurrentUser();
+
+  if (!user) {
+    return null;
+  }
+
   useEffect(() => {
     async function retrieve() {
-      const { data } = await callApi<UserStatsResponse>(`/api/users/${userId}/stats?type=${type}&mode=${mode}`);
+      if (!user) {
+        return;
+      }
+      const { statsMinWatched, statsMinCastOrder } = user.settings;
+      const { data } = await callApi<UserStatsResponse>(`/api/users/${user.id}/stats?type=${type}&mode=${mode}&minCastOrder=${statsMinCastOrder}&minWatched=${statsMinWatched}`);
       setResults(data.stats);
     }
     retrieve();
-  }, [type, userId]);
+  }, [type, user, mode]);
   
-  if (isPeople(results)) {
-    return <PeopleStatsPanel userId={userId} people={results} type={type as PeopleStatsType} mode={mode} />
+  if (user && isPeople(results)) {
+    return <PeopleStatsPanel userId={user.id} people={results} type={type as PeopleStatsType} mode={mode} />
   }
 
-  if (isCollections(results)) {
+  if (user && isCollections(results)) {
     return <CollectionsStatsPanel collections={results} mode={mode} />
   }
 
@@ -270,20 +283,81 @@ function PeopleStatsPanel({ people, type, userId, mode }: { people: PersonStats[
 
 function PeopleStatSettings() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  return null;
-  // return (
-  //   <Settings fontSize="large" sx={{ cursor: "pointer" }} />
-  // )
+  const { user } = useCurrentUser();
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <>
+      <Box sx={{ display: { xs: 'none', md: 'flex' }, cursor: "pointer" }} onClick={() => setIsOpen(true)}>
+        <Chip 
+          size="small" 
+          color="secondary"
+          variant="outlined"
+          sx={{ marginLeft: 1 }} 
+          label={`Min Watched: ${user.settings.statsMinWatched}`} 
+          onClick={() => setIsOpen(true)} 
+        />
+        <Chip 
+          size="small" 
+          color="secondary"
+          variant="outlined"
+          sx={{ marginLeft: 1 }} 
+          label={`Lowest Cast Order: ${user.settings.statsMinCastOrder}`} 
+          onClick={() => setIsOpen(true)} 
+        />
+        
+      </Box>
+      <Box
+        sx={{ cursor: "pointer", p: 1, display: { xs: 'inherit', md: 'none' }}} 
+        onClick={() => setIsOpen(true)}
+      >
+        <Settings color="secondary" fontSize="medium" />
+      </Box>
+      <Dialog
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        fullWidth={true}
+        PaperProps={{
+          sx: {
+            backgroundColor: "background.default",
+            backgroundImage: "none",
+            position: "relative"
+          }
+        }}
+      >
+        <>  
+          <Box sx={{ p: 4 }}>
+            <Typography color="primary" component="div" variant="h5" sx={{ marginBottom: 4 }}>Settings</Typography>
+            <Box sx={{ mb: 4 }}><UserSettingStatsMinWatched /></Box>
+            <Box sx={{ mb: 4 }}><UserSettingStatsMinCastOrder /></Box>
+          </Box>
+          <Box 
+            sx={{ position: 'absolute', top: 0, right: 0, cursor: 'pointer', p: 2 }}
+            onClick={() => setIsOpen(false)}
+          >
+            <CloseSharp />
+          </Box>
+        </>
+      </Dialog>
+    </>
+  )
 }
 
 function PersonDetails({ userId, type, details, setDetails }: { userId: number, type: PeopleStatsType; details: null | PersonStats; setDetails: (d: null | PersonStats) => void }) {
+  const { user } = useCurrentUser();
   const [ratings, setRatings] = useState<Rating[]>([]);
   useEffect(() => {
-    if (details === null) {
+    if (details === null || !user) {
       return;
     }
     async function retrieve(id: number) {
-      const qs = convertFiltersToQueryString({ [type]: [id] });
+      let qs = convertFiltersToQueryString({ [type]: [id] });
+      if (type === "actors") {
+        qs += `&minCastOrder=${user?.settings.statsMinCastOrder}`;
+      }
       const url = `/api/users/${userId}/ratings?${qs}`;
       const response = await callApi<{ ratings: Rating[] }>(url);
       setRatings(response.data.ratings);

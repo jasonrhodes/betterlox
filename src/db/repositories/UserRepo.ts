@@ -61,7 +61,14 @@ export const getUserRepository = async () => (await getDataSource()).getReposito
   
   // formerly checkToken
   async getUserByRememberMeToken(token: string) {
-    const user = await this.findOne({ where: { rememberMeToken: token }});
+    const user = await this.findOne({
+      relations: {
+        settings: true
+      },
+      where: {
+        rememberMeToken: token
+      }
+    });
   
     if (!user) {
       throw new UserRepoError('User not found');
