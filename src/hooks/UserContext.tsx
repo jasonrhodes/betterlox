@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { UserSettings } from '../db/entities';
 import { callApi } from './useApi';
 import { UpdateUserSettingsResponse } from '../common/types/api';
+import { getErrorAsString } from '../lib/getErrorAsString';
 
 const ADMIN_USER_IDS = [1];
 
@@ -97,17 +98,25 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     if (!user) {
       return;
     }
-    const { data } = await callApi<UpdateUserSettingsResponse, { settings: Partial<UserSettings> }>(`/api/users/${user.id}/settings`, {
-      method: 'PATCH',
-      data: {
-        settings
+
+    try {
+      const { data } = await callApi<UpdateUserSettingsResponse, { settings: Partial<UserSettings> }>(`/api/users/${user.id}/settings`, {
+        method: 'PATCH',
+        data: {
+          settings
+        }
+      });
+
+      if (!data.success) {
+        throw new Error(`Update settings failed: ${data.message}`);
       }
-    });
 
-    // TODO: handle if success === false?
-
-    const updated = { ...user, settings: { ...user.settings, ...data.settings }};
-    setUser(updated);
+      const updated = { ...user, settings: { ...user.settings, ...data.settings }};
+      setUser(updated);
+    } catch (error: unknown) {
+      // TODO: some kind of toast or pop up or banner notification system?
+      console.log((new Date()).toUTCString(), getErrorAsString(error));
+    }
   }
 
   function logout() {

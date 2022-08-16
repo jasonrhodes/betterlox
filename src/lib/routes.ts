@@ -35,7 +35,7 @@ export function createApiRoute<T>({
   handlers,
   isAdmin = false
 }: RouteOptions<T>): NextApiHandler<T | ApiErrorResponse> {
-  return (req, res) => {
+  return async (req, res) => {
     try {
       const methods = Object.keys(handlers).map(m => m.toUpperCase());
       if (!req.method) {
@@ -57,9 +57,9 @@ export function createApiRoute<T>({
       }
 
       if (isAdmin) {
-        return createAdminRoute<T>(handler)(req, res);
+        return await createAdminRoute<T>(handler)(req, res);
       } else {
-        return handler(req, res);
+        return await handler(req, res);
       }
     } catch (error: unknown) {
       // global error handler for all API routes

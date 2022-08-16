@@ -43,6 +43,7 @@ export function BaseSettingsField({
   settingsKey
 }: BaseSettingsFieldOptions) {
   const { user, updateSettings } = useCurrentUser();
+  const [isTempEmpty, setIsTempEmpty] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
     
   if (!user || typeof user.settings[settingsKey] === "undefined") {
@@ -50,8 +51,13 @@ export function BaseSettingsField({
   } 
 
   const handleChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = async (e) => {
+    if (type === "number" && e.target.value === "") {
+      setIsTempEmpty(true);
+      return;
+    }
     setIsUpdating(true);
     await updateSettings({ [settingsKey]: e.target.value });
+    setIsTempEmpty(false);
     setIsUpdating(false);
   }
 
@@ -59,7 +65,7 @@ export function BaseSettingsField({
     <FormControl>
       <TextField 
         type={type} 
-        value={user.settings[settingsKey]}
+        value={isTempEmpty ? "" : user.settings[settingsKey]}
         disabled={isUpdating}
         label={label} 
         helperText={helperText}
