@@ -117,8 +117,8 @@ const StatsPage: NextPage = () => {
   );
 }
 
-function isPeople(list: PersonStats[] | Collection[]): list is PersonStats[] {
-  return list && list[0] && 'placeOfBirth' in list[0];
+function isPeople(list: PersonStats[] | Collection[], type: AllStatsType): list is PersonStats[] {
+  return ["actors", "directors", "cinematographers", "editors"].includes(type);
 }
 
 function isCollections(list: PersonStats[] | Collection[]): list is Collection[] {
@@ -141,7 +141,7 @@ function StatsTab({ type, mode }: { type: AllStatsType; mode: StatMode; }) {
     retrieve();
   }, [type, user, mode]);
   
-  if (user && isPeople(results)) {
+  if (user && isPeople(results, type)) {
     return <PeopleStatsPanel userId={user.id} people={results} type={type as PeopleStatsType} mode={mode} />
   }
 
@@ -181,12 +181,13 @@ function getTitleByMode(mode: StatMode, value: string) {
   return `${prefix} ${value}`;
 }
 
-function PeopleStatsPanel({ people, type, userId, mode }: { people: PersonStats[]; type: PeopleStatsType; userId: number; mode: StatMode; }) {
+function PeopleStatsPanel({ people, type, mode }: { people: PersonStats[]; type: PeopleStatsType; mode: StatMode; }) {
   const [details, setDetails] = useState<PersonStats | null>(null);
   const PRESENTATION_SPLIT = 24;
   const PRESENTATION_MAX = 50;
   const topStats = people.slice(0, PRESENTATION_SPLIT);
   const bottomStats = people.slice(PRESENTATION_SPLIT, PRESENTATION_MAX);
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -195,84 +196,108 @@ function PeopleStatsPanel({ people, type, userId, mode }: { people: PersonStats[
         </Typography>
         <PeopleStatSettings />
       </Box>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-        {topStats.map((person, i) => (
-          <Box 
-            key={person.id} 
-            sx={{ 
-              width: 250, 
-              display: 'flex', 
-              marginRight: 1, 
-              marginBottom: 4, 
-              padding: 2,
-              cursor: "pointer",
-              opacity: 0.9,
-              transition: 'all 0.3s ease-out',
-              '&:hover': {
-                opacity: 1,
-                backgroundColor: 'rgba(0,0,0,0.2)'
-              }
-            }}
-            onClick={() => setDetails(person)}
-          >
-            <Badge color="secondary" badgeContent={i + 1} anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
-            }}>
-              <PersonImage path={person.profilePath} />
-            </Badge>
-            <Box>
-              <Typography color="primary" component="h3" variant="body1" sx={{ marginBottom: 1 }}>{person.name}</Typography>
-              <Typography component="div" variant="caption" sx={{ verticalAlign: 'middle', opacity: 0.6 }}>
-                <Star fontSize="small" />
-                {' '}
-                <span style={{ position: 'relative', top: -5, left: 2 }}>{round(person.averageRating)}</span>
-              </Typography>
-              <Typography component="div" variant="caption" sx={{ opacity: 0.6 }}>
-                <Visibility fontSize="small" />
-                {' '}
-                <span style={{ position: 'relative', top: -5, left: 2 }}>{person.countRated}</span>
-              </Typography>
-            </Box>
-          </Box>
-        ))}
-      </Box>
-      <Box>
-        {bottomStats.map((person, i) => (
-          <Box 
-            key={person.id} 
-            sx={{ 
-              marginBottom: 1, 
-              paddingLeft: 5,
-              py: 1,
-              position: "relative",
-              cursor: "pointer",
-              transition: 'all 0.3s ease-out',
-              "&:hover": {
-                backgroundColor: "rgba(0,0,0,0.2)"
-              }
-            }}
-            onClick={() => setDetails(person)}
-          >
-            <Typography component="span">{person.name}</Typography>
-            {' '}
-            <Typography component="span" sx={{ opacity: 0.4 }}>({round(person.averageRating)} | {person.countRated})</Typography>
-            <Box sx={{ 
-              position: 'absolute', 
-              top: 8, 
-              left: 8,
-              backgroundColor: "secondary.main",
-              color: "#000",
-              borderRadius: "20px",
-              padding: "2px 4px",
-              fontSize: "12px"
-            }}>
-              {i + (PRESENTATION_SPLIT + 1)}
-            </Box>
-          </Box>
-        ))}
-      </Box>
+      {people.length === 0 ?
+        <Box>
+          <Typography>No results match this set of criteria.</Typography>
+        </Box> :
+        <>
+          <TopPersonStats people={topStats} setDetails={setDetails} />
+          <BottomPersonStats people={bottomStats} setDetails={setDetails} splitNumber={PRESENTATION_SPLIT} />
+        </>
+      }
       <PersonDetails type={type} details={details} setDetails={setDetails} />
+    </Box>
+  )
+}
+
+interface StatsDisplayOptions {
+  people: PersonStats[];
+  setDetails: (person: PersonStats) => void;
+}
+
+function TopPersonStats({ people, setDetails }: StatsDisplayOptions) {
+  return (
+    <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+      {people.map((person, i) => (
+        <Box 
+          key={person.id} 
+          sx={{ 
+            width: 250, 
+            display: 'flex', 
+            marginRight: 1, 
+            marginBottom: 4, 
+            padding: 2,
+            cursor: "pointer",
+            opacity: 0.9,
+            transition: 'all 0.3s ease-out',
+            '&:hover': {
+              opacity: 1,
+              backgroundColor: 'rgba(0,0,0,0.2)'
+            }
+          }}
+          onClick={() => setDetails(person)}
+        >
+          <Badge color="secondary" badgeContent={i + 1} anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}>
+            <PersonImage path={person.profilePath} />
+          </Badge>
+          <Box>
+            <Typography color="primary" component="h3" variant="body1" sx={{ marginBottom: 1 }}>{person.name}</Typography>
+            <Typography component="div" variant="caption" sx={{ verticalAlign: 'middle', opacity: 0.6 }}>
+              <Star fontSize="small" />
+              {' '}
+              <span style={{ position: 'relative', top: -5, left: 2 }}>{round(person.averageRating)}</span>
+            </Typography>
+            <Typography component="div" variant="caption" sx={{ opacity: 0.6 }}>
+              <Visibility fontSize="small" />
+              {' '}
+              <span style={{ position: 'relative', top: -5, left: 2 }}>{person.countRated}</span>
+            </Typography>
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  )
+}
+
+function BottomPersonStats({ people, setDetails, splitNumber }) {
+  return (
+    <Box>
+      {people.map((person, i) => (
+        <Box 
+          key={person.id} 
+          sx={{ 
+            marginBottom: 1, 
+            paddingLeft: 5,
+            py: 1,
+            position: "relative",
+            cursor: "pointer",
+            transition: 'all 0.3s ease-out',
+            "&:hover": {
+              backgroundColor: "rgba(0,0,0,0.2)"
+            }
+          }}
+          onClick={() => setDetails(person)}
+        >
+          <Typography component="span">{person.name}</Typography>
+          {' '}
+          <Typography component="span" sx={{ opacity: 0.4 }}>({round(person.averageRating)} | {person.countRated})</Typography>
+          <Box sx={{ 
+            position: 'absolute', 
+            top: 8, 
+            left: 8,
+            backgroundColor: "secondary.main",
+            color: "#000",
+            borderRadius: "20px",
+            padding: "2px 4px",
+            fontSize: "12px"
+          }}>
+            {i + (splitNumber + 1)}
+          </Box>
+        </Box>
+      ))}
     </Box>
   )
 }
