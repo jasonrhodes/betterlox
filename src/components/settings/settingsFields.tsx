@@ -17,7 +17,7 @@ export function UserSettingStatsMinWatched({
     <BaseSettingsField
       type="number"
       settingsKey="statsMinWatched"
-      label="Stats: Min Watched" 
+      label="Stats: Minimum Watched" 
       helperText={helperText}
     />
   );
