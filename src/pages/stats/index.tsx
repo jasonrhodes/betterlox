@@ -142,7 +142,7 @@ function StatsTab({ type, mode }: { type: AllStatsType; mode: StatMode; }) {
   }, [type, user, mode]);
   
   if (user && isPeople(results, type)) {
-    return <PeopleStatsPanel userId={user.id} people={results} type={type as PeopleStatsType} mode={mode} />
+    return <PeopleStatsPanel people={results} type={type as PeopleStatsType} mode={mode} />
   }
 
   if (user && isCollections(results)) {
@@ -262,7 +262,7 @@ function TopPersonStats({ people, setDetails }: StatsDisplayOptions) {
   )
 }
 
-function BottomPersonStats({ people, setDetails, splitNumber }) {
+function BottomPersonStats({ people, setDetails, splitNumber }: StatsDisplayOptions & { splitNumber: number }) {
   return (
     <Box>
       {people.map((person, i) => (
