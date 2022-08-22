@@ -6,33 +6,32 @@ import { callApi } from '../hooks/useApi';
 import { UserPageTemplate } from '../components/PageTemplate';
 import { Rating } from '../db/entities';
 import { useRouter } from 'next/router';
-import { convertFiltersToQueryString } from '../components/ratings/helpers';
 import { RatingsFilterControls } from '../components/ratings/RatingsFilterControls';
 import { MobileRatingsFilterControls } from '../components/ratings/MobileRatingsFilterControls';
 import { RatingsTabs } from '../components/ratings/RatingsTabs';
+import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
+import { useRatingsFilters } from '../hooks/GlobalFiltersContext';
 
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedRatings, updateUnprocessedRatings] = useState<Rating[]>([]);
-  const [filters, updateFilters] = useState<RatingsFilters>({});
+  const [ratingsFilters, setRatingsFilters] = useRatingsFilters();
 
   useEffect(() => {
     async function retrieve() {
-      let url = `/api/users/${userId}/ratings`;
-      if (filters) {
-        url += `?${convertFiltersToQueryString(filters)}`;
-      }
+      const qs = convertFiltersToQueryString<RatingsFilters>(ratingsFilters);
+      const url = `/api/users/${userId}/ratings?${qs}`;
       const response = await callApi<{ ratings: Rating[] }>(url);
       updateUnprocessedRatings(response.data.ratings);
     }
     retrieve();
-  }, [filters, userId]);
+  }, [ratingsFilters, userId]);
 
   return (
     <>
       <Box sx={{ position: "absolute", top: 15, right: 15 }}>
         <MobileRatingsFilterControls
-          currentFilters={filters}
-          onChange={updateFilters} 
+          appliedFilters={ratingsFilters}
+          applyFilters={setRatingsFilters} 
         />
       </Box>
       <Box sx={{ height: 600 }}>
@@ -40,12 +39,12 @@ function PageContent({ userId }: { userId: number }) {
           <Grid item xs={12} md={6} lg={5}>
             <RatingsTabs 
               unprocessedRatings={unprocessedRatings} 
-              filters={filters}
+              filters={ratingsFilters}
             />
           </Grid>
           <Grid container item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>
             <Grid item xs={12}>
-              <RatingsFilterControls filters={filters} onChange={updateFilters} />
+              <RatingsFilterControls />
             </Grid>
           </Grid>
         </Grid>

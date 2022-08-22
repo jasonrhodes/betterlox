@@ -4,14 +4,16 @@ export const theme = createTheme({
   palette: {
     mode: "dark",
     background: {
-      default: '#011e3c'
+      default: '#011e3c',
+      paper: '#011e3c'
     },
     primary: {
       main: '#FA8072', // salmon pink
-      dark: '#DB1D08'
+      dark: '#F06B64'
     },
     secondary: {
       main: '#72ECFA', // blue complementary
+      dark: '#07b7cc'
     }
   },
   typography: {
@@ -23,4 +25,20 @@ export const theme = createTheme({
   },
 });
 
-export type BetterloxTheme = typeof theme;
+export const lightTheme = createTheme({
+  palette: {
+    mode: 'light',
+    background: {
+      default: '#fff',
+      paper: '#fff'
+    },
+    primary: {
+      main: theme.palette.primary.dark
+    },
+    secondary: {
+      main: theme.palette.secondary.dark
+    }
+  }
+})
+
+export type BetterloxDarkTheme = typeof theme;

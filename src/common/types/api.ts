@@ -172,3 +172,11 @@ export type StatMode = 'favorite' | 'most';
 export interface UpdateUserSettingsResponse extends ApiSuccessResponse {
   settings: UserSettings | undefined;
 }
+
+export interface StatsFilters {
+  years?: string | null;
+  genres?: string[];
+  onlyWomen?: boolean;
+  onlyNonBinary?: boolean;
+  allGenres?: boolean;
+}

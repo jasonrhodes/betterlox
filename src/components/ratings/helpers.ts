@@ -46,21 +46,3 @@ export function applySort(sortBy: SortBy, sortDir: SortDir, ratings: Rating[]) {
   });
   return sorted;
 }
-
-export function convertFiltersToQueryString(filters: RatingsFilters) {
-  const keys = Object.keys(filters) as Array<keyof RatingsFilters>;
-  const queries = keys.reduce<string[]>((queries, key) => {
-    const values = filters[key];
-    if (!values) {
-      return queries;
-    }
-    if (Array.isArray(values)) {
-      queries.push(`${key}=${values.join(',')}`);
-    } else {
-      queries.push(`${key}=${values}`);
-    }
-    return queries;
-  }, []);
-
-  return queries.join('&');
-}

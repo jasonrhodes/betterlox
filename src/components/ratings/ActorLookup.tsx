@@ -2,18 +2,20 @@ import { Autocomplete, TextField } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { PeopleApiResponse, RatingsFilters } from '../../common/types/api';
 import { Person } from '../../db/entities';
+import { useRatingsFilters } from '../../hooks/GlobalFiltersContext';
 import { useApi } from '../../hooks/useApi';
 
-export function ActorLookUp({ filters, onChange }: { filters: RatingsFilters, onChange: (filters: RatingsFilters) => void }) {
+export function ActorLookUp() {
   const [searchValue, updateSearchValue] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
   const [actorOptions, setActorOptions] = useState<Person[]>([]);
   const response = useApi<PeopleApiResponse>(`/api/people?role=actor&name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
+  const [ratingsFilters, setRatingsFilters] = useRatingsFilters();
 
   useEffect(() => {
-    const filtered = response?.data.people.filter((p) => !filters.actors?.includes(p.id));
+    const filtered = response?.data.people.filter((p) => !ratingsFilters.actors?.includes(p.id));
     setActorOptions(filtered || []);
-  }, [response, filters]);
+  }, [response, ratingsFilters]);
 
   return (
     <Autocomplete
@@ -31,9 +33,9 @@ export function ActorLookUp({ filters, onChange }: { filters: RatingsFilters, on
       }}
       isOptionEqualToValue={(option, value) => option.name === value.name}
       onChange={(e, person) => {
-        const { actors = [] } = filters;
+        const { actors = [] } = ratingsFilters;
         if (person) {
-          onChange({ ...filters, actors: [...actors, person.id ]})
+          setRatingsFilters({ ...ratingsFilters, actors: [...actors, person.id ]})
         }
         updateSearchValue('');
       }}

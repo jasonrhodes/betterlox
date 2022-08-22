@@ -69,7 +69,7 @@ export class Movie extends BaseEntity {
   @Column({ nullable: true })
   letterboxdSlug: string;
 
-  @ManyToMany(() => Genre)
+  @ManyToMany(() => Genre, (genre) => genre.movies, { cascade: true, eager: true })
   @JoinTable({
     name: "join_movies_genres",
     joinColumn: {
@@ -83,7 +83,7 @@ export class Movie extends BaseEntity {
   })
   genres: Relation<Genre[]>;
 
-  @ManyToMany(() => ProductionCompany)
+  @ManyToMany(() => ProductionCompany, (pc) => pc.movies, { cascade: true, eager: true })
   @JoinTable({
     name: "join_movies_production_companies",
     joinColumn: {

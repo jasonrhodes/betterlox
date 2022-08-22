@@ -1,10 +1,14 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { BaseEntity, Entity, PrimaryColumn, Column, ManyToMany, Relation } from "typeorm";
+import { Movie } from "./Movie";
 
 @Entity('genres')
-export class Genre extends BaseEntity {
-  @PrimaryGeneratedColumn()
+export class Genre {
+  @PrimaryColumn()
   id: number;
 
   @Column()
   name: string;
+
+  @ManyToMany(() => Movie, (movie) => movie.genres)
+  movies: Relation<Movie>[];
 }

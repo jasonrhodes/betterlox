@@ -1,4 +1,5 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, Relation, ManyToMany } from "typeorm";
+import { Movie } from "./Movie";
 
 @Entity('production_companies')
 export class ProductionCompany extends BaseEntity {
@@ -13,4 +14,7 @@ export class ProductionCompany extends BaseEntity {
 
   @Column({ nullable: true })
   originCountry: string;
+
+  @ManyToMany(() => Movie, (movie) => movie.productionCompanies)
+  movies: Relation<ProductionCompany>[];
 }

@@ -2,18 +2,20 @@ import { Autocomplete, TextField } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { CollectionsApiResponse, RatingsFilters } from '../../common/types/api';
 import { Collection, Person } from '../../db/entities';
+import { useRatingsFilters } from '../../hooks/GlobalFiltersContext';
 import { useApi } from '../../hooks/useApi';
 
-export function CollectionLookUp({ filters, onChange }: { filters: RatingsFilters, onChange: (filters: RatingsFilters) => void }) {
+export function CollectionLookUp() {
+  const [ratingsFilters, setRatingsFilters] = useRatingsFilters();
   const [searchValue, updateSearchValue] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
   const [collectionOptions, setCollectionOptions] = useState<Pick<Collection, 'id' | 'name'>[]>([]);
   const response = useApi<CollectionsApiResponse>(`/api/collections?name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
 
   useEffect(() => {
-    const filtered = response?.data.collections.filter((c) => !filters.collections?.includes(c.id));
+    const filtered = response?.data.collections.filter((c) => !ratingsFilters.collections?.includes(c.id));
     setCollectionOptions(filtered || []);
-  }, [response, filters]);
+  }, [response, ratingsFilters]);
 
   return (
     <Autocomplete
@@ -31,9 +33,9 @@ export function CollectionLookUp({ filters, onChange }: { filters: RatingsFilter
       }}
       isOptionEqualToValue={(option, value) => option.name === value.name}
       onChange={(e, collection) => {
-        const { collections = [] } = filters;
+        const { collections = [] } = ratingsFilters;
         if (collection) {
-          onChange({ ...filters, collections: [...collections, collection.id ]})
+          setRatingsFilters({ ...ratingsFilters, collections: [...collections, collection.id ]})
         }
         updateSearchValue('');
       }}

@@ -3,6 +3,11 @@ export function singleQueryParam<T extends string>(x: string[] | string | undefi
   return single as T | undefined;
 }
 
+export function stringListQueryParam<T extends string>(x: string[] | string | undefined) {
+  const single = singleQueryParam<T>(x);
+  return single ? single.split(',') : [];
+}
+
 export function numericQueryParam(x: string[] | string | undefined, fallback: number): number;
 export function numericQueryParam(x: string[] | string | undefined): number | undefined;
 

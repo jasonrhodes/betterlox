@@ -11,6 +11,7 @@ import { UserContextProvider } from '../hooks/UserContext';
 import { CookiesProvider } from 'react-cookie';
 import { init as initApm } from '@elastic/apm-rum';
 import { theme } from "../theme";
+import { GlobalFiltersContextProvider } from '../hooks/GlobalFiltersContext';
 
 initApm({
   // Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)
@@ -28,7 +29,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       <CookiesProvider>
         <ImageContextProvider>
           <UserContextProvider>
-            <Component {...pageProps} />
+            <GlobalFiltersContextProvider>
+              <Component {...pageProps} />
+            </GlobalFiltersContextProvider>
           </UserContextProvider>
         </ImageContextProvider>
       </CookiesProvider>

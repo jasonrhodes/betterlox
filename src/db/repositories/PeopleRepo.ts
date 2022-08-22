@@ -1,10 +1,12 @@
+import { query } from "express";
 import { SelectQueryBuilder } from "typeorm";
-import { getCastRepository, getCrewRepository } from ".";
+import { getCastRepository, getCrewRepository, getMoviesRepository } from ".";
 import { CREW_JOB_MAP } from "../../common/constants";
 import { PeopleStatsType, PersonStats, StatMode } from "../../common/types/api";
 import { backoff } from "../../lib/backoff";
+import { getErrorAsString } from "../../lib/getErrorAsString";
 import { tmdb, TmdbPerson } from "../../lib/tmdb";
-import { Person, UserSettings } from "../entities";
+import { Movie, Person, UserSettings } from "../entities";
 import { getDataSource } from "../orm";
 
 function forceUndefined(value: string | undefined | null) {
@@ -82,69 +84,169 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
     userId, 
     orderBy,
     minCastOrder,
-    minWatched
+    minWatched,
+    dateRange,
+    genres,
+    allGenres,
+    onlyWomen,
+    onlyNonBinary
   }: { 
     type: PeopleStatsType; 
     userId: number; 
     orderBy: StatMode;
     minCastOrder: UserSettings['statsMinCastOrder'];
     minWatched: UserSettings['statsMinWatched'];
+    dateRange: string[];
+    genres: string[];
+    allGenres: boolean;
+    onlyWomen: boolean;
+    onlyNonBinary: boolean;
   }) {
     if (orderBy === "most") {
       minWatched = 0;
     }
-    
-    if (type === "actors") {
-      const query = this.createQueryBuilder('person')
-        .innerJoin("person.castRoles", "castRole")
-        .innerJoin("castRole.movie", "movie")
-        .innerJoin((sub) => {
-          return sub.select(["stars", `"rating"."movieId"`])
-            .from("ratings", "rating")
-            .distinctOn(["rating.movieId"])
-            .where("rating.userId = :userId", { userId })
-            .orderBy("rating.movieId", "ASC")
-            .addOrderBy("rating.date", "DESC");
-        }, "rating", `"rating"."movieId" = movie.id`)
-        .addSelect('AVG(rating.stars) as average_rating')
-        .addSelect('COUNT(movie.id) as count_rated')
-        .where('castRole.castOrder <= :maxCastOrder', { maxCastOrder: minCastOrder })
-        .groupBy("person.id")
-        .having("COUNT(movie.id) >= :minWatched", { minWatched })
-        .limit(150); // TODO: Configurable?
-      
-      const orderedQuery = applyOrderBy(orderBy, query);
-      // console.log(orderedQuery.getSql()); // REMOVE
- 
-      return mapPersonStats(await orderedQuery.getRawMany<RawPersonStatResult>());
 
-    } else if (Object.keys(CREW_JOB_MAP).includes(type)) {
-      const jobs = CREW_JOB_MAP[type].map(j => `'${j}'`).join(',');
-      const query = this.createQueryBuilder('person')
-        .innerJoin("person.crewRoles", "crewRole")
-        .innerJoin("crewRole.movie", "movie")
-        .innerJoin((sub) => {
-          return sub.select(["stars", `"rating"."movieId"`])
-            .from("ratings", "rating")
-            .distinctOn(["rating.movieId"])
-            .where("rating.userId = :userId", { userId })
-            .orderBy("rating.movieId", "ASC")
-            .addOrderBy("rating.date", "DESC");
-        }, "rating", `"rating"."movieId" = movie.id`)
-        .addSelect('AVG(rating.stars) as average_rating')
-        .addSelect('COUNT(movie.id) as count_rated')
-        .where(`crewRole.job IN (${jobs})`)
-        .groupBy("person.id")
-        .having("COUNT(movie.id) >= :minWatched", { minWatched })
-        .limit(150); // TODO: Configurable?
-      
-      const orderedQuery = applyOrderBy(orderBy, query);
-      // console.log(orderedQuery.getSql()); // REMOVE
-      
-      return mapPersonStats(await orderedQuery.getRawMany<RawPersonStatResult>());
+    // console.log("Attempting stat look up for date range", dateRange.join(" - "));
+    try {
+      if (type === "actors") {
+        let query = this.createQueryBuilder('person')
+          .innerJoin("person.castRoles", "castRole")
+          .innerJoin("castRole.movie", "movie");
+
+        query = addRatingsJoin(query, { userId });
+        query = selectAverageRating(query);
+        query = selectCountRated(query);
+        query = query.where('castRole.castOrder <= :maxCastOrder', { maxCastOrder: minCastOrder })
+        query = andWhereGenderFilter(query, { onlyWomen, onlyNonBinary });
+        query = andWhereMovieInDateRange(query, { dateRange });
+        query = andWhereMovieInGenres(query, { genres, allGenres });
+        query = query.groupBy("person.id");
+        query = query.having("COUNT(movie.id) >= :minWatched", { minWatched });
+        query = query.limit(150); // TODO: Configurable?
+        query = applyOrderBy(orderBy, query);
+
+        // console.log(query.getSql()); // REMOVE
+        
+        try {
+          return mapPersonStats(await query.getRawMany<RawPersonStatResult>());
+        } catch (error) {
+          console.log('Error with actors query:', query.getSql());
+          if (error instanceof Error) {
+            error.message = `Caught actors SQL error, original message: ${error.message}`;
+          }
+          throw error;
+        }
+
+      } else if (Object.keys(CREW_JOB_MAP).includes(type)) {
+        const jobs = CREW_JOB_MAP[type].map(j => `'${j}'`).join(',');
+        let query = this.createQueryBuilder('person')
+          .innerJoin("person.crewRoles", "crewRole")
+          .innerJoin("crewRole.movie", "movie");
+          // .innerJoin("movie.genres", "genre");
+        
+        query = addRatingsJoin(query, { userId });
+        query = selectAverageRating(query);
+        query = selectCountRated(query);
+        query = query.where(`crewRole.job IN (${jobs})`);
+        query = andWhereGenderFilter(query, { onlyWomen, onlyNonBinary });
+        query = andWhereMovieInDateRange(query, { dateRange });
+        query = andWhereMovieInGenres(query, { genres, allGenres });
+        query = query.groupBy("person.id");
+        query = query.having("COUNT(movie.id) >= :minWatched", { minWatched });
+        query = query.limit(150); // TODO: Configurable?
+        query = applyOrderBy(orderBy, query);
+
+        // console.log(query.getSql()); // REMOVE
+        
+        return mapPersonStats(await query.getRawMany<RawPersonStatResult>());
+      }
+    } catch (error: unknown) {
+      console.log("Query error", getErrorAsString(error));
+      throw error;
     }
   }
 });
+
+function addRatingsJoin(query: SelectQueryBuilder<Person>, { userId }: { userId: number }) {
+  return query.innerJoin((sub) => {
+    return sub.select(["stars", `"rating"."movieId"`])
+      .from("ratings", "rating")
+      .distinctOn(["rating.movieId"])
+      .where("rating.userId = :userId", { userId })
+      .orderBy("rating.movieId", "ASC")
+      .addOrderBy("rating.date", "DESC");
+  }, "rating", `"rating"."movieId" = movie.id`)
+}
+
+function selectAverageRating(query: SelectQueryBuilder<Person>) {
+  return query.addSelect('AVG(rating.stars) as average_rating');
+}
+
+function selectCountRated(query: SelectQueryBuilder<Person>) {
+  return query.addSelect('COUNT(movie.id) as count_rated');
+}
+
+function andWhereMovieInDateRange(query: SelectQueryBuilder<Person>, { dateRange }: { dateRange: string[] }) {
+  if (dateRange.length === 2) {
+    return query.andWhere('movie.releaseDate BETWEEN :start AND :end', {
+      start: dateRange[0],
+      end: dateRange[1]
+    });
+  } else {
+    return query;
+  }
+}
+
+function andWhereGenderFilter(query: SelectQueryBuilder<Person>, { onlyWomen, onlyNonBinary }: { onlyWomen: boolean; onlyNonBinary: boolean; }) {
+  if (!onlyWomen && !onlyNonBinary) {
+    return query;
+  }
+
+  if (!onlyWomen && onlyNonBinary) {
+    return query.andWhere('person.gender = 3');
+  }
+
+  if (onlyWomen && !onlyNonBinary) {
+    return query.andWhere('person.gender = 1');
+  }
+
+  return query.andWhere('person.gender IN (1, 3)');
+}
+
+function andWhereMovieInGenres(query: SelectQueryBuilder<Person>, { 
+  genres, 
+  allGenres
+}: { 
+  genres: string[]; 
+  allGenres?: boolean;
+}) {
+  if (genres.length === 0) {
+    return query;
+  }
+
+  if (allGenres) {
+    return query.andWhere((qb) => {
+      const subQuery = qb.subQuery()
+        .select("movie.id")
+        .from(Movie, "movie")
+        .leftJoin("movie.genres", "genre")
+        .where(`genre.name IN (${genres.map(g => `'${g}'`).join(',')})`)
+        .groupBy("movie.id")
+        .having(`COUNT(movie.id) = ${genres.length}`)
+        .getQuery();
+
+      // JSON.stringify(subQuery, null, 2)
+      
+      // console.log('\n', Object.keys(subQuery), '\n');
+
+      return "movie.id IN " + subQuery;
+    })
+  } else {
+    // Not implementing the "ANY" case for genres at this time
+    return query;
+  }
+
+}
 
 interface RawPersonResult {
   person_biography: Person['biography'];

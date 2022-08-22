@@ -34,3 +34,25 @@ export const CREW_JOB_MAP = {
   "cinematographers": ["Director of Photography", "Cinematography"],
   "writers": ["Writer", "Screenplay", "Novel", "Story"]
 };
+
+export const GENRES = [
+  "Action",
+  "Adventure",
+  "Animation",
+  "Comedy",
+  "Crime",
+  "Documentary",
+  "Drama",
+  "Family",
+  "Fantasy",
+  "History",
+  "Horror",
+  "Music",
+  "Mystery",
+  "Romance",
+  "Science Fiction",
+  "Thriller",
+  "TV Movie",
+  "War",
+  "Western"
+];
