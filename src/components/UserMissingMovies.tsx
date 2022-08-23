@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import { RatingsFilters, TmdbCollectionByIdResponse, TmdbPersonByIdResponse } from '../common/types/api';
+import { GlobalFilters, TmdbCollectionByIdResponse, TmdbPersonByIdResponse } from '../common/types/api';
 import { Movie, Rating } from '../db/entities';
 import { callApi } from '../hooks/useApi';
 import { TMDBImage } from './images';
@@ -8,7 +8,7 @@ import { ImdbSearchLink, LetterboxdSearchLink } from './externalServiceLinks';
 
 interface GetMissingOptions {
   ratings: Rating[];
-  filters: RatingsFilters;
+  filters: GlobalFilters;
 }
 
 interface MissingMovieExtras {

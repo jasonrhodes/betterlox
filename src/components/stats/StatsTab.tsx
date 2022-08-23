@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { AllStatsType, StatMode, PersonStats, UserStatsResponse, PeopleStatsType, StatsFilters } from "../../common/types/api";
+import { AllStatsType, StatMode, PersonStats, UserStatsResponse, PeopleStatsType } from "../../common/types/api";
 import { Collection } from "../../db/entities";
-import { useStatsFilters } from "../../hooks/GlobalFiltersContext";
+import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";
 import { convertFiltersToQueryString } from "../../lib/convertFiltersToQueryString";
@@ -16,7 +16,7 @@ interface StatsTabOptions {
 
 export function StatsTab({ type, mode }: StatsTabOptions) {
   const [results, setResults] = useState<(PersonStats[] | Collection[])>([]);
-  const [statsFilters, setStatsFilters] = useStatsFilters();
+  const { globalFilters, setGlobalFilters } = useGlobalFilters();
   const { user } = useCurrentUser();
 
   useEffect(() => {
@@ -25,20 +25,18 @@ export function StatsTab({ type, mode }: StatsTabOptions) {
         return;
       }
       // Hard-code allGenres to true, not implementing "ANY" for genres at this time
-      statsFilters.allGenres = true;
-      const filtersQueryString = convertFiltersToQueryString<StatsFilters>(statsFilters);
+      globalFilters.allGenres = true;
+      const filtersQueryString = convertFiltersToQueryString(globalFilters);
       const { statsMinWatched, statsMinCastOrder } = user.settings;
       const { data } = await callApi<UserStatsResponse>(`/api/users/${user.id}/stats?type=${type}&mode=${mode}&minCastOrder=${statsMinCastOrder}&minWatched=${statsMinWatched}&${filtersQueryString}`);
       setResults(data.stats);
     }
     retrieve();
-  }, [type, user, mode, statsFilters]);
+  }, [type, user, mode, globalFilters]);
   
   if (user && isPeople(results, type)) {
     return (
       <PeopleStatsPanel 
-        statsFilters={statsFilters} 
-        setStatsFilters={setStatsFilters} 
         people={results} 
         type={type as PeopleStatsType} 
         mode={mode} 

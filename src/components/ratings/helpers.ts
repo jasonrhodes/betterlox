@@ -1,4 +1,3 @@
-import { RatingsFilters } from "../../common/types/api";
 import { Rating } from "../../db/entities";
 
 export type SortBy = 'date' | 'stars' | 'movie.title';

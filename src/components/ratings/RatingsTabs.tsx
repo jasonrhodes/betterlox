@@ -1,6 +1,6 @@
 import { TextField, Box, Tabs, Tab, FormControl, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import { RatingsFilters } from "../../common/types/api";
+import { GlobalFilters } from "../../common/types/api";
 import { Rating } from "../../db/entities";
 import { escapeRegExp } from "../../lib/escapeRegex";
 import { RatingsTable } from "../RatingsTable";
@@ -9,10 +9,9 @@ import { MissingMovie, getMissingMoviesForFilters, MissingMovieList } from "../U
 import { SortBy, SortDir, applyTitleFilter, applySort } from "./helpers";
 import { RatingsShowAndSortControls } from "./RatingsShowAndSortControls";
 
-
 interface RatingsTabsOptions {
   unprocessedRatings: Rating[];
-  filters: RatingsFilters;
+  filters: GlobalFilters;
 }
 
 export function RatingsTabs({
@@ -65,9 +64,11 @@ export function RatingsTabs({
       const missing = await getMissingMoviesForFilters({ ratings: unprocessedRatings, filters });
       setMissing(missing);
     }
-    const filterKeys = Object.keys(filters) as Array<keyof RatingsFilters>;
+    const filterKeys = Object.keys(filters) as Array<keyof GlobalFilters>;
     const activeFilterCount = filterKeys.reduce((count, key) => {
-      return count + (filters[key]?.length || 0);
+      const f = filters[key];
+      const numActive = Array.isArray(f) ? f.length : (f !== undefined && f !== null) ? 1 : 0;
+      return count + numActive;
     }, 0);
     setActiveFilterCount(activeFilterCount);
     if (activeFilterCount === 0) {

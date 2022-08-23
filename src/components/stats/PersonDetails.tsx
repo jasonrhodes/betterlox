@@ -1,9 +1,9 @@
 import { Close } from "@mui/icons-material";
 import { Drawer, Typography, capitalize } from "@mui/material";
 import { useState, useEffect } from "react";
-import { PeopleStatsType, PersonStats, RatingsFilters, StatsFilters } from "../../common/types/api";
+import { PeopleStatsType, PersonStats, GlobalFilters } from "../../common/types/api";
 import { Rating } from "../../db/entities";
-import { useStatsFilters } from "../../hooks/GlobalFiltersContext";
+import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";
 import { convertFiltersToQueryString } from "../../lib/convertFiltersToQueryString";
@@ -12,7 +12,7 @@ import { RatingsTable } from "../RatingsTable";
 export function PersonDetails({ type, details, setDetails }: { type: PeopleStatsType; details: null | PersonStats; setDetails: (d: null | PersonStats) => void }) {
   const { user } = useCurrentUser();
   const [ratings, setRatings] = useState<Rating[]>([]);
-  const [statsFilters] = useStatsFilters();
+  const { globalFilters } = useGlobalFilters();
 
   useEffect(() => {
     if (details === null || !user) {
@@ -22,11 +22,11 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
       if (!user) {
         return;
       }
-      let qs = convertFiltersToQueryString<RatingsFilters>({ [type]: [id] });
+      let qs = convertFiltersToQueryString({ [type]: [id] });
       if (type === "actors") {
         qs += `&minCastOrder=${user.settings.statsMinCastOrder}`;
       }
-      qs += convertFiltersToQueryString<StatsFilters>(statsFilters);
+      qs += convertFiltersToQueryString(globalFilters);
       const url = `/api/users/${user.id}/ratings?${qs}`;
       const response = await callApi<{ ratings: Rating[] }>(url);
 
@@ -34,7 +34,7 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
       // on a single "movie.genres" field, we exclude movies that contain any of
       // the excluded genres in JS after we've retrieved the list of movies
       // ... this is a TypeORM find options limitation for now
-      const { excludedGenres = [] } = statsFilters;
+      const { excludedGenres = [] } = globalFilters;
       const ratings = excludedGenres.length > 0
         ? response.data.ratings.filter((rating) => {
           return excludedGenres.every((eg) => !rating.movie.genres.includes(eg))
@@ -44,7 +44,7 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
       setRatings(ratings);
     }
     retrieve(details.id);
-  }, [details, type, user, statsFilters]);
+  }, [details, type, user, globalFilters]);
 
   if (details === null) {
     return null;

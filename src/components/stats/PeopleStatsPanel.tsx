@@ -9,7 +9,7 @@ import { AddBox, CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { ReleaseDateRangeFilterControl } from "../filterControls/ReleaseDateRangeFilterControl";
 import { GenreFilterControl } from "../filterControls/GenreFilterControl";
-import { ExcludedGenreFilterControls } from "../filterControls/ExcludedGenreFilterControl";
+import { ExcludedGenreFilterControl } from "../filterControls/ExcludedGenreFilterControl";
 import { OnlyNonBinaryFilterControl, OnlyWomenFilterControl } from "../filterControls/genderFilterControls";
 
 interface PeopleStatsPanelOptions {
@@ -86,7 +86,7 @@ function PeopleStatFilters() {
               <GenreFilterControl />
             </Box>
             <Box sx={{ mb: 2 }}>
-              <ExcludedGenreFilterControls />
+              <ExcludedGenreFilterControl />
             </Box>
             {/* Not implementing ANY functionality for genres at this time, will hard-code to true
             <Box>
