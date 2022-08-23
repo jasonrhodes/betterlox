@@ -26,9 +26,8 @@ function whereJob(jobs: string[], ids: string[]): FindOptionsWhere<Rating> {
 const UserRatingsRoute = createApiRoute({
   handlers: {
     get: async (req, res) => {
-      const dateRange = convertYearsToRange(singleQueryParam(req.query.years));
+      const releaseDateRange = convertYearsToRange(singleQueryParam(req.query.releaseDateRange));
       const genres = stringListQueryParam(req.query.genres);
-      const excludedGenres = stringListQueryParam(req.query.excludedGenres);
       
       // start with an array of where clauses that will
       // be reduced back into a single where clause, so
@@ -40,10 +39,10 @@ const UserRatingsRoute = createApiRoute({
         unsyncable: false
       };
 
-      if (dateRange.length === 2) {
+      if (releaseDateRange.length === 2) {
         wheres.push({
           movie: {
-            releaseDate: Between(dateRange[0], dateRange[1])
+            releaseDate: Between(releaseDateRange[0], releaseDateRange[1])
           }
         })
       }
@@ -51,7 +50,7 @@ const UserRatingsRoute = createApiRoute({
       if (genres.length > 0) {
         wheres.push({
           movie: {
-            genres: ArrayContains(genres)  // .getSql() + ' AND ' + Not(ArrayOverlap(excludedGenres))  ;_____; not working
+            genres: ArrayContains(genres)
           }
         })
       }
@@ -120,7 +119,6 @@ const UserRatingsRoute = createApiRoute({
         ...baselineConditions,
         ...wheres.reduce((a, b) => merge(a, b), {})
       }];
-
 
       // add baseline criteria to every where condition so that
       // they are treated as "OR", which is actually what we want

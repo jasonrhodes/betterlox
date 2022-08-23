@@ -1,81 +1,136 @@
 import { Autocomplete, SxProps, TextField } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import { CollectionsApiResponse, RatingsFilters } from '../../common/types/api';
-import { Collection } from '../../db/entities';
-import { useRatingsFilters } from '../../hooks/GlobalFiltersContext';
-import { ExternalApiResponse, useApi } from '../../hooks/useApi';
+import { GlobalFilters, SearchApiResponse, SearchCollection } from '../../common/types/api';
+import { Person } from '../../db/entities';
+import { useGlobalFilters } from '../../hooks/GlobalFiltersContext';
+import { useApi } from '../../hooks/useApi';
 
-interface HasId {
-  id: number;
-}
-
-interface HasResults<T> {
-  results: T[];
-}
-
-export function RatingsFilterFieldLookup<T extends HasId, A extends HasResults<T>>({ 
-  id,
-  inputLabel,
-  filterKey,
-  sx,
-  getOptionsApiEndpoint,
-  filterResponse,
-  isOptionEqualToValue,
-  getOptionLabel
-}: { 
-  id: string;
-  inputLabel: string;
-  filterKey: keyof RatingsFilters;
-  sx: SxProps;
-  getOptionsApiEndpoint: (searchValue: string) => string; 
-  filterResponse: (response: ExternalApiResponse<A>) => T[];
+type ChangeHandler<T> = (e: React.SyntheticEvent, option: T | null) => void;
+interface AutocompleteFilterProps<T> {
+  options: T[];
+  inputValue: string;
+  onChange: ChangeHandler<T>;
+  onInputChange: ChangeHandler<string>;
   isOptionEqualToValue?: (option: T, value: T) => boolean;
   getOptionLabel?: (option: T) => string;
-}) {
-  const [ratingsFilters, setRatingsFilters] = useRatingsFilters();
-  const [searchValue, updateSearchValue] = useState<string>('');
-  const [open, setOpen] = useState<boolean>(false);
+}
+
+function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
+  searchType,
+  limit,
+  filterKey,
+  getId = (option) => ('id' in option ? option.id : option)
+}: {
+  searchType: string;
+  limit?: number;
+  filterKey: keyof GlobalFilters;
+  getId?: (option: T) => number | string;
+}): AutocompleteFilterProps<T> {
+  const { globalFilters, setGlobalFilters } = useGlobalFilters();
+  const [inputValue, setInputValue] = useState<string>('');
   const [options, setOptions] = useState<T[]>([]);
-  // `/api/collections?name=${encodeURIComponent(searchValue)}&limit=100`
-  const response = useApi<A>(getOptionsApiEndpoint(searchValue), [searchValue]);
+  let apiEndpoint = `/api/search?searchType=${searchType}&limit=${limit}&role=${String(filterKey)}`;
+  const encoded = encodeURIComponent(inputValue);
+  apiEndpoint += encoded ? `&${encoded}` : '';
+  const response = useApi<SearchApiResponse<T[]>>(apiEndpoint, [inputValue, limit, filterKey]);
 
   useEffect(() => {
     if (response === null) {
       // TODO: Should we return and ignore here or set to empty [] first?
       return;
     }
-    const existing = ratingsFilters[filterKey] || [];
-    const filtered = response?.data.results.filter((r) => Array.isArray(existing) && !existing.includes(r.id) )
+    const existing = globalFilters[filterKey] as number[];
+    const filtered = response?.data.results.filter((r) => {
+      if (!Array.isArray(existing)) {
+        return true;
+      }
+      return !existing.includes(r.id);
+    });
     setOptions(filtered);
-  }, [response, ratingsFilters]);
+  }, [response, globalFilters, filterKey]);
+
+  return {
+    options,
+    inputValue,
+    onChange: (e, incoming) => {
+      const existing = globalFilters[filterKey] as number[];
+      if (incoming && Array.isArray(existing)) {
+        setGlobalFilters({ ...globalFilters, [filterKey]: [...existing, incoming.id]})
+      }
+      setInputValue('');
+    },
+    onInputChange: (e, value) => {
+      setInputValue(value || '');
+    }
+  }
+}
+
+export function RatingsFilterFieldLookup<T extends Person | SearchCollection>({ 
+  searchType,
+  filterKey,
+  id = `filter-${String(filterKey)}`,
+  inputLabel = `Filter by ${String(filterKey)}`,
+  AutocompleteSx,
+  limit = 100,
+  isOptionEqualToValue,
+  getOptionLabel
+}: { 
+  id?: string;
+  searchType: 'people' | 'collections';
+  personRole?: string;
+  filterKey: keyof GlobalFilters;
+  inputLabel?: string;
+  limit?: number;
+  AutocompleteSx: SxProps;
+  isOptionEqualToValue?: (option: T, value: T) => boolean;
+  getOptionLabel?: (option: T) => string;
+}) {
+  const { globalFilters, setGlobalFilters } = useGlobalFilters();
+  const acProps = useAutocompleteFilterOptions<T>({
+    searchType,
+    limit,
+    filterKey
+  });
 
   return (
+    <FieldLookup 
+      acProps={{
+        ...acProps,
+        isOptionEqualToValue,
+        getOptionLabel
+      }}
+      id={id}
+      inputLabel={inputLabel}
+      sx={AutocompleteSx}
+    />
+  )
+}
+
+function FieldLookup<T>({
+  acProps,
+  id,
+  inputLabel,
+  sx = {}
+}: {
+  acProps: AutocompleteFilterProps<T>;
+  id: string;
+  inputLabel: string;
+  sx?: SxProps;
+}) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  return (
     <Autocomplete
+      {...acProps}
       id={id}
       sx={sx}
-      open={open}
-      value={null}
-      inputValue={searchValue}
+      open={isOpen}
       clearOnBlur={true}
       onOpen={() => {
-        setOpen(true);
+        setIsOpen(true);
       }}
       onClose={() => {
-        setOpen(false);
+        setIsOpen(false);
       }}
-      isOptionEqualToValue={isOptionEqualToValue}
-      onChange={(e, incoming) => {
-        const existing = ratingsFilters[filterKey] || [];
-        if (incoming) {
-          setRatingsFilters({ ...ratingsFilters, [filterKey]: [...existing, incoming.id ]})
-        }
-        updateSearchValue('');
-      }}
-      onInputChange={(e, value) => {
-        updateSearchValue(value);
-      }}
-      getOptionLabel={getOptionLabel}
-      options={options}
       renderInput={(params) => (
         <TextField
           {...params}

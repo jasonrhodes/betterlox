@@ -102,13 +102,19 @@ export interface SyncNone {
 
 export type SyncResponse = SyncAllMovieCollectionsResponse | SyncRatingsMoviesResponse | SyncMoviesCreditsResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
 
-export interface RatingsFilters {
+export interface GlobalFilters {
   title?: string;
   collections?: number[];
   writers?: number[];
   directors?: number[];
   editors?: number[];
   actors?: number[];
+  releaseDateRange?: string | null;
+  genres?: string[];
+  excludedGenres?: string[];
+  onlyWomen?: boolean;
+  onlyNonBinary?: boolean;
+  allGenres?: boolean;
 }
 
 export interface SyncsManagementGetResponse {
@@ -180,11 +186,3 @@ export interface UpdateUserSettingsResponse extends ApiSuccessResponse {
   settings: UserSettings | undefined;
 }
 
-export interface StatsFilters {
-  years?: string | null;
-  genres?: string[];
-  excludedGenres?: string[];
-  onlyWomen?: boolean;
-  onlyNonBinary?: boolean;
-  allGenres?: boolean;
-}

@@ -1,45 +1,21 @@
 import { Box, Typography, capitalize, Accordion, AccordionSummary, AccordionDetails, FormControl, Checkbox, FormControlLabel, Autocomplete, TextField, Switch, Chip } from "@mui/material";
 import { HtmlHTMLAttributes, useState } from "react";
-import { PersonStats, PeopleStatsType, StatMode, StatsFilters } from "../../common/types/api";
+import { PersonStats, PeopleStatsType, StatMode, GlobalFilters } from "../../common/types/api";
 import { getTitleByMode } from "./helpers";
 import { StatsSettings } from "./StatsSettings";
 import { PersonDetails } from "./PersonDetails";
 import { CardsPersonStats, ListPersonStats } from "./statsDisplay";
 import { AddBox, CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material";
-import { Genre } from "../../db/entities";
-import { GENRES } from "../../common/constants";
-import { useStatsFilters } from "../../hooks/GlobalFiltersContext";
-
-const years: string[] = [];
-const now = new Date();
-const nowYear = now.getFullYear();
-
-for (let i = nowYear; i >= 1900; i--) {
-  const y = i.toString();
-  if (y.slice(3) === '0') {
-    years.push(`Decade: ${y}s`);
-  }
-  years.push(y);
-}
+import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
+import { ReleaseDateRangeFilterControl } from "../filterControls/ReleaseDateRangeFilterControl";
+import { GenreFilterControl } from "../filterControls/GenreFilterControl";
+import { ExcludedGenreFilterControls } from "../filterControls/ExcludedGenreFilterControl";
+import { OnlyNonBinaryFilterControl, OnlyWomenFilterControl } from "../filterControls/genderFilterControls";
 
 interface PeopleStatsPanelOptions {
   people: PersonStats[]; 
   type: PeopleStatsType; 
   mode: StatMode;
-  statsFilters: StatsFilters;
-  setStatsFilters: (f: StatsFilters) => void;
-}
-
-const icon = <CheckBoxOutlineBlank fontSize="small" />;
-const checkedIcon = <CheckBox fontSize="small" />;
-
-const lbProps: React.HTMLAttributes<HTMLUListElement> = {
-  style: {
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderTop: 'none',
-    borderRadius: '4px',
-    boxShadow: '0 3px 6px 8px rgba(0,0,0,0.5)'
-  }
 }
 
 function StatsFilterChip({ label }: { label: string }) {
@@ -55,9 +31,8 @@ function StatsFilterChip({ label }: { label: string }) {
 }
 
 function StatsFiltersSummary() {
-  const [statsFilters] = useStatsFilters();
-
-  const { years, genres = [], excludedGenres = [], onlyWomen, onlyNonBinary } = statsFilters;
+  const { globalFilters } = useGlobalFilters();
+  const { releaseDateRange, genres = [], excludedGenres = [], onlyWomen, onlyNonBinary } = globalFilters;
 
   let genderFilter = "";
 
@@ -75,7 +50,7 @@ function StatsFiltersSummary() {
 
   return (
     <Box sx={{ mb: 2 }}>
-      {years ? <StatsFilterChip label={`Released In: ${years.replace(/^Decade: /, '')}`} /> : null}
+      {releaseDateRange ? <StatsFilterChip label={`Released In: ${releaseDateRange.replace(/^Decade: /, '')}`} /> : null}
       {genres.length > 0 ? <StatsFilterChip label={`Genres: ${genres.join(' + ')}`} /> : null}
       {excludedGenres.length > 0 ? <StatsFilterChip label={`Excluded Genres: ${excludedGenres.join(', ')}`} /> : null}
       {genderFilter ? <StatsFilterChip label={genderFilter} /> : null}
@@ -83,7 +58,7 @@ function StatsFiltersSummary() {
   );
 }
 
-function PeopleStatFilters({ type, setStatsFilters, statsFilters }: { type: PeopleStatsType; setStatsFilters: (f: StatsFilters) => void; statsFilters: StatsFilters; }) {
+function PeopleStatFilters() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <>
@@ -105,77 +80,13 @@ function PeopleStatFilters({ type, setStatsFilters, statsFilters }: { type: Peop
         <AccordionDetails>
           <Box sx={{ px: 1 }}>
             <Box sx={{ mb: 2 }}>
-              <FormControl>
-                <Autocomplete
-                  sx={{
-                    width: 300,
-                    paper: {
-                      backgroundColor: "secondary.dark"
-                    }
-                  }}
-                  autoComplete
-                  id="stats-year-filter"
-                  value={statsFilters.years || null}
-                  options={years}
-                  renderInput={(params) => <TextField {...params} label="Release Date Range" />}
-                  ListboxProps={lbProps}
-                  onChange={(e, value) => setStatsFilters({ ...statsFilters, years: value })}
-                />
-              </FormControl>
+              <ReleaseDateRangeFilterControl />
             </Box>
             <Box sx={{ mb: 2 }}>
-              <Autocomplete<string, true>
-                multiple
-                autoComplete
-                id="stats-genre-filter"
-                disableCloseOnSelect
-                options={GENRES}
-                sx={{ width: 500, maxWidth: '100%' }}
-                value={statsFilters.genres}
-                renderInput={(params) => <TextField {...params} label="Genres" />}
-                ListboxProps={lbProps}
-                renderOption={(props, genre, { selected }) => !statsFilters.excludedGenres?.includes(genre) ? (
-                  <Box key={genre}>
-                    <li {...props}>
-                      <Checkbox
-                        icon={icon}
-                        checkedIcon={checkedIcon}
-                        style={{ marginRight: 8 }}
-                        checked={selected}
-                      />
-                      {genre}
-                    </li>
-                  </Box>
-                ) : null}
-                onChange={(e, values) => setStatsFilters({ ...statsFilters, genres: values })}
-              />
+              <GenreFilterControl />
             </Box>
             <Box sx={{ mb: 2 }}>
-              <Autocomplete<string, true>
-                multiple
-                autoComplete
-                id="stats-excluded-genre-filter"
-                disableCloseOnSelect
-                options={GENRES}
-                sx={{ width: 500, maxWidth: '100%' }}
-                value={statsFilters.excludedGenres}
-                renderInput={(params) => <TextField {...params} label="Excluded Genres" />}
-                ListboxProps={lbProps}
-                renderOption={(props, genre, { selected }) => !statsFilters.genres?.includes(genre) ? (
-                  <Box key={genre}>
-                    <li {...props}>
-                      <Checkbox
-                        icon={icon}
-                        checkedIcon={checkedIcon}
-                        style={{ marginRight: 8 }}
-                        checked={selected}
-                      />
-                      {genre}
-                    </li>
-                  </Box>
-                ): null}
-                onChange={(e, values) => setStatsFilters({ ...statsFilters, excludedGenres: values })}
-              />
+              <ExcludedGenreFilterControls />
             </Box>
             {/* Not implementing ANY functionality for genres at this time, will hard-code to true
             <Box>
@@ -187,22 +98,10 @@ function PeopleStatFilters({ type, setStatsFilters, statsFilters }: { type: Peop
               />
             </Box> */}
             <Box>
-              <FormControlLabel 
-                control={<Switch />} 
-                label="Only consider women"
-                checked={statsFilters.onlyWomen}
-                value={statsFilters.onlyWomen}
-                onChange={(e, value) => setStatsFilters({ ...statsFilters, onlyWomen: value })}
-              />
+              <OnlyWomenFilterControl />
             </Box>
             <Box>
-              <FormControlLabel 
-                control={<Switch />} 
-                label="Only consider non-binary"
-                checked={statsFilters.onlyNonBinary}
-                value={statsFilters.onlyNonBinary}
-                onChange={(e, value) => setStatsFilters({ ...statsFilters, onlyNonBinary: value })}
-              />
+              <OnlyNonBinaryFilterControl />
             </Box>
           </Box>
         </AccordionDetails>
@@ -212,7 +111,7 @@ function PeopleStatFilters({ type, setStatsFilters, statsFilters }: { type: Peop
   )
 }
 
-export function PeopleStatsPanel({ people, type, mode, setStatsFilters, statsFilters }: PeopleStatsPanelOptions) {
+export function PeopleStatsPanel({ people, type, mode }: PeopleStatsPanelOptions) {
   const [details, setDetails] = useState<PersonStats | null>(null);
   const PRESENTATION_SPLIT = 24;
   const PRESENTATION_MAX = 50;
@@ -229,7 +128,7 @@ export function PeopleStatsPanel({ people, type, mode, setStatsFilters, statsFil
         </Typography>
         <StatsSettings showMinCastOrder={showMinCastOrder} showMinWatched={showMinWatched} />
       </Box>
-      <PeopleStatFilters type={type} statsFilters={statsFilters} setStatsFilters={setStatsFilters} />
+      <PeopleStatFilters />
       {people.length === 0 ?
         <Box>
           <Typography>No results match this set of criteria.</Typography>

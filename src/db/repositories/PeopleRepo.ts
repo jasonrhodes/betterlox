@@ -43,7 +43,7 @@ function applyOrderBy(orderBy: StatMode, query: SelectQueryBuilder<Person>) {
 interface PeopleSearchOptions {
   limit?: number;
   ids?: string[];
-  type?: string;
+  role?: string;
   namePattern?: string;
   exactName?: string;
 }
@@ -183,7 +183,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
   async searchForApi({
     limit,
     ids,
-    type,
+    role,
     namePattern,
     exactName
   }: PeopleSearchOptions) {
@@ -199,11 +199,11 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
       where.id = In(ids);
     }
     
-    if (type === "actor") {
+    if (role === "actors") {
       where.castRoles = true;
-    } else if (type) {
+    } else if (role) {
       where.crewRoles = {
-        job: type
+        job: ILike(role.slice(0, -1)) // TODO: this removes plural "s", so hacky oof, make it better plz
       }
     }
     

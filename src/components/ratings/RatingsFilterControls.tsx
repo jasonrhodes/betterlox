@@ -1,12 +1,14 @@
 import { Button, Grid, Typography } from "@mui/material";
-import { ActorLookUp } from "./ActorLookup";
-import { CollectionLookUp } from "./CollectionLookup";
-import { DirectorLookUp } from "./DirectorLookup";
 import { CurrentFilters } from "./CurrentFilters";
-import { useRatingsFilters } from "../../hooks/GlobalFiltersContext";
+import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
+import { RatingsFilterFieldLookup } from "./FieldLookup";
+import { Collection, Person } from "../../db/entities";
+import { ReleaseDateRangeFilterControl } from "../filterControls/ReleaseDateRangeFilterControl";
+import { GenreFilterControl } from "../filterControls/GenreFilterControl";
+import { ExcludedGenreFilterControl } from "../filterControls/ExcludedGenreFilterControl";
 
 export function RatingsFilterControls() {
-  const [, setRatingsFilters] = useRatingsFilters();
+  const { setGlobalFilters } = useGlobalFilters();
   return (
     <Grid item container spacing={2} sx={{ paddingBottom: 2 }}>
       <Grid item xs={12}>
@@ -16,19 +18,43 @@ export function RatingsFilterControls() {
         <CurrentFilters />
       </Grid>
       <Grid item xs={12}>
-        {/* <ReleaseDateLookUp /> */}
+        <ReleaseDateRangeFilterControl />
       </Grid>
       <Grid item xs={12}>
-        <ActorLookUp />
+        <GenreFilterControl />
       </Grid>
       <Grid item xs={12}>
-        <DirectorLookUp />
+        <ExcludedGenreFilterControl />
       </Grid>
       <Grid item xs={12}>
-        <CollectionLookUp />
+        <RatingsFilterFieldLookup<Person>
+          searchType="people"
+          filterKey="actors"
+          AutocompleteSx={{ width: 300 }}
+          isOptionEqualToValue={(option, value) => value && option.id === value.id}
+          getOptionLabel={(option) => option.name}
+        />
       </Grid>
       <Grid item xs={12}>
-        <Button variant="outlined" onClick={() => setRatingsFilters({})}>Clear Filters</Button>
+        <RatingsFilterFieldLookup<Person>
+          searchType="people"
+          filterKey="directors"
+          AutocompleteSx={{ width: 300 }}
+          isOptionEqualToValue={(option, value) => value && option.id === value.id}
+          getOptionLabel={(option) => option.name}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <RatingsFilterFieldLookup<Collection>
+          searchType="collections"
+          filterKey="collections"
+          AutocompleteSx={{ width: 300 }}
+          isOptionEqualToValue={(option, value) => value && option.id === value.id}
+          getOptionLabel={(option) => option.name}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <Button variant="outlined" onClick={() => setGlobalFilters({})}>Clear Filters</Button>
       </Grid>
     </Grid>
   )

@@ -29,7 +29,7 @@ const SearchApiRoute = createApiRoute<SearchApiResponse>({
           const results = await PeopleRepo.searchForApi({
             limit,
             ids,
-            type: role,
+            role,
             namePattern,
             exactName
           });
@@ -49,7 +49,7 @@ const SearchApiRoute = createApiRoute<SearchApiResponse>({
           res.json({ success: true, results });
         }
 
-        
+
       }
      
     }

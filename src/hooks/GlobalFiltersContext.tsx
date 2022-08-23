@@ -1,37 +1,28 @@
 import React, { useContext, useState } from 'react';
-import { RatingsFilters, StatsFilters } from '../common/types/api';
+import { GlobalFilters } from '../common/types/api';
 
 const GlobalFiltersContext = React.createContext<{ 
-  ratingsFilters: RatingsFilters;
-  setRatingsFilters: (f: RatingsFilters) => void;
-  statsFilters: StatsFilters;
-  setStatsFilters: (f: StatsFilters) => void;
+  globalFilters: GlobalFilters;
+  setGlobalFilters: (f: GlobalFilters) => void;
 }>({
-  ratingsFilters: {},
-  setRatingsFilters: () => null,
-  statsFilters: {},
-  setStatsFilters: () => null
+  globalFilters: {},
+  setGlobalFilters: () => null
 });
 
 const GlobalFiltersContextConsumer = GlobalFiltersContext.Consumer;
 
 const GlobalFiltersContextProvider: React.FC<{ 
-  initialRatingsFilters?: RatingsFilters;
-  initialStatsFilters?: StatsFilters; 
+  initialGlobalFilters?: GlobalFilters;
 }> = ({ 
   children,
-  initialRatingsFilters,
-  initialStatsFilters
+  initialGlobalFilters
 }) => {
-  const [ratingsFilters, setRatingsFilters] = useState<RatingsFilters>(initialRatingsFilters || {});
-  const [statsFilters, setStatsFilters] = useState<StatsFilters>(initialStatsFilters || {});
+  const [globalFilters, setGlobalFilters] = useState<GlobalFilters>(initialGlobalFilters || {});
 
   return (
     <GlobalFiltersContext.Provider value={{ 
-      ratingsFilters,
-      setRatingsFilters,
-      statsFilters,
-      setStatsFilters
+      globalFilters,
+      setGlobalFilters
     }}>
       {children}
     </GlobalFiltersContext.Provider>
@@ -42,21 +33,9 @@ function useGlobalFilters() {
   return useContext(GlobalFiltersContext);
 }
 
-function useRatingsFilters(): [RatingsFilters, (f: RatingsFilters) => void] {
-  const { ratingsFilters, setRatingsFilters } = useGlobalFilters();
-  return [ratingsFilters, setRatingsFilters];
-}
-
-function useStatsFilters(): [StatsFilters, (f: StatsFilters) => void] {
-  const { statsFilters, setStatsFilters } = useGlobalFilters();
-  return [statsFilters, setStatsFilters];
-}
-
 export {
   GlobalFiltersContext,
   GlobalFiltersContextConsumer,
   GlobalFiltersContextProvider,
-  useGlobalFilters,
-  useRatingsFilters,
-  useStatsFilters
+  useGlobalFilters
 };

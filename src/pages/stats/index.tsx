@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
 import { Box, SxProps, Tab, Tabs } from '@mui/material';
 import { a11yTabProps, TabPanel } from '../../components/TabPanel';
-import { StatMode, StatsFilters } from '../../common/types/api';
+import { StatMode, GlobalFilters } from '../../common/types/api';
 import { StatModeToggle } from '../../components/stats/StatModeToggle';
 import { StatsTab } from '../../components/stats/StatsTab';
 import { MobileSwitcher } from '../../components/stats/MobileSwitcher';
@@ -11,7 +11,6 @@ import { MobileSwitcher } from '../../components/stats/MobileSwitcher';
 const StatsPage: NextPage = () => {
   const [value, setValue] = useState<number>(0);
   const [mode, setMode] = useState<StatMode>('favorite');
-  const [statsFilters, setStatsFilters] = useState<StatsFilters>({});
 
   function toggleStatMode() {
     setMode(mode === 'favorite' ? 'most' : 'favorite');
