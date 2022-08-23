@@ -32,7 +32,8 @@ const StatsPage: NextPage = () => {
       md: 4
     },
     py: 0,
-    paddingRight: 0
+    paddingRight: 0,
+    flexGrow: 1
   };
 
   return (
@@ -42,10 +43,13 @@ const StatsPage: NextPage = () => {
     >
       {() => (
         <Box
-          sx={{ flexGrow: 1, bgcolor: 'transparent', display: {
-            xs: 'block',
-            md: 'flex'
-          } }}
+          sx={{ 
+            bgcolor: 'transparent', 
+            display: {
+              xs: 'block',
+              md: 'flex'
+            }
+          }}
         >
           <Tabs
             orientation="vertical"
@@ -70,24 +74,26 @@ const StatsPage: NextPage = () => {
             <Tab sx={tabSx} label="Editors" {...a11yTabProps(3)} />
             {/* <Tab sx={tabSx} label="Collections" {...a11yTabProps(4)} /> */}
           </Tabs>
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, flexShrink: 0 }}>
-            <MobileSwitcher value={value} setValue={setValue} sx={{ display: { xs: 'block', md: 'none' }}} />
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, flexShrink: 0 }}>
+              <MobileSwitcher value={value} setValue={setValue} sx={{ display: { xs: 'block', md: 'none' }}} />
+            </Box>
+            <TabPanel sx={tabPanelSx} value={value} index={0}>
+              <StatsTab type="actors" mode={mode} />
+            </TabPanel>
+            <TabPanel sx={tabPanelSx} value={value} index={1}>
+              <StatsTab type="directors" mode={mode} />
+            </TabPanel>
+            <TabPanel sx={tabPanelSx} value={value} index={2}>
+              <StatsTab type="cinematographers" mode={mode} />
+            </TabPanel>
+            <TabPanel sx={tabPanelSx} value={value} index={3}>
+              <StatsTab type="editors" mode={mode} />
+            </TabPanel>
+            <TabPanel sx={tabPanelSx} value={value} index={4}>
+              <StatsTab type="collections" mode={mode} />
+            </TabPanel>
           </Box>
-          <TabPanel sx={tabPanelSx} value={value} index={0}>
-            <StatsTab type="actors" mode={mode} />
-          </TabPanel>
-          <TabPanel sx={tabPanelSx} value={value} index={1}>
-            <StatsTab type="directors" mode={mode} />
-          </TabPanel>
-          <TabPanel sx={tabPanelSx} value={value} index={2}>
-            <StatsTab type="cinematographers" mode={mode} />
-          </TabPanel>
-          <TabPanel sx={tabPanelSx} value={value} index={3}>
-            <StatsTab type="editors" mode={mode} />
-          </TabPanel>
-          <TabPanel sx={tabPanelSx} value={value} index={4}>
-            <StatsTab type="collections" mode={mode} />
-          </TabPanel>
         </Box>
       )}
     </UserPageTemplate>

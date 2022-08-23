@@ -19,6 +19,8 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
       ? await (await getCollectionsRepository()).createFromTmdb(movie.belongs_to_collection)
       : [];
 
+    const tmdbGenreNames = movie.genres ? movie.genres.map(g => g.name || '').filter(n => n !== '') : [];
+
     const created = this.create({
       id: movie.id,
       backdropPath: movie.backdrop_path,
@@ -35,7 +37,7 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
       status: movie.status,
       tagline: movie.tagline,
       title: movie.title,
-      genres,
+      genres: tmdbGenreNames,
       productionCompanies,
       collections
     });

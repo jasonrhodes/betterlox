@@ -1,10 +1,10 @@
-import { RatingsFilters } from "../../../../../common/types/api";
 import { getRatingsRepository } from "../../../../../db/repositories/RatingsRepo";
-import { numericQueryParam, singleQueryParam } from "../../../../../lib/queryParams";
+import { numericQueryParam, singleQueryParam, stringListQueryParam } from "../../../../../lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
-import { FindOptionsWhere, In, LessThanOrEqual } from "typeorm";
+import { ArrayContains, ArrayOverlap, Between, FindOptionsWhere, In, LessThanOrEqual, Not } from "typeorm";
 import { Rating } from "../../../../../db/entities";
 import merge from "lodash.merge";
+import { convertYearsToRange } from "../../../../../lib/convertYearsToRange";
 
 function first(x: string | string[]) {
   return Array.isArray(x) ? x[0] : x;
@@ -26,20 +26,35 @@ function whereJob(jobs: string[], ids: string[]): FindOptionsWhere<Rating> {
 const UserRatingsRoute = createApiRoute({
   handlers: {
     get: async (req, res) => {
+      const dateRange = convertYearsToRange(singleQueryParam(req.query.years));
+      const genres = stringListQueryParam(req.query.genres);
+      const excludedGenres = stringListQueryParam(req.query.excludedGenres);
+      
       // start with an array of where clauses that will
       // be reduced back into a single where clause, so
       // that all options will be "AND" joined (not "OR")
       const wheres: FindOptionsWhere<Rating>[] = [];
 
-      // wheres.push({
-      //   userId: numericQueryParam(req.query.userId),
-      //   unsyncable: false
-      // });
-
       const baselineConditions: FindOptionsWhere<Rating> = {
         userId: numericQueryParam(req.query.userId),
         unsyncable: false
       };
+
+      if (dateRange.length === 2) {
+        wheres.push({
+          movie: {
+            releaseDate: Between(dateRange[0], dateRange[1])
+          }
+        })
+      }
+
+      if (genres.length > 0) {
+        wheres.push({
+          movie: {
+            genres: ArrayContains(genres)  // .getSql() + ' AND ' + Not(ArrayOverlap(excludedGenres))  ;_____; not working
+          }
+        })
+      }
 
       if (req.query.actors) {
         const actors = first(req.query.actors);
@@ -99,16 +114,20 @@ const UserRatingsRoute = createApiRoute({
         ));
       }
       
-      // (Update: Oops) reduce array of where clauses into a single "AND" clause
+      // Reduce array of where clauses into a single "AND" clause
       // otherwise the array would be treated as "OR"
-      // const where = wheres.reduce((a, b) => merge(a, b), {});
+      const where = [{
+        ...baselineConditions,
+        ...wheres.reduce((a, b) => merge(a, b), {})
+      }];
+
 
       // add baseline criteria to every where condition so that
       // they are treated as "OR", which is actually what we want
-      const where = wheres.length === 0 ? baselineConditions : wheres.map((condition) => ({
-        ...condition,
-        ...baselineConditions
-      }));
+      // const where = wheres.length === 0 ? baselineConditions : wheres.map((condition) => ({
+      //   ...condition,
+      //   ...baselineConditions
+      // }));
       
       try {
         const RatingsRepository = await getRatingsRepository();

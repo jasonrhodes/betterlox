@@ -29,7 +29,8 @@ export class Rating extends BaseEntity {
   unsyncable: boolean;
 
   @ManyToOne(() => Movie, {
-    createForeignKeyConstraints: false
+    createForeignKeyConstraints: false,
+    eager: true
   })
   @JoinColumn({ name: 'movieId' })
   movie: Relation<Movie>;

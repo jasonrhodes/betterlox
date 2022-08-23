@@ -1,4 +1,4 @@
-import { Box, Typography, capitalize, Accordion, AccordionSummary, AccordionDetails, FormControl, Checkbox, FormControlLabel, Autocomplete, TextField, Switch } from "@mui/material";
+import { Box, Typography, capitalize, Accordion, AccordionSummary, AccordionDetails, FormControl, Checkbox, FormControlLabel, Autocomplete, TextField, Switch, Chip } from "@mui/material";
 import { HtmlHTMLAttributes, useState } from "react";
 import { PersonStats, PeopleStatsType, StatMode, StatsFilters } from "../../common/types/api";
 import { getTitleByMode } from "./helpers";
@@ -8,6 +8,7 @@ import { CardsPersonStats, ListPersonStats } from "./statsDisplay";
 import { AddBox, CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material";
 import { Genre } from "../../db/entities";
 import { GENRES } from "../../common/constants";
+import { useStatsFilters } from "../../hooks/GlobalFiltersContext";
 
 const years: string[] = [];
 const now = new Date();
@@ -41,90 +42,173 @@ const lbProps: React.HTMLAttributes<HTMLUListElement> = {
   }
 }
 
-function PeopleStatFilters({ type, setStatsFilters, statsFilters }: { type: PeopleStatsType; setStatsFilters: (f: StatsFilters) => void; statsFilters: StatsFilters; }) {
+function StatsFilterChip({ label }: { label: string }) {
   return (
-    <Accordion square={true} color="primary" variant="elevation" elevation={1} sx={{ mb: 2 }}>
-      <AccordionSummary expandIcon={<AddBox />}><Typography variant="subtitle2">QUICK FILTERS</Typography></AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ px: 1 }}>
-          <Box sx={{ mb: 2 }}>
-            <FormControl>
-              <Autocomplete
-                sx={{
-                  width: 300,
-                  paper: {
-                    backgroundColor: "secondary.dark"
-                  }
-                }}
+    <Chip
+      size="small"
+      variant="outlined"
+      color="secondary"
+      label={label}
+      sx={{ mr: 1, mb: 1 }}
+    />
+  )
+}
+
+function StatsFiltersSummary() {
+  const [statsFilters] = useStatsFilters();
+
+  const { years, genres = [], excludedGenres = [], onlyWomen, onlyNonBinary } = statsFilters;
+
+  let genderFilter = "";
+
+  if (onlyWomen && !onlyNonBinary) {
+    genderFilter = "Only Women";
+  }
+
+  if (!onlyWomen && onlyNonBinary) {
+    genderFilter = "Only Non-Binary";
+  }
+
+  if (onlyWomen && onlyNonBinary) {
+    genderFilter = "Only Women and Non-Binary";
+  }
+
+  return (
+    <Box sx={{ mb: 2 }}>
+      {years ? <StatsFilterChip label={`Released In: ${years.replace(/^Decade: /, '')}`} /> : null}
+      {genres.length > 0 ? <StatsFilterChip label={`Genres: ${genres.join(' + ')}`} /> : null}
+      {excludedGenres.length > 0 ? <StatsFilterChip label={`Excluded Genres: ${excludedGenres.join(', ')}`} /> : null}
+      {genderFilter ? <StatsFilterChip label={genderFilter} /> : null}
+    </Box>
+  );
+}
+
+function PeopleStatFilters({ type, setStatsFilters, statsFilters }: { type: PeopleStatsType; setStatsFilters: (f: StatsFilters) => void; statsFilters: StatsFilters; }) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  return (
+    <>
+      <Accordion 
+        expanded={isOpen} 
+        onChange={() => setIsOpen(!isOpen)} 
+        square={true} 
+        color="primary" 
+        variant="elevation" 
+        elevation={1}
+        sx={{ mb: 2 }}
+        disableGutters
+      >
+        <AccordionSummary expandIcon={<AddBox />}>
+          <Box display="flex">
+            <Box sx={{ mr: 1 }}><Typography>QUICK FILTERS</Typography></Box>
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box sx={{ px: 1 }}>
+            <Box sx={{ mb: 2 }}>
+              <FormControl>
+                <Autocomplete
+                  sx={{
+                    width: 300,
+                    paper: {
+                      backgroundColor: "secondary.dark"
+                    }
+                  }}
+                  autoComplete
+                  id="stats-year-filter"
+                  value={statsFilters.years || null}
+                  options={years}
+                  renderInput={(params) => <TextField {...params} label="Release Date Range" />}
+                  ListboxProps={lbProps}
+                  onChange={(e, value) => setStatsFilters({ ...statsFilters, years: value })}
+                />
+              </FormControl>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <Autocomplete<string, true>
+                multiple
                 autoComplete
-                id="stats-year-filter"
-                value={statsFilters.years || null}
-                options={years}
-                renderInput={(params) => <TextField {...params} label="Year/Decade" />}
+                id="stats-genre-filter"
+                disableCloseOnSelect
+                options={GENRES}
+                sx={{ width: 500, maxWidth: '100%' }}
+                value={statsFilters.genres}
+                renderInput={(params) => <TextField {...params} label="Genres" />}
                 ListboxProps={lbProps}
-                onChange={(e, value) => setStatsFilters({ ...statsFilters, years: value })}
+                renderOption={(props, genre, { selected }) => !statsFilters.excludedGenres?.includes(genre) ? (
+                  <Box key={genre}>
+                    <li {...props}>
+                      <Checkbox
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                      />
+                      {genre}
+                    </li>
+                  </Box>
+                ) : null}
+                onChange={(e, values) => setStatsFilters({ ...statsFilters, genres: values })}
               />
-            </FormControl>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <Autocomplete<string, true>
+                multiple
+                autoComplete
+                id="stats-excluded-genre-filter"
+                disableCloseOnSelect
+                options={GENRES}
+                sx={{ width: 500, maxWidth: '100%' }}
+                value={statsFilters.excludedGenres}
+                renderInput={(params) => <TextField {...params} label="Excluded Genres" />}
+                ListboxProps={lbProps}
+                renderOption={(props, genre, { selected }) => !statsFilters.genres?.includes(genre) ? (
+                  <Box key={genre}>
+                    <li {...props}>
+                      <Checkbox
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                      />
+                      {genre}
+                    </li>
+                  </Box>
+                ): null}
+                onChange={(e, values) => setStatsFilters({ ...statsFilters, excludedGenres: values })}
+              />
+            </Box>
+            {/* Not implementing ANY functionality for genres at this time, will hard-code to true
+            <Box>
+              <FormControlLabel 
+                control={<Switch />} 
+                label="Only consider movies that include ALL of the above genres"
+                value={statsFilters.allGenres}
+                onChange={(e, value) => setStatsFilters({ ...statsFilters, allGenres: value })}
+              />
+            </Box> */}
+            <Box>
+              <FormControlLabel 
+                control={<Switch />} 
+                label="Only consider women"
+                checked={statsFilters.onlyWomen}
+                value={statsFilters.onlyWomen}
+                onChange={(e, value) => setStatsFilters({ ...statsFilters, onlyWomen: value })}
+              />
+            </Box>
+            <Box>
+              <FormControlLabel 
+                control={<Switch />} 
+                label="Only consider non-binary"
+                checked={statsFilters.onlyNonBinary}
+                value={statsFilters.onlyNonBinary}
+                onChange={(e, value) => setStatsFilters({ ...statsFilters, onlyNonBinary: value })}
+              />
+            </Box>
           </Box>
-          <Box sx={{ mb: 2 }}>
-            <Autocomplete<string, true>
-              multiple
-              autoComplete
-              id="stats-genre-filter"
-              // getOptionLabel={(o) => o.name}
-              // isOptionEqualToValue={(o, v) => o.id === v.id}
-              disableCloseOnSelect
-              options={GENRES}
-              sx={{ width: 500 }}
-              value={statsFilters.genres}
-              renderInput={(params) => <TextField {...params} label="Genres" />}
-              ListboxProps={lbProps}
-              renderOption={(props, genre, { selected }) => (
-                <Box key={genre}>
-                  <li {...props}>
-                    <Checkbox
-                      icon={icon}
-                      checkedIcon={checkedIcon}
-                      style={{ marginRight: 8 }}
-                      checked={selected}
-                    />
-                    {genre}
-                  </li>
-                </Box>
-              )}
-              onChange={(e, values) => setStatsFilters({ ...statsFilters, genres: values })}
-            />
-          </Box>
-          {/* Not implementing ANY functionality for genres at this time, will hard-code to true
-           <Box>
-            <FormControlLabel 
-              control={<Switch />} 
-              label="Only consider movies that include ALL of the above genres"
-              value={statsFilters.allGenres}
-              onChange={(e, value) => setStatsFilters({ ...statsFilters, allGenres: value })}
-            />
-          </Box> */}
-          <Box>
-            <FormControlLabel 
-              control={<Switch />} 
-              label="Only consider women"
-              checked={statsFilters.onlyWomen}
-              value={statsFilters.onlyWomen}
-              onChange={(e, value) => setStatsFilters({ ...statsFilters, onlyWomen: value })}
-            />
-          </Box>
-          <Box>
-            <FormControlLabel 
-              control={<Switch />} 
-              label="Only consider non-binary"
-              checked={statsFilters.onlyNonBinary}
-              value={statsFilters.onlyNonBinary}
-              onChange={(e, value) => setStatsFilters({ ...statsFilters, onlyNonBinary: value })}
-            />
-          </Box>
-        </Box>
-      </AccordionDetails>
-    </Accordion>
+        </AccordionDetails>
+      </Accordion>
+      {!isOpen ? <StatsFiltersSummary /> : null}
+    </>
   )
 }
 
@@ -138,7 +222,7 @@ export function PeopleStatsPanel({ people, type, mode, setStatsFilters, statsFil
   const showMinWatched = mode === "favorite";
 
   return (
-    <Box>
+    <Box sx={{ backgroundColor: "rose" }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Typography variant="h5" sx={{ marginBottom: 3 }}>
           {getTitleByMode(mode, capitalize(type))}

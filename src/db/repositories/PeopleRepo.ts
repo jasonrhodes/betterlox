@@ -27,11 +27,15 @@ function safeDate(dateValue: string | undefined | null) {
 
 function applyOrderBy(orderBy: StatMode, query: SelectQueryBuilder<Person>) {
   if (orderBy === "favorite") {
-    return query.orderBy("AVG(rating.stars)", "DESC");
+    return query
+      .orderBy("ROUND(CAST(AVG(rating.stars) as NUMERIC), 1)", "DESC")
+      .addOrderBy("COUNT(movie.id)", "DESC")
+      .addOrderBy("person.name", "ASC");
   } else if (orderBy === "most") {
     return query
       .orderBy('COUNT(movie.id)', "DESC")
-      .addOrderBy("AVG(rating.stars)", "DESC");
+      .addOrderBy("ROUND(CAST(AVG(rating.stars) as NUMERIC), 1)", "DESC")
+      .addOrderBy("person.name", "ASC");
   } else {
     return query;
   }
@@ -87,6 +91,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
     minWatched,
     dateRange,
     genres,
+    excludedGenres,
     allGenres,
     onlyWomen,
     onlyNonBinary
@@ -98,6 +103,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
     minWatched: UserSettings['statsMinWatched'];
     dateRange: string[];
     genres: string[];
+    excludedGenres: string[];
     allGenres: boolean;
     onlyWomen: boolean;
     onlyNonBinary: boolean;
@@ -120,6 +126,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
         query = andWhereGenderFilter(query, { onlyWomen, onlyNonBinary });
         query = andWhereMovieInDateRange(query, { dateRange });
         query = andWhereMovieInGenres(query, { genres, allGenres });
+        query = andWhereMovieNotInGenres(query, { excludedGenres });
         query = query.groupBy("person.id");
         query = query.having("COUNT(movie.id) >= :minWatched", { minWatched });
         query = query.limit(150); // TODO: Configurable?
@@ -151,6 +158,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
         query = andWhereGenderFilter(query, { onlyWomen, onlyNonBinary });
         query = andWhereMovieInDateRange(query, { dateRange });
         query = andWhereMovieInGenres(query, { genres, allGenres });
+        query = andWhereMovieNotInGenres(query, { excludedGenres });
         query = query.groupBy("person.id");
         query = query.having("COUNT(movie.id) >= :minWatched", { minWatched });
         query = query.limit(150); // TODO: Configurable?
@@ -225,27 +233,19 @@ function andWhereMovieInGenres(query: SelectQueryBuilder<Person>, {
   }
 
   if (allGenres) {
-    return query.andWhere((qb) => {
-      const subQuery = qb.subQuery()
-        .select("movie.id")
-        .from(Movie, "movie")
-        .leftJoin("movie.genres", "genre")
-        .where(`genre.name IN (${genres.map(g => `'${g}'`).join(',')})`)
-        .groupBy("movie.id")
-        .having(`COUNT(movie.id) = ${genres.length}`)
-        .getQuery();
-
-      // JSON.stringify(subQuery, null, 2)
-      
-      // console.log('\n', Object.keys(subQuery), '\n');
-
-      return "movie.id IN " + subQuery;
-    })
+    return query.andWhere(`movie.genres @> '{${genres.join(',')}}'`);
   } else {
     // Not implementing the "ANY" case for genres at this time
     return query;
   }
+}
 
+function andWhereMovieNotInGenres(query: SelectQueryBuilder<Person>, { excludedGenres }: { excludedGenres: string[] }) {
+  if (excludedGenres.length === 0) {
+    return query;
+  }
+
+  return query.andWhere(`NOT(movie.genres && '{${excludedGenres.join(',')}}')`);
 }
 
 interface RawPersonResult {

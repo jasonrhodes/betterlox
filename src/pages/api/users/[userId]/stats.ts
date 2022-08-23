@@ -1,25 +1,10 @@
 import { ApiErrorResponse, StatMode, UserStatsResponse } from "../../../../common/types/api";
 import { getCollectionsRepository, getPeopleRepository } from "../../../../db/repositories";
+import { convertYearsToRange } from "../../../../lib/convertYearsToRange";
 import { numericQueryParam, singleQueryParam, stringListQueryParam } from "../../../../lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
 
-function convertYearsToRange(year?: string) {
-  if (!year) {
-    return [];
-  }
 
-  if (year.startsWith('Decade')) {
-    const startingYear = Number(year.substring(8, 12));
-    const start = `${startingYear}-01-01`;
-    const end = `${startingYear + 9}-12-31`;
-
-    return [start, end];
-  }
-
-  const start = `${year}-01-01`;
-  const end = `${year}-12-31`;
-  return [start, end];
-}
 
 const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
   handlers: {
@@ -31,6 +16,7 @@ const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
       const mode = singleQueryParam<StatMode>(req.query.mode) || 'favorite';
       const dateRange = convertYearsToRange(singleQueryParam(req.query.years));
       const genres = stringListQueryParam(req.query.genres);
+      const excludedGenres = stringListQueryParam(req.query.excludedGenres);
       const allGenres = Boolean(singleQueryParam(req.query.allGenres));
       const onlyWomen = Boolean(singleQueryParam(req.query.onlyWomen));
       const onlyNonBinary = Boolean(singleQueryParam(req.query.onlyNonBinary));
@@ -61,6 +47,7 @@ const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
             minCastOrder,
             dateRange,
             genres,
+            excludedGenres,
             allGenres,
             onlyWomen,
             onlyNonBinary

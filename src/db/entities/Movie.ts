@@ -69,19 +69,12 @@ export class Movie extends BaseEntity {
   @Column({ nullable: true })
   letterboxdSlug: string;
 
-  @ManyToMany(() => Genre, (genre) => genre.movies, { cascade: true, eager: true })
-  @JoinTable({
-    name: "join_movies_genres",
-    joinColumn: {
-      name: "movieId",
-      referencedColumnName: "id"
-    },
-    inverseJoinColumn: {
-      name: "genreId",
-      referencedColumnName: "id"
-    }
+  @Column("text", { 
+    nullable: true,
+    array: true,
+    default: []
   })
-  genres: Relation<Genre[]>;
+  genres: string[];
 
   @ManyToMany(() => ProductionCompany, (pc) => pc.movies, { cascade: true, eager: true })
   @JoinTable({

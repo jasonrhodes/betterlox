@@ -18,9 +18,6 @@ const UserSettingsRoute = createApiRoute<UpdateUserSettingsResponse | ApiErrorRe
 
       const UserSettingsRepo = await getUserSettingsRepository();
       const userId = numericQueryParam(req.query.userId)!;
-
-      console.log('About to update user settings', { ...settings, userId });
-
       const updated = await UserSettingsRepo.preload({ ...settings, userId });
 
       if (updated) {

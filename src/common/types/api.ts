@@ -176,6 +176,7 @@ export interface UpdateUserSettingsResponse extends ApiSuccessResponse {
 export interface StatsFilters {
   years?: string | null;
   genres?: string[];
+  excludedGenres?: string[];
   onlyWomen?: boolean;
   onlyNonBinary?: boolean;
   allGenres?: boolean;
