@@ -1,8 +1,7 @@
-import { query } from "express";
-import { SelectQueryBuilder } from "typeorm";
+import { In, ILike, FindManyOptions, FindOptionsWhere, SelectQueryBuilder } from "typeorm";
 import { getCastRepository, getCrewRepository, getMoviesRepository } from ".";
 import { CREW_JOB_MAP } from "../../common/constants";
-import { PeopleStatsType, PersonStats, StatMode } from "../../common/types/api";
+import { PeopleStatsType, PersonStats, SearchApiResults, StatMode } from "../../common/types/api";
 import { backoff } from "../../lib/backoff";
 import { getErrorAsString } from "../../lib/getErrorAsString";
 import { tmdb, TmdbPerson } from "../../lib/tmdb";
@@ -39,6 +38,14 @@ function applyOrderBy(orderBy: StatMode, query: SelectQueryBuilder<Person>) {
   } else {
     return query;
   }
+}
+
+interface PeopleSearchOptions {
+  limit?: number;
+  ids?: string[];
+  type?: string;
+  namePattern?: string;
+  exactName?: string;
 }
 
 export const getPeopleRepository = async () => (await getDataSource()).getRepository(Person).extend({
@@ -172,6 +179,49 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
       console.log("Query error", getErrorAsString(error));
       throw error;
     }
+  },
+  async searchForApi({
+    limit,
+    ids,
+    type,
+    namePattern,
+    exactName
+  }: PeopleSearchOptions) {
+    const options: FindManyOptions<Person> = {};
+
+    if (limit) {
+      options.take = Number(limit);
+    }
+
+    const where: FindOptionsWhere<Person> = {};
+    
+    if (ids) {
+      where.id = In(ids);
+    }
+    
+    if (type === "actor") {
+      where.castRoles = true;
+    } else if (type) {
+      where.crewRoles = {
+        job: type
+      }
+    }
+    
+    if (namePattern) {
+      where.name = ILike(`%${namePattern.replace(' ', '%')}%`);
+    }
+
+    
+    if (exactName) {
+      where.name = exactName;
+    }
+
+    options.where = where;
+    options.order = {
+      popularity: 'DESC'
+    };
+
+    return this.find(options);
   }
 });
 

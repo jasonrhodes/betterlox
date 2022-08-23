@@ -1,6 +1,6 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import { PeopleApiResponse, RatingsFilters } from '../../common/types/api';
+import { SearchApiResponse } from '../../common/types/api';
 import { Person } from '../../db/entities';
 import { useRatingsFilters } from '../../hooks/GlobalFiltersContext';
 import { useApi } from '../../hooks/useApi';
@@ -10,10 +10,10 @@ export function DirectorLookUp() {
   const [searchValue, updateSearchValue] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
   const [directorOptions, setDirectorOptions] = useState<Person[]>([]);
-  const response = useApi<PeopleApiResponse>(`/api/people?role=Director&name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
+  const response = useApi<SearchApiResponse<Person[]>>(`/api/search?searchType=people&role=Director&name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
 
   useEffect(() => {
-    const filtered = response?.data.people.filter((p) => !ratingsFilters.directors?.includes(p.id));
+    const filtered = response?.data.results?.filter((p) => !ratingsFilters.directors?.includes(p.id));
     setDirectorOptions(filtered || []);
   }, [response, ratingsFilters]);
 

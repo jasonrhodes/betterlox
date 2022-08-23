@@ -23,7 +23,8 @@ const StatsPage: NextPage = () => {
 
   const tabSx: SxProps = {
     textAlign: "left",
-    alignSelf: "start"
+    alignSelf: "start",
+    p: '12px 32px 12px 0'
   };
 
   const tabPanelSx: SxProps = {
@@ -62,6 +63,7 @@ const StatsPage: NextPage = () => {
               borderColor: 'divider', 
               alignItems: "flex-start",
               flexShrink: 0,
+              paddingLeft: 0,
               display: {
                 xs: 'none',
                 md: 'inherit'

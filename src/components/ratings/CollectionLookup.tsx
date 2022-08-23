@@ -1,6 +1,6 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import { CollectionsApiResponse, RatingsFilters } from '../../common/types/api';
+import { CollectionsApiResponse, RatingsFilters, SearchApiResponse, SearchCollection } from '../../common/types/api';
 import { Collection, Person } from '../../db/entities';
 import { useRatingsFilters } from '../../hooks/GlobalFiltersContext';
 import { useApi } from '../../hooks/useApi';
@@ -10,10 +10,10 @@ export function CollectionLookUp() {
   const [searchValue, updateSearchValue] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
   const [collectionOptions, setCollectionOptions] = useState<Pick<Collection, 'id' | 'name'>[]>([]);
-  const response = useApi<CollectionsApiResponse>(`/api/collections?name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
+  const response = useApi<SearchApiResponse<SearchCollection[]>>(`/api/search?searchType=collections&name=${encodeURIComponent(searchValue)}&limit=100`, [searchValue]);
 
   useEffect(() => {
-    const filtered = response?.data.collections.filter((c) => !ratingsFilters.collections?.includes(c.id));
+    const filtered = response?.data.results?.filter((c) => !ratingsFilters.collections?.includes(c.id));
     setCollectionOptions(filtered || []);
   }, [response, ratingsFilters]);
 

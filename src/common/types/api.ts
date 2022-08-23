@@ -134,6 +134,13 @@ export interface CollectionsApiResponse extends ApiSuccessResponse {
   collections: Pick<Collection, 'id' | 'name'>[];
 }
 
+export type SearchCollection = Pick<Collection, 'id' | 'name'>;
+export type SearchApiResults = Person[] | SearchCollection[];
+
+export interface SearchApiResponse<T extends SearchApiResults = SearchApiResults> extends ApiSuccessResponse {
+  results: T;
+}
+
 export interface SyncOneMovieCredits extends ApiSuccessResponse {
   movie: Movie;
   syncedCredits: {

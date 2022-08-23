@@ -11,5 +11,5 @@ export function isCollections(list: PersonStats[] | Collection[], type: AllStats
 
 export function getTitleByMode(mode: StatMode, value: string) {
   const prefix = mode === "most" ? "Most Watched" : "Highest Rated";
-  return `Your ${prefix} ${value}`;
+  return `My ${prefix} ${value}`;
 }

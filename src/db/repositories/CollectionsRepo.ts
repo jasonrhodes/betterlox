@@ -1,3 +1,5 @@
+import { FindManyOptions, FindOptionsWhere, In, ILike } from "typeorm";
+import { SearchCollection } from "../../common/types/api";
 import { Collection } from "../entities";
 import { getDataSource } from "../orm";
 
@@ -6,6 +8,13 @@ interface TmdbCollection {
   name: string;
   poster_path?: string;
   backdrop_path?: string;
+}
+
+interface CollectionsSearchOptions {
+  limit?: number;
+  ids?: string[];
+  namePattern?: string;
+  exactName?: string;
 }
 
 export const getCollectionsRepository = async () => (await getDataSource()).getRepository(Collection).extend({
@@ -43,5 +52,40 @@ export const getCollectionsRepository = async () => (await getDataSource()).getR
       console.log('Error while checking type for belongsToCollection value', errorMessage, JSON.stringify(belongsToCollection));
       return [];
     }
+  },
+  async searchForApi({
+    limit,
+    ids,
+    namePattern,
+    exactName
+  }: CollectionsSearchOptions) {
+    const where: FindOptionsWhere<Collection> = {};
+
+    if (ids) {
+      where.id = In(ids);
+    }
+
+    if (namePattern) {
+      where.name = ILike(`%${namePattern.replace(' ', '%')}%`);
+    }
+
+    if (exactName) {
+      where.name = exactName;
+    }
+
+    const query = this.createQueryBuilder('collection')
+      .select('collection.id', 'id')
+      .addSelect('collection.name', 'name')
+      .addSelect('COUNT(rating.movieId) as ratingCount')
+      .where(where)
+      .leftJoin("collection.movies", "movie")
+      .leftJoin("movie.ratings", "rating")
+      .groupBy('collection.id')
+      .addGroupBy('collection.name')
+      .having('COUNT(rating.movieId) > 0')
+      .orderBy('ratingCount', 'DESC')
+      .take(limit ? Number(limit) : undefined);
+
+    return query.getRawMany<SearchCollection>();
   }
 });

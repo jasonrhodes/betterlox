@@ -17,7 +17,7 @@ const CollectionsApiRoute = createApiRoute<CollectionsApiResponse>({
       const options: FindManyOptions<Collection> = {};
       const limit = singleQueryParam(req.query.limit);
 
-      const where: FindOptionsWhere<Person> = {};
+      const where: FindOptionsWhere<Collection> = {};
       const ids = forceArray(req.query.ids);
       if (ids) {
         where.id = In(ids);
