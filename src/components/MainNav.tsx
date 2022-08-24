@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 
 const pages = [
-  { label: 'Ratings', route: '/ratings' },
+  { label: 'My Films', route: '/films' },
   { label: 'Stats', route: '/stats' },
   { label: 'Lists', route: '/lists' },
 ];

@@ -1,17 +1,17 @@
 import { Close } from "@mui/icons-material";
 import { Drawer, Typography, capitalize } from "@mui/material";
 import { useState, useEffect } from "react";
-import { PeopleStatsType, PersonStats, GlobalFilters } from "../../common/types/api";
-import { Rating } from "../../db/entities";
+import { PeopleStatsType, PersonStats } from "../../common/types/api";
+import { FilmEntry } from "../../db/entities";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";
 import { convertFiltersToQueryString } from "../../lib/convertFiltersToQueryString";
-import { RatingsTable } from "../RatingsTable";
+import { EntriesTable } from "../EntriesTable";
 
 export function PersonDetails({ type, details, setDetails }: { type: PeopleStatsType; details: null | PersonStats; setDetails: (d: null | PersonStats) => void }) {
   const { user } = useCurrentUser();
-  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [entries, setEntries] = useState<FilmEntry[]>([]);
   const { globalFilters } = useGlobalFilters();
 
   useEffect(() => {
@@ -22,26 +22,26 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
       if (!user) {
         return;
       }
-      const queries: string[] = []; // [convertFiltersToQueryString({ [type]: [id] })];
+      const queries: string[] = [];
       if (type === "actors") {
         queries.push(`minCastOrder=${user.settings.statsMinCastOrder}`);
       }
-      queries.push(convertFiltersToQueryString({ ...globalFilters, [type]: id }));
-      const url = `/api/users/${user.id}/ratings?${queries.join('&')}`;
-      const response = await callApi<{ ratings: Rating[] }>(url);
+      queries.push(convertFiltersToQueryString({ ...globalFilters, [type]: [id] }));
+      const url = `/api/users/${user.id}/entries?${queries.join('&')}`;
+      const response = await callApi<{ entries: FilmEntry[] }>(url);
 
       // since the query on the back end can't perform multiple WHERE conditions
       // on a single "movie.genres" field, we exclude movies that contain any of
       // the excluded genres in JS after we've retrieved the list of movies
       // ... this is a TypeORM find options limitation for now
       const { excludedGenres = [] } = globalFilters;
-      const ratings = excludedGenres.length > 0
-        ? response.data.ratings.filter((rating) => {
-          return excludedGenres.every((eg) => !rating.movie.genres.includes(eg))
+      const entries = excludedGenres.length > 0
+        ? response.data.entries.filter((entry) => {
+          return excludedGenres.every((eg) => !entry.movie.genres.includes(eg))
         })
-        : response.data.ratings;
+        : response.data.entries;
       
-      setRatings(ratings);
+      setEntries(entries);
     }
     retrieve(details.id);
   }, [details, type, user, globalFilters]);
@@ -58,8 +58,8 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
     >
       <Typography sx={{ my: 2 }}>{capitalize(type)}{' > '}<b>{details.name}</b></Typography>
       <Close sx={{ cursor: "pointer", position: "absolute", top: 20, right: 20 }} onClick={() => setDetails(null) } />
-      <RatingsTable
-        ratings={ratings}
+      <EntriesTable
+        entries={entries}
       />
     </Drawer>
   )

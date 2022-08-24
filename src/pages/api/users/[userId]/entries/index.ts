@@ -1,16 +1,16 @@
-import { getRatingsRepository } from "../../../../../db/repositories/RatingsRepo";
+import { getFilmEntriesRepository } from "../../../../../db/repositories/FilmEntriesRepo";
 import { numericQueryParam, singleQueryParam, stringListQueryParam } from "../../../../../lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
 import { ArrayContains, ArrayOverlap, Between, FindOptionsWhere, In, LessThanOrEqual, Not } from "typeorm";
-import { Rating } from "../../../../../db/entities";
 import merge from "lodash.merge";
 import { convertYearsToRange } from "../../../../../lib/convertYearsToRange";
+import { FilmEntry } from "../../../../../db/entities";
 
 function first(x: string | string[]) {
   return Array.isArray(x) ? x[0] : x;
 }
 
-function whereJob(jobs: string[], ids: string[]): FindOptionsWhere<Rating> {
+function whereJob(jobs: string[], ids: string[]): FindOptionsWhere<FilmEntry> {
   return {
     movie: {
       crew: {
@@ -23,7 +23,7 @@ function whereJob(jobs: string[], ids: string[]): FindOptionsWhere<Rating> {
   }
 }
 
-const UserRatingsRoute = createApiRoute({
+const UserEntriesRoute = createApiRoute({
   handlers: {
     get: async (req, res) => {
       const releaseDateRange = convertYearsToRange(singleQueryParam(req.query.releaseDateRange));
@@ -32,9 +32,9 @@ const UserRatingsRoute = createApiRoute({
       // start with an array of where clauses that will
       // be reduced back into a single where clause, so
       // that all options will be "AND" joined (not "OR")
-      const wheres: FindOptionsWhere<Rating>[] = [];
+      const wheres: FindOptionsWhere<FilmEntry>[] = [];
 
-      const baselineConditions: FindOptionsWhere<Rating> = {
+      const baselineConditions: FindOptionsWhere<FilmEntry> = {
         userId: numericQueryParam(req.query.userId),
         unsyncable: false
       };
@@ -129,17 +129,14 @@ const UserRatingsRoute = createApiRoute({
       // }));
       
       try {
-        const RatingsRepository = await getRatingsRepository();
-        const ratings = await RatingsRepository.find({
+        const FilmEntriesRepo = await getFilmEntriesRepository();
+        const entries = await FilmEntriesRepo.find({
           where,
           order: {
-            date: "DESC"
-          },
-          relations: {
-            movie: true
+            date: 'ASC'
           }
         });
-        res.json({ ratings });
+        res.json({ entries });
       } catch (err) {
         res.status(500).json({ err });
       }
@@ -147,4 +144,4 @@ const UserRatingsRoute = createApiRoute({
   }
 });
 
-export default UserRatingsRoute;
+export default UserEntriesRoute;

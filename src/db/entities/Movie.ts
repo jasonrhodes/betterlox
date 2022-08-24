@@ -14,7 +14,7 @@ import { Collection } from "./Collection";
 import { CrewRole } from "./CrewRole";
 import { Genre } from "./Genre";
 import { ProductionCompany } from "./ProductionCompany";
-import { Rating } from "./Rating";
+import { FilmEntry } from "./FilmEntry";
 
 @Entity('movies')
 export class Movie extends BaseEntity {
@@ -103,6 +103,6 @@ export class Movie extends BaseEntity {
   @OneToMany(() => CrewRole, (crew) => crew.movie)
   crew: Relation<CrewRole[]>;
 
-  @OneToMany(() => Rating, (rating) => rating.movie)
-  ratings: Relation<Rating[]>;
+  @OneToMany(() => FilmEntry, (entry) => entry.movie)
+  entries: Relation<FilmEntry[]>;
 }

@@ -1,27 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { Box, Grid } from '@mui/material';
-import { GlobalFilters } from '../common/types/api';
 import { callApi } from '../hooks/useApi';
 import { UserPageTemplate } from '../components/PageTemplate';
-import { Rating } from '../db/entities';
+import { FilmEntry } from '../db/entities';
 import { useRouter } from 'next/router';
 import { RatingsFilterControls } from '../components/ratings/RatingsFilterControls';
 import { MobileRatingsFilterControls } from '../components/ratings/MobileRatingsFilterControls';
-import { RatingsTabs } from '../components/ratings/RatingsTabs';
+import { FilmEntryTabs } from '../components/ratings/FilmEntryTabs';
 import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
 import { useGlobalFilters } from '../hooks/GlobalFiltersContext';
 
 function PageContent({ userId }: { userId: number }) {
-  const [unprocessedRatings, updateUnprocessedRatings] = useState<Rating[]>([]);
+  const [unprocessedEntries, updateUnprocessedEntries] = useState<FilmEntry[]>([]);
   const { globalFilters, setGlobalFilters } = useGlobalFilters();
 
   useEffect(() => {
     async function retrieve() {
       const qs = convertFiltersToQueryString(globalFilters);
-      const url = `/api/users/${userId}/ratings?${qs}`;
-      const response = await callApi<{ ratings: Rating[] }>(url);
-      updateUnprocessedRatings(response.data.ratings);
+      const url = `/api/users/${userId}/entries?${qs}`;
+      const response = await callApi<{ entries: FilmEntry[] }>(url);
+      updateUnprocessedEntries(response.data.entries);
     }
     retrieve();
   }, [globalFilters, userId]);
@@ -37,8 +36,8 @@ function PageContent({ userId }: { userId: number }) {
       <Box sx={{ height: 600 }}>
         <Grid container spacing={10} alignItems="flex-start">
           <Grid item xs={12} md={6} lg={5}>
-            <RatingsTabs 
-              unprocessedRatings={unprocessedRatings} 
+            <FilmEntryTabs 
+              unprocessedEntries={unprocessedEntries} 
               filters={globalFilters}
             />
           </Grid>
@@ -53,10 +52,10 @@ function PageContent({ userId }: { userId: number }) {
   );
 }
 
-const RatingsPage: NextPage = () => {
+const EntriesPage: NextPage = () => {
   const router = useRouter();
   return (
-    <UserPageTemplate title="My Ratings">
+    <UserPageTemplate title="My Films">
       {(userContext) => {
         if (!userContext.user) {
           router.replace('/login');
@@ -68,4 +67,4 @@ const RatingsPage: NextPage = () => {
   );
 };
 
-export default RatingsPage;
+export default EntriesPage;

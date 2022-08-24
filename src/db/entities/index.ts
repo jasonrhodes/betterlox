@@ -5,7 +5,7 @@ export * from "./Genre";
 export * from "./Movie";
 export * from "./Person";
 export * from "./ProductionCompany";
-export * from "./Rating";
+export * from "./FilmEntry";
 export * from "./ResetToken";
 export * from "./Sync";
 export * from "./User";

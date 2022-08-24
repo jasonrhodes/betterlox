@@ -3,9 +3,8 @@ import Head from 'next/head';
 import { Box, Breakpoint, Button, CircularProgress, Container, LinearProgress, Typography } from '@mui/material';
 import { MainNav } from "./MainNav";
 import Link from 'next/link';
-import { UserContext, UserContextValue, ValidUserContextValue } from '../hooks/UserContext';
+import { UserContext, ValidUserContextValue } from '../hooks/UserContext';
 import { useRouter } from 'next/router';
-import { UserPublic } from '../common/types/db';
 
 export interface BackLinkProps {
   url: string;
@@ -56,7 +55,7 @@ export const UserPageTemplate: React.FC<UserPageTemplateProps> = ({ children: Ch
         router.push('/login');
       }
     } else if (isAdmin && userContext.user.id !== 1) {
-      router.replace('/ratings');
+      router.replace('/films');
     } else {
       setReady(true);
     }

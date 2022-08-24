@@ -4,7 +4,7 @@ import { UserPublic } from "../../../common/types/db";
 import { getUserRepository } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
-import { syncAllRatingsForUser } from "../../../lib/syncAllRatingsForUser";
+import { syncAllEntriesForUser } from "../../../lib/syncAllEntriesForUser";
 
 interface RegisterApiResponseSuccess {
   success: true;
@@ -51,7 +51,7 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     res.json({ success: true, created: user });
 
     // after responding to the request, kick off a ratings sync for this user
-    syncAllRatingsForUser({ userId: user.id, username: user.username, order: "DESC" });
+    syncAllEntriesForUser({ userId: user.id, username: user.username, order: "DESC" });
   } catch (error: unknown) {
     if (error instanceof TypeORMError) {
       if (error.message.startsWith("duplicate key value violates unique constraint")) {

@@ -3,7 +3,7 @@ import { UserPublic } from "../../../common/types/db";
 import { getUserRepository, UserRepoError } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
-import { syncAllRatingsForUser } from "../../../lib/syncAllRatingsForUser";
+import { syncAllEntriesForUser } from "../../../lib/syncAllEntriesForUser";
 
 interface LoginApiResponseSuccess {
   success: true;
@@ -28,7 +28,7 @@ const LoginRoute: NextApiHandler<LoginApiResponse> = async (req, res) => {
     res.json({ success: true, user });
 
     // after responding to the request, kick off a ratings sync for this user
-    syncAllRatingsForUser({ userId: user.id, username: user.username, order: "ASC" });
+    syncAllEntriesForUser({ userId: user.id, username: user.username, order: "ASC" });
   } catch (error: unknown) {
     if (error instanceof UserRepoError) {
       res.statusCode = 401;

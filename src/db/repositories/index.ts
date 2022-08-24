@@ -5,7 +5,7 @@ export * from "./GenresRepo";
 export * from "./MoviesRepo";
 export * from "./PeopleRepo";
 export * from "./ProductionCompaniesRepo";
-export * from "./RatingsRepo";
+export * from "./FilmEntriesRepo";
 export * from "./ResetTokensRepo";
 export * from "./SyncRepo";
 export * from "./UserRepo";

@@ -6,7 +6,7 @@ import { handleGenericError } from "../../../../../lib/apiErrorHandler";
 import { getErrorAsString } from "../../../../../lib/getErrorAsString";
 import { numericQueryParam } from "../../../../../lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
-import { syncAllRatingsForUser, SyncRatingsError } from "../../../../../lib/syncAllRatingsForUser";
+import { syncAllEntriesForUser, SyncLetterboxdError } from "../../../../../lib/syncAllEntriesForUser";
 
 const UserSyncRoute = createApiRoute<UserRatingsSyncApiResponse | ApiErrorResponse>({
   handlers: {
@@ -34,20 +34,21 @@ const UserSyncRoute = createApiRoute<UserRatingsSyncApiResponse | ApiErrorRespon
       try {
         sync.type = SyncType.USER_RATINGS;
         SyncsRepo.startSync(sync);
-        const { synced } = await syncAllRatingsForUser({
+        const { synced } = await syncAllEntriesForUser({
           userId: numericUserId,
           username: user?.username,
           order: "ASC" 
         });
-        SyncsRepo.endSync(sync, { status: SyncStatus.COMPLETE, numSynced: synced.length || 0 });
-        res.status(200).json({ success: true, synced, count: synced.length });
+        const numSynced = synced.watches.length + synced.ratings.length;
+        SyncsRepo.endSync(sync, { status: SyncStatus.COMPLETE, numSynced });
+        res.status(200).json({ success: true, synced, count: numSynced });
       } catch (error: unknown) {
         SyncsRepo.endSync(sync, { 
           status: SyncStatus.FAILED,
           numSynced: 0,
           errorMessage: getErrorAsString(error) 
         });
-        if (error instanceof SyncRatingsError) {
+        if (error instanceof SyncLetterboxdError) {
           const { message } = error;
           res.status(500).json({ success: false, code: 500, message });
         } else {

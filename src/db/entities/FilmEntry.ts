@@ -1,26 +1,26 @@
-import { BaseEntity, Entity, PrimaryColumn, Column, ManyToOne, Relation, JoinColumn } from "typeorm";
+import { Entity, Column, Relation, JoinColumn, PrimaryColumn, ManyToOne } from "typeorm";
 import { Movie } from "./Movie";
 import { User } from "./User";
 
-@Entity("ratings")
-export class Rating extends BaseEntity {
+@Entity("film_entries")
+export class FilmEntry {
   @PrimaryColumn()
   userId: number;
 
   @PrimaryColumn()
   movieId: number;
 
-  @Column({ type: "float" })
-  stars: number;
+  @Column({ nullable: true, type: "float" })
+  stars?: number;
 
-  @Column()
-  date: Date;
+  @Column({ nullable: true })
+  dateRated?: Date;
+
+  @Column({ nullable: true })
+  date?: Date;
 
   @Column()
   name: string;
-
-  @Column({ nullable: true })
-  year: number;
 
   @Column({ nullable: true })
   letterboxdSlug: string;
@@ -32,7 +32,6 @@ export class Rating extends BaseEntity {
     createForeignKeyConstraints: false,
     eager: true
   })
-  @JoinColumn({ name: 'movieId' })
   movie: Relation<Movie>;
 
   @ManyToOne(() => User, (user) => user.ratings)

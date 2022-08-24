@@ -1,8 +1,7 @@
-import { JOB_ALLOW_LIST } from "../../common/constants";
 import { tmdb, TmdbMovie, getMovieInfoSafely } from "../../lib/tmdb";
 import { Movie } from "../entities";
 import { getDataSource } from "../orm";
-import { getCollectionsRepository, getGenresRepository, getProductionCompaniesRepository, getRatingsRepository, getCrewRepository, getCastRepository } from ".";
+import { getCollectionsRepository, getGenresRepository, getProductionCompaniesRepository, getFilmEntriesRepository, getCrewRepository, getCastRepository } from ".";
 import { addCast, addCrew } from "../../lib/addCredits";
 
 export const getMoviesRepository = async () => (await getDataSource()).getRepository(Movie).extend({
@@ -53,10 +52,10 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
       movieId
     })));
 
-    const RatingsRepo = await getRatingsRepository();
+    const FilmEntriesRepo = await getFilmEntriesRepository();
     const saved = await Promise.all(retrievedMovies.map(async ({ tmdbMovie, userId, movieId, slug }) => {
       if (tmdbMovie === null || typeof tmdbMovie.id === "undefined") {
-        await RatingsRepo.update({ movieId, userId }, { unsyncable: true });
+        await FilmEntriesRepo.update({ movieId, userId }, { unsyncable: true });
         return null;
       }
 

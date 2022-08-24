@@ -1,13 +1,13 @@
 import { Box, Typography } from '@mui/material';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { GlobalFilters, TmdbCollectionByIdResponse, TmdbPersonByIdResponse } from '../common/types/api';
-import { Movie, Rating } from '../db/entities';
+import { Movie, FilmEntry } from '../db/entities';
 import { callApi } from '../hooks/useApi';
 import { TMDBImage } from './images';
 import { ImdbSearchLink, LetterboxdSearchLink } from './externalServiceLinks';
 
 interface GetMissingOptions {
-  ratings: Rating[];
+  entries: FilmEntry[];
   filters: GlobalFilters;
 }
 
@@ -61,15 +61,15 @@ function MissingMovieListItem({ movie }: { movie: MissingMovie }) {
   );
 }
 
-export async function getMissingMoviesForFilters({ ratings, filters }: GetMissingOptions): Promise<MissingMovie[]> {
+export async function getMissingMoviesForFilters({ entries, filters }: GetMissingOptions): Promise<MissingMovie[]> {
   const missing: MissingMovie[] = [];
-  const currentRatingIds = ratings.map(r => r.movieId);
+  const currentEntryIds = entries.map(r => r.movieId);
 
   if (filters.actors?.length) {
     const actors = (await Promise.all(filters.actors.map((actorId) => callApi<TmdbPersonByIdResponse>(`/api/tmdb/people/${actorId}`)))).map(response => response.data?.person);
     actors.forEach((actor) => {
       actor.movie_credits.cast?.forEach((credit) => {
-        if (credit.id && credit.title && typeof credit.popularity === "number" && !currentRatingIds.includes(credit.id)) {
+        if (credit.id && credit.title && typeof credit.popularity === "number" && !currentEntryIds.includes(credit.id)) {
           missing.push({
             id: credit.id,
             reason: `${actor.name} plays ${credit.character || '(unknown)'}`,
@@ -90,7 +90,7 @@ export async function getMissingMoviesForFilters({ ratings, filters }: GetMissin
     const directors = (await Promise.all(filters.directors.map((personId) => callApi<TmdbPersonByIdResponse>(`/api/tmdb/people/${personId}`)))).map(response => response.data?.person);
     directors.forEach((person) => {
       person.movie_credits.crew?.forEach((role) => {
-        if (role.id && role.title && role.job === "Director" && typeof role.popularity === "number" && !currentRatingIds.includes(role.id)) {
+        if (role.id && role.title && role.job === "Director" && typeof role.popularity === "number" && !currentEntryIds.includes(role.id)) {
           missing.push({
             id: role.id,
             reason: `Directed by ${person.name}`,
@@ -119,7 +119,7 @@ export async function getMissingMoviesForFilters({ ratings, filters }: GetMissin
         continue;
       }
       for (const movie of collection.parts) {
-        if (!movie.id || !movie.title || typeof movie.popularity !== "number" || currentRatingIds.includes(movie.id)) {
+        if (!movie.id || !movie.title || typeof movie.popularity !== "number" || currentEntryIds.includes(movie.id)) {
           continue;
         }
         missing.push({

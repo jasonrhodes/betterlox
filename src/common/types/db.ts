@@ -1,10 +1,10 @@
 import { TmdbCast } from "../../lib/tmdb";
-import { Movie, Rating, User } from "../../db/entities";
+import { Movie, User, FilmEntry } from "../../db/entities";
 
 export type UserPublic = Omit<User, "password" | "salt" | "hashUserPassword" | "checkPassword"> & {
   isAdmin?: boolean;
 };
-export type RatedMovie = Movie & Pick<Rating, "stars" | "year">;
+export type RatedMovie = Movie & Pick<FilmEntry, "stars">;
 export type RatedTmdbCast = TmdbCast & { rating?: number };
 
 export enum SyncStatus {

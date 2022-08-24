@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
-import { Rating } from "../db/entities";
+import { FilmEntry } from "../db/entities";
 import { getDataImageTagFromUrl } from "./dataImageUtils";
 const MAX_TRIES = 5;
 
@@ -114,15 +114,65 @@ export async function findLastRatingsPage(username: string) {
   return Number(lastPage);
 }
 
-interface ScrapeRatingsByPageOptions {
+export async function findLastWatchesPage(username: string) {
+  const { data } = await tryLetterboxd(`https://letterboxd.com/${username}/films/`);
+  const $ = cheerio.load(data);
+  const lastPageLink = $('.paginate-pages li.paginate-page:last-child');
+  const lastPage = lastPageLink.text();
+  return Number(lastPage);
+}
+
+interface ScrapeByPageOptions {
   username: string;
   page?: number;
+}
+
+export async function scrapeWatchesByPage({
+  username,
+  page = 1
+}: ScrapeByPageOptions): Promise<{ watches: Array<Partial<FilmEntry>> }> {
+  const { data } = await tryLetterboxd(
+    `https://letterboxd.com/${username}/films/by/date/page/${page}`
+  );
+  const $ = cheerio.load(data);
+  const watchElements = $('.poster-list li');
+
+  if (!watchElements.length) {
+    return { watches: [] };
+  }
+
+  const watches = await Promise.all(watchElements.map(async (i, item) => {
+    const w: Partial<FilmEntry> = {};
+
+    const poster = $(item).find('.film-poster');
+    const filmData = poster.data();
+
+    if (typeof filmData.filmSlug === "string") {
+      w.letterboxdSlug = filmData.filmSlug;
+      const { data } = await tryLetterboxd(filmData.filmSlug);
+      const $$ = cheerio.load(data);
+      const { tmdbId } = $$("body").data();
+      const id = Number(tmdbId);
+      if (!isNaN(id)) {
+        w.movieId = id;
+      }
+    }
+
+    const name = $(item).find("img")?.attr()?.alt;
+    if (typeof name === "string") {
+      w.name = name;
+    }
+
+    return w;
+  }).get());
+
+  return { watches };
 }
 
 export async function scrapeRatingsByPage({
   username,
   page = 1
-}: ScrapeRatingsByPageOptions): Promise<{ ratings: Array<Promise<Partial<Rating>>> }> {
+}: ScrapeByPageOptions): Promise<{ ratings: Array<Partial<FilmEntry>> }> {
   const { data } = await tryLetterboxd(
     `https://letterboxd.com/${username}/films/ratings/page/${page}`
   );
@@ -134,8 +184,8 @@ export async function scrapeRatingsByPage({
   }
 
   // process ratings
-  const ratings = await ratingElements.map(async (i, item) => {
-    const r: Partial<Rating> = {};
+  const ratings = await Promise.all(ratingElements.map(async (i, item) => {
+    const r: Partial<FilmEntry> = {};
 
     const poster = $(item).find('.film-poster');
     const ratingData = poster.data();
@@ -167,7 +217,7 @@ export async function scrapeRatingsByPage({
     }
 
     return r;
-  }).get();
+  }).get());
 
   return { ratings };
 }

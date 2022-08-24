@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique, Relation, OneToOne, JoinColumn } from "typeorm";
 import { getSalt, hash, getRememberMeToken } from "../../lib/hashPassword";
-import { Rating } from "./Rating";
+import { FilmEntry } from "./FilmEntry";
 import { UserSettings } from "./UserSettings";
 
 @Entity('users')
@@ -39,8 +39,8 @@ export class User {
   @OneToOne(() => UserSettings, (settings) => settings.user, { cascade: true, nullable: true })
   settings: Relation<UserSettings>;
 
-  @ManyToOne(() => Rating, rating => rating.user)
-  ratings: Relation<Rating[]>;
+  @ManyToOne(() => FilmEntry, entry => entry.user)
+  ratings: Relation<FilmEntry[]>;
 
   @BeforeInsert()
   hashUserPassword() {

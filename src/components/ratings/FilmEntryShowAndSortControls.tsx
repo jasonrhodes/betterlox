@@ -4,7 +4,7 @@ import { SortBy, SortDir } from "./helpers";
 
 type StateChanger<T> = (value: T) => void;
 
-export interface RatingsShowAndSortControlsOptions {
+export interface FilmEntryShowAndSortControlsOptions {
   show: number | "all";
   handleShowChange: StateChanger<SelectChangeEvent<number | "all">>;
   sortBy: SortBy;
@@ -13,14 +13,15 @@ export interface RatingsShowAndSortControlsOptions {
   handleSortDirClick: () => void;
 }
 
-export function RatingsShowAndSortControls({
+export function FilmEntryShowAndSortControls({
   show,
   handleShowChange,
   sortBy,
   handleSortByChange,
   sortDir,
   handleSortDirClick
-}: RatingsShowAndSortControlsOptions) {
+}: FilmEntryShowAndSortControlsOptions) {
+  console.log('initializing show and sort controls', sortBy);
   return (
     <Box sx={{ marginBottom: '20px' }}>
       {/* <Box sx={{ display: { xs: 'none', md: 'inline-block' }}}>
@@ -58,7 +59,7 @@ export function RatingsShowAndSortControls({
           autoWidth
           onChange={handleSortByChange}
         >
-          <MenuItem selected={sortBy === "date"} value="date">Date Rated</MenuItem>
+          <MenuItem selected={sortBy === "dateRated"} value="dateRated">Date Rated</MenuItem>
           <MenuItem selected={sortBy === "stars"} value="stars">Your Rating</MenuItem>
           <MenuItem selected={sortBy === "movie.title"} value="movie.title">Movie Title</MenuItem>
         </Select>

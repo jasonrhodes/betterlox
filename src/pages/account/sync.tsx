@@ -1,6 +1,6 @@
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
-import { Avatar, Button, Box, Typography, Link, Alert, CircularProgress, Grid } from '@mui/material';
+import { Avatar, Button, Box, Typography, Link, Alert, CircularProgress, Grid, Paper } from '@mui/material';
 import React, { useState } from 'react';
 import { callApi } from '../../hooks/useApi';
 import { UserRatingsSyncApiResponse, ApiErrorResponse } from '../../common/types/api';
@@ -8,9 +8,14 @@ import { getErrorAsString } from '../../lib/getErrorAsString';
 
 type SyncingState = 'none' | 'syncing' | 'success' | 'failed';
 
+interface NumSynced {
+  watches: number;
+  ratings: number;
+}
+
 interface ResponseMessageProps {
   resyncState: SyncingState;
-  numSynced: number;
+  numSynced: NumSynced;
   syncError: string | null;
 }
 
@@ -21,18 +26,15 @@ function ResponseMessage({ resyncState, numSynced, syncError }: ResponseMessageP
   const alertVariant = "filled";
   if (resyncState === "syncing") {
     return (
-      <Alert severity="info" variant={alertVariant}>
-        <Grid container spacing={2} justifyItems="center" alignItems="center">
-          <Grid item><Typography>Sync in progress, please wait.</Typography></Grid>
-          <Grid item><CircularProgress /></Grid>
-        </Grid>
+      <Alert severity="info" variant={alertVariant} action={<CircularProgress color="primary" size="small" />}>
+        Sync in progress, please wait.
       </Alert>
     );
   }
   if (resyncState === "success") {
     return (
       <Alert severity="success" variant={alertVariant}>
-        <Typography>Sync complete! {numSynced || 0} ratings synced.</Typography>
+        <Typography>Sync complete! {numSynced.ratings} ratings and {numSynced.watches} watches synced.</Typography>
       </Alert>
     );
   }
@@ -49,7 +51,7 @@ function ResponseMessage({ resyncState, numSynced, syncError }: ResponseMessageP
 
 const AccountSyncPage: NextPage = () => {
   const [resyncState, setResyncState] = useState<SyncingState>('none');
-  const [numSynced, setNumSynced] = useState<number>(0);
+  const [numSynced, setNumSynced] = useState<NumSynced>({ watches: 0, ratings: 0 });
   const [syncError, setSyncError] = useState<string | null>(null);
 
   const handleSyncClick = async (userId: number) => {
@@ -59,8 +61,9 @@ const AccountSyncPage: NextPage = () => {
         method: 'POST'
       });
       if (response.success && 'synced' in response.data) {
+        const { synced } = response.data;
         setResyncState("success");
-        setNumSynced(response.data.synced.length);
+        setNumSynced({ ratings: synced.ratings.length, watches: synced.watches.length });
       } else {
         setResyncState("failed");
         setSyncError("Sync may have failed")
@@ -73,11 +76,11 @@ const AccountSyncPage: NextPage = () => {
   };
 
   return (
-    <UserPageTemplate title="Sync Data" maxWidth='lg'>
+    <UserPageTemplate title="Sync Data" maxWidth='md'>
       {({ user }) => (
-        <Box>
+        <Paper elevation={5} sx={{ p: 5 }}>
           <Avatar src={user.avatarUrl} sx={{ height: 100, width: 100, mb: 2, boxShadow: "0 0 1px rgba(0,0,0,0.8)" }} />
-          <Typography sx={{ mb: 5 }} variant="body1" component="div">Syncing your data will gather your latest <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/ratings`}>ratings</Link> and <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/lists`}>lists</Link> (coming soon) from Letterboxd and make them available here.</Typography>
+          <Typography sx={{ mb: 5 }} variant="body1" component="div">Syncing your data will gather your latest <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/by/date`}>watches</Link>, <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/ratings`}>ratings</Link>, and <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/lists`}>lists</Link> (coming soon) from Letterboxd and make them available here.</Typography>
 
           <ResponseMessage resyncState={resyncState} numSynced={numSynced} syncError={syncError} />
 
@@ -88,7 +91,7 @@ const AccountSyncPage: NextPage = () => {
             }
             {/* <Button disabled={true}>Remove My Data</Button> */}
           </Box>
-        </Box>
+        </Paper>
       )}
     </UserPageTemplate>
   )
