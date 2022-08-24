@@ -75,7 +75,7 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
   async function login({ email, password, rememberMe }: LoginOptions) {
     const response = await api.login({ email, password, rememberMe });
     const publicUser = { ...response.data.user, isAdmin: isAdmin(response.data.user) }
-    setUser(response.data.user);
+    setUser(publicUser);
     if (response.data.user.rememberMeToken) {
       try {
         const now = new Date();

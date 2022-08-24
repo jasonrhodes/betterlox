@@ -1,13 +1,16 @@
 import { TextField, FormControl, CircularProgress } from "@mui/material";
-import { useState, ChangeEventHandler, FocusEventHandler, KeyboardEventHandler } from "react";
+import { useState, ChangeEventHandler, FocusEventHandler, KeyboardEventHandler, useCallback, useEffect } from "react";
 import { UserSettings } from "../../db/entities";
 import { useCurrentUser } from "../../hooks/UserContext";
+import debounce from "just-debounce";
 
 export interface BaseSettingsFieldOptions {
   label: string;
   helperText?: string | React.ReactNode;
   type?: 'number' | 'email' | 'password';
   settingsKey: keyof Omit<UserSettings, 'user'>;
+  min?: number;
+  max?: number;
 }
 
 export function UserSettingStatsMinWatched({ 
@@ -19,6 +22,7 @@ export function UserSettingStatsMinWatched({
       settingsKey="statsMinWatched"
       label="Stats: Minimum Watched" 
       helperText={helperText}
+      min={0}
     />
   );
 }
@@ -32,6 +36,7 @@ export function UserSettingStatsMinCastOrder({
       settingsKey="statsMinCastOrder"
       label="Stats: Lowest Cast Order" 
       helperText={helperText}
+      min={1}
     />
   );
 }
@@ -40,11 +45,20 @@ export function BaseSettingsField({
   label, 
   helperText, 
   type, 
-  settingsKey
+  settingsKey,
+  min,
+  max
 }: BaseSettingsFieldOptions) {
   const { user, updateSettings } = useCurrentUser();
+  const [localValue, setLocalValue] = useState<any>(user?.settings[settingsKey]);
   const [isTempEmpty, setIsTempEmpty] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLocalValue(user?.settings[settingsKey]);
+  }, [user, settingsKey]);
+
+  const debouncedUpdateSettings = useCallback(debounce(updateSettings, 200), [updateSettings]);
     
   if (!user || typeof user.settings[settingsKey] === "undefined") {
     return null;
@@ -55,8 +69,18 @@ export function BaseSettingsField({
       setIsTempEmpty(true);
       return;
     }
+    if (type === "number" && (typeof min === "number" || typeof max === "number")) {
+      const value = Number(e.target.value);
+      if (typeof min === "number" && value < min) {
+        return;
+      }
+      if (typeof max === "number" && value > max) {
+        return;
+      }
+    }
     setIsUpdating(true);
-    await updateSettings({ [settingsKey]: e.target.value });
+    setLocalValue(e.target.value);
+    await debouncedUpdateSettings({ [settingsKey]: e.target.value });
     setIsTempEmpty(false);
     setIsUpdating(false);
   }
@@ -65,7 +89,7 @@ export function BaseSettingsField({
     <FormControl>
       <TextField 
         type={type} 
-        value={isTempEmpty ? "" : user.settings[settingsKey]}
+        value={isTempEmpty ? "" : localValue}
         disabled={isUpdating}
         label={label} 
         helperText={helperText}

@@ -22,12 +22,12 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
       if (!user) {
         return;
       }
-      let qs = convertFiltersToQueryString({ [type]: [id] });
+      const queries: string[] = []; // [convertFiltersToQueryString({ [type]: [id] })];
       if (type === "actors") {
-        qs += `&minCastOrder=${user.settings.statsMinCastOrder}`;
+        queries.push(`minCastOrder=${user.settings.statsMinCastOrder}`);
       }
-      qs += convertFiltersToQueryString(globalFilters);
-      const url = `/api/users/${user.id}/ratings?${qs}`;
+      queries.push(convertFiltersToQueryString({ ...globalFilters, [type]: id }));
+      const url = `/api/users/${user.id}/ratings?${queries.join('&')}`;
       const response = await callApi<{ ratings: Rating[] }>(url);
 
       // since the query on the back end can't perform multiple WHERE conditions

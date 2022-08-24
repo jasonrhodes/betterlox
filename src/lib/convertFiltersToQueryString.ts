@@ -1,9 +1,7 @@
 import { GlobalFilters } from "../common/types/api";
 
-type FilterValue = string | number | boolean | Array<FilterValue>;
-
 export function convertFiltersToQueryString(filters: GlobalFilters) {
-  const keys = Object.keys(filters) as Array<keyof GlobalFilters>;
+  const keys = Object.keys(filters) as Array<keyof GlobalFilters>;  
   const queries = keys.reduce<string[]>((queries, key) => {
     const values = filters[key];
     if (!values) {

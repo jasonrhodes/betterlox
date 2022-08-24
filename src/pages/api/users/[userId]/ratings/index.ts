@@ -57,7 +57,8 @@ const UserRatingsRoute = createApiRoute({
 
       if (req.query.actors) {
         const actors = first(req.query.actors);
-        const minCastOrder = numericQueryParam(req.query.minCastOrder, 10000); // super high default if not provided
+        const minCastOrder = numericQueryParam(req.query.minCastOrder, 10000) - 1; // super high default if not provided, subtract 1 because the number is 1-indexed but needs to be zero-indexed for the real queries
+
         wheres.push({
           movie: {
             cast: {
