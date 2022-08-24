@@ -35,7 +35,7 @@ function RatingCard({ rating }: { rating: Rating }) {
         {poster}
       </Box>
       <Box>
-        <Typography><b>{rating.movie?.title || rating.name}</b></Typography>
+        <Typography><b>{rating.movie?.title || rating.name}</b> ({rating.movie.releaseDate.substring(0, 4)})</Typography>
         <Box sx={{ marginBottom: "-7px" }}><StarRating color="primary" score={rating.stars} /></Box>
         <Box><Typography variant="caption">{(new Date(rating.date)).toLocaleDateString()}</Typography></Box>
         <Box sx={{ display: "flex", py: 1 }}>
