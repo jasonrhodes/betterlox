@@ -34,7 +34,7 @@ export class FilmEntry {
   })
   movie: Relation<Movie>;
 
-  @ManyToOne(() => User, (user) => user.ratings)
+  @ManyToOne(() => User, (user) => user.ratings, { eager: true })
   @JoinColumn({ name: 'userId' })
   user: Relation<User>;
 }

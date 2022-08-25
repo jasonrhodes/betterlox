@@ -5,6 +5,7 @@ import { ArrayContains, ArrayOverlap, Between, FindOptionsWhere, In, LessThanOrE
 import merge from "lodash.merge";
 import { convertYearsToRange } from "../../../../../lib/convertYearsToRange";
 import { FilmEntry } from "../../../../../db/entities";
+import { NOTFOUND } from "dns";
 
 function first(x: string | string[]) {
   return Array.isArray(x) ? x[0] : x;
@@ -133,7 +134,10 @@ const UserEntriesRoute = createApiRoute({
         const entries = await FilmEntriesRepo.find({
           where,
           order: {
-            date: 'ASC'
+            dateRated: 'DESC'
+          },
+          relations: {
+            movie: true
           }
         });
         res.json({ entries });

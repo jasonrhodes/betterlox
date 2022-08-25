@@ -1,5 +1,5 @@
 import { TextField, Box, Tabs, Tab, FormControl, Typography } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { GlobalFilters } from "../../common/types/api";
 import { FilmEntry } from "../../db/entities";
 import { escapeRegExp } from "../../lib/escapeRegex";
@@ -12,6 +12,23 @@ import { FilmEntryShowAndSortControls } from "./FilmEntryShowAndSortControls";
 interface FilmEntryTabsOptions {
   unprocessedEntries: FilmEntry[];
   filters: GlobalFilters;
+}
+
+function removeInvalidEntries(entries: FilmEntry[], sortBy: SortBy) {
+  switch (sortBy) {
+    case 'dateRated':
+      entries = entries.filter((e) => Boolean(e.dateRated));
+      break;
+    case 'stars':
+      entries = entries.filter((e) => Boolean(e.stars));
+      break;
+    case 'movie.title':
+      entries = entries.filter((e) => Boolean(e.movie?.title));
+      break;
+  }
+
+  entries = entries.filter((e) => Boolean(e.movie));
+  return entries;
 }
 
 export function FilmEntryTabs({
@@ -27,9 +44,31 @@ export function FilmEntryTabs({
   const [sortDir, setSortDir] = React.useState<SortDir>("DESC");
   const [processedEntries, updateProcessedEntries] = useState<FilmEntry[]>([]);
 
+  // const validated = useMemo(
+  //   () => removeInvalidEntries(unprocessedEntries, sortBy), 
+  //   [unprocessedEntries, sortBy]
+  // );
+
+  // const filtered = useMemo(
+  //   () => applyTitleFilter(quickTitleSearch, validated),
+  //   [quickTitleSearch, validated]
+  // );
+
+  // const filteredSorted = useMemo(
+  //   () => { console.log('sort'); return applySort(sortBy, sortDir, filtered) },
+  //   [sortBy, sortDir, filtered]
+  // );
+
+  // const processedEntries = useMemo(
+  //   () => { console.log('slice'); return show === "all" ? filteredSorted : filteredSorted.slice(0, show) },
+  //   [filteredSorted, show]
+  // );
+
   useEffect(() => {
+    // TODO: Look into how to avoid re-validating the same data over and over
+    const validated = removeInvalidEntries(unprocessedEntries, sortBy);
     // TODO: Look into how to avoid re-filtering the same data with the same filter
-    const filtered = applyTitleFilter(quickTitleSearch, unprocessedEntries);
+    const filtered = applyTitleFilter(quickTitleSearch, validated);
     // TODO: Look into how to avoid re-sorting the same data over and over
     const filteredSorted = applySort(sortBy, sortDir, filtered);
     const filteredSortedSliced = show === "all" ? filteredSorted : filteredSorted.slice(0, show);

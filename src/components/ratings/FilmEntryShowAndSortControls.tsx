@@ -21,7 +21,6 @@ export function FilmEntryShowAndSortControls({
   sortDir,
   handleSortDirClick
 }: FilmEntryShowAndSortControlsOptions) {
-  console.log('initializing show and sort controls', sortBy);
   return (
     <Box sx={{ marginBottom: '20px' }}>
       {/* <Box sx={{ display: { xs: 'none', md: 'inline-block' }}}>

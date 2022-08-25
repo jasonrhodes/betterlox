@@ -1,6 +1,4 @@
-import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from "typeorm";
-import { PeopleApiResponse, SearchApiResponse } from "../../../common/types/api";
-import { Person } from "../../../db/entities";
+import { SearchApiResponse } from "../../../common/types/api";
 import { getCollectionsRepository, getPeopleRepository } from "../../../db/repositories";
 import { numericQueryParam, singleQueryParam } from "../../../lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";

@@ -5,7 +5,7 @@ import { PeopleStatsType, PersonStats, SearchApiResults, StatMode } from "../../
 import { backoff } from "../../lib/backoff";
 import { getErrorAsString } from "../../lib/getErrorAsString";
 import { tmdb, TmdbPerson } from "../../lib/tmdb";
-import { Movie, Person, UserSettings } from "../entities";
+import { Person, UserSettings } from "../entities";
 import { getDataSource } from "../orm";
 
 function forceUndefined(value: string | undefined | null) {
@@ -27,13 +27,13 @@ function safeDate(dateValue: string | undefined | null) {
 function applyOrderBy(orderBy: StatMode, query: SelectQueryBuilder<Person>) {
   if (orderBy === "favorite") {
     return query
-      .orderBy("ROUND(CAST(AVG(rating.stars) as NUMERIC), 1)", "DESC")
+      .orderBy("ROUND(CAST(AVG(entry.stars) as NUMERIC), 1)", "DESC")
       .addOrderBy("COUNT(movie.id)", "DESC")
       .addOrderBy("person.name", "ASC");
   } else if (orderBy === "most") {
     return query
       .orderBy('COUNT(movie.id)', "DESC")
-      .addOrderBy("ROUND(CAST(AVG(rating.stars) as NUMERIC), 1)", "DESC")
+      .addOrderBy("ROUND(CAST(AVG(entry.stars) as NUMERIC), 1)", "DESC")
       .addOrderBy("person.name", "ASC");
   } else {
     return query;
@@ -126,10 +126,11 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
           .innerJoin("person.castRoles", "castRole")
           .innerJoin("castRole.movie", "movie");
 
-        query = addRatingsJoin(query, { userId });
+        query = addEntriesJoin(query, { userId });
         query = selectAverageRating(query);
         query = selectCountRated(query);
         query = query.where('castRole.castOrder <= :maxCastOrder', { maxCastOrder: minCastOrder })
+        query = andWhereRatingExists(query, { orderBy });
         query = andWhereGenderFilter(query, { onlyWomen, onlyNonBinary });
         query = andWhereMovieInDateRange(query, { dateRange });
         query = andWhereMovieInGenres(query, { genres, allGenres });
@@ -158,10 +159,11 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
           .innerJoin("crewRole.movie", "movie");
           // .innerJoin("movie.genres", "genre");
         
-        query = addRatingsJoin(query, { userId });
+        query = addEntriesJoin(query, { userId });
         query = selectAverageRating(query);
         query = selectCountRated(query);
         query = query.where(`crewRole.job IN (${jobs})`);
+        query = andWhereRatingExists(query, { orderBy });
         query = andWhereGenderFilter(query, { onlyWomen, onlyNonBinary });
         query = andWhereMovieInDateRange(query, { dateRange });
         query = andWhereMovieInGenres(query, { genres, allGenres });
@@ -225,26 +227,34 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
   }
 });
 
-function addRatingsJoin(query: SelectQueryBuilder<Person>, { userId }: { userId: number }) {
+function addEntriesJoin(query: SelectQueryBuilder<Person>, { userId }: { userId: number }) {
   return query.innerJoin((sub) => {
-    return sub.select(["stars", `"rating"."movieId"`])
-      .from("ratings", "rating")
-      .distinctOn(["rating.movieId"])
-      .where("rating.userId = :userId", { userId })
-      .orderBy("rating.movieId", "ASC")
-      .addOrderBy("rating.date", "DESC");
-  }, "rating", `"rating"."movieId" = movie.id`)
+    return sub.select(["stars", `"entry"."movieId"`])
+      .from("film_entries", "entry")
+      .distinctOn(["entry.movieId"])
+      .where("entry.userId = :userId", { userId })
+      .orderBy("entry.movieId", "ASC")
+      .addOrderBy("entry.date", "DESC");
+  }, "entry", `"entry"."movieId" = movie.id`)
 }
 
 function selectAverageRating(query: SelectQueryBuilder<Person>) {
-  return query.addSelect('AVG(rating.stars) as average_rating');
+  return query.addSelect('AVG(entry.stars) as average_rating');
 }
 
 function selectCountRated(query: SelectQueryBuilder<Person>) {
   return query.addSelect('COUNT(movie.id) as count_rated');
 }
 
+function andWhereRatingExists(query: SelectQueryBuilder<Person>, { orderBy }: { orderBy: StatMode }) {
+  if (orderBy === 'favorite') {
+    return query.andWhere('entry IS NOT NULL');
+  }
+  return query;
+}
+
 function andWhereMovieInDateRange(query: SelectQueryBuilder<Person>, { dateRange }: { dateRange: string[] }) {
+  console.log("Evaluating Date Range", dateRange.join(','));
   if (dateRange.length === 2) {
     return query.andWhere('movie.releaseDate BETWEEN :start AND :end', {
       start: dateRange[0],

@@ -34,11 +34,14 @@ function EntryCard({ entry }: { entry: FilmEntry }) {
         {poster}
       </Box>
       <Box>
-        <Typography><b>{entry.movie.title || entry.name}</b> ({entry.movie.releaseDate.substring(0, 4)})</Typography>
-        <Box sx={{ marginBottom: "-7px" }}>
-          {entry.stars ? <StarRating color="primary" score={entry.stars} /> : <Typography>Unrated</Typography>}
+        <Typography><b>{entry.movie?.title || entry.name}</b> ({entry.movie?.releaseDate.substring(0, 4)})</Typography>
+        <Box>
+          {entry.stars ? 
+            <Box sx={{ marginBottom: "-7px" }}><StarRating color="primary" score={entry.stars} /></Box> : 
+            <Typography variant="caption" sx={{ my: 0.5 }}>Unrated</Typography>
+          }
         </Box> 
-        {entry.date ? <Box><Typography variant="caption">{(new Date(entry.date)).toLocaleDateString()}</Typography></Box> : null}
+        {entry.dateRated ? <Box><Typography variant="caption">{(new Date(entry.dateRated)).toLocaleDateString()}</Typography></Box> : null}
         <Box sx={{ display: "flex", py: 1 }}>
           <Box sx={{ marginRight: 1 }}>
             <LetterboxdLink username={user?.username} slug={slug} />
@@ -53,7 +56,7 @@ function EntryCard({ entry }: { entry: FilmEntry }) {
 }
 
 export function EntriesTable({ entries = [] }: EntriesTableProps) {
-  const getRowId = React.useCallback((row: typeof entries[number]) => row.name + '-' + row.movie.releaseDate, []);
+  const getRowId = React.useCallback((row: typeof entries[number]) => row.name + '-' + row.movie?.releaseDate, []);
   
   return (
     <DisplayTable<FilmEntry>

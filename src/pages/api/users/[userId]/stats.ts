@@ -4,17 +4,18 @@ import { convertYearsToRange } from "../../../../lib/convertYearsToRange";
 import { numericQueryParam, singleQueryParam, stringListQueryParam } from "../../../../lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
 
-
-
 const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
   handlers: {
     get: async (req, res) => {
       const userId = numericQueryParam(req.query.userId);
       const minWatched = numericQueryParam(req.query.minWatched, 1);
-      const minCastOrder = numericQueryParam(req.query.minCastOrder, 26) - 1; // needs to be zero-indexed but UI will show it as 1-indexed
+      
+      // needs to be zero-indexed but UI will show it as 1-indexed
+      const minCastOrder = numericQueryParam(req.query.minCastOrder, 26) - 1;
+      
       const type = singleQueryParam(req.query.type);
       const mode = singleQueryParam<StatMode>(req.query.mode) || 'favorite';
-      const dateRange = convertYearsToRange(singleQueryParam(req.query.years));
+      const dateRange = convertYearsToRange(singleQueryParam(req.query.releaseDateRange));
       const genres = stringListQueryParam(req.query.genres);
       const excludedGenres = stringListQueryParam(req.query.excludedGenres);
       const allGenres = Boolean(singleQueryParam(req.query.allGenres));

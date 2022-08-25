@@ -1,4 +1,5 @@
 import { FilmEntry } from "../../db/entities";
+import { getErrorAsString } from "../../lib/getErrorAsString";
 
 export type SortBy = 'dateRated' | 'stars' | 'movie.title';
 export type SortDir = 'ASC' | 'DESC';
@@ -22,31 +23,38 @@ export function applySort(sortBy: SortBy, sortDir: SortDir, entries: FilmEntry[]
     return [];
   }
   const sorted = entries.sort((a, b) => {
-    switch (sortBy) {
-      case 'dateRated':
-        if (a.date === undefined || b.date === undefined) {
+    try {
+      switch (sortBy) {
+        case 'dateRated':
+          if (a.dateRated === undefined || b.dateRated === undefined) {
+            return 0;
+          }
+          if (sortDir === 'ASC') {
+            return a.dateRated < b.dateRated ? -1 : 1;
+          } else {
+            return a.dateRated > b.dateRated ? -1 : 1;
+          }
+        case 'stars':
+          if (a.stars === undefined || b.stars === undefined) {
+            return 0;
+          }
+          if (sortDir === 'ASC') {
+            return a.stars < b.stars ? -1 : 1;
+          } else {
+            return a.stars > b.stars ? -1 : 1;
+          }
+        case 'movie.title':
+          if (sortDir === 'ASC') {
+            return a.movie.title.localeCompare(b.movie.title);
+          } else {
+            return a.movie.title.localeCompare(b.movie.title) * -1;
+          }
+        default:
           return 0;
-        }
-        if (sortDir === 'ASC') {
-          return a.date < b.date ? -1 : 1;
-        } else {
-          return a.date > b.date ? -1 : 1;
-        }
-      case 'stars':
-        if (a.stars === undefined || b.stars === undefined) {
-          return 0;
-        }
-        if (sortDir === 'ASC') {
-          return a.stars < b.stars ? -1 : 1;
-        } else {
-          return a.stars > b.stars ? -1 : 1;
-        }
-      case 'movie.title':
-        if (sortDir === 'ASC') {
-          return a.movie.title.localeCompare(b.movie.title);
-        } else {
-          return a.movie.title.localeCompare(b.movie.title) * -1;
-        }
+      }
+    } catch (error: unknown) {
+      console.log('oh no an error hath happened', getErrorAsString(error), a.name);
+      throw error;
     }
   });
   return sorted;
