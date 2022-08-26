@@ -1,5 +1,5 @@
 import { TextField, Box, Tabs, Tab, FormControl, Typography } from "@mui/material";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { GlobalFilters } from "../../common/types/api";
 import { FilmEntry } from "../../db/entities";
 import { escapeRegExp } from "../../lib/escapeRegex";
@@ -12,6 +12,7 @@ import { FilmEntryShowAndSortControls } from "./FilmEntryShowAndSortControls";
 interface FilmEntryTabsOptions {
   unprocessedEntries: FilmEntry[];
   filters: GlobalFilters;
+  isReloading: boolean;
 }
 
 function removeInvalidEntries(entries: FilmEntry[], sortBy: SortBy) {
@@ -33,15 +34,17 @@ function removeInvalidEntries(entries: FilmEntry[], sortBy: SortBy) {
 
 export function FilmEntryTabs({
   unprocessedEntries, 
-  filters
+  filters,
+  isReloading
 }: FilmEntryTabsOptions) {
-  const [value, setValue] = React.useState<number>(0);
-  const [activeFilterCount, setActiveFilterCount] = React.useState<number>(0);
+  const [value, setValue] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [activeFilterCount, setActiveFilterCount] = useState<number>(0);
   const [missing, setMissing] = useState<MissingMovie[]>([]);
   const [quickTitleSearch, updateQuickTitleSearch] = useState<string>('');
-  const [show, setShow] = React.useState<"all" | number>(100);
-  const [sortBy, setSortBy] = React.useState<SortBy>("dateRated");
-  const [sortDir, setSortDir] = React.useState<SortDir>("DESC");
+  const [show, setShow] = useState<"all" | number>(100);
+  const [sortBy, setSortBy] = useState<SortBy>("dateRated");
+  const [sortDir, setSortDir] = useState<SortDir>("DESC");
   const [processedEntries, updateProcessedEntries] = useState<FilmEntry[]>([]);
 
   // const validated = useMemo(
@@ -65,6 +68,7 @@ export function FilmEntryTabs({
   // );
 
   useEffect(() => {
+    setIsProcessing(true);
     // TODO: Look into how to avoid re-validating the same data over and over
     const validated = removeInvalidEntries(unprocessedEntries, sortBy);
     // TODO: Look into how to avoid re-filtering the same data with the same filter
@@ -74,9 +78,10 @@ export function FilmEntryTabs({
     const filteredSortedSliced = show === "all" ? filteredSorted : filteredSorted.slice(0, show);
 
     updateProcessedEntries(filteredSortedSliced);
+    setIsProcessing(false);
   }, [quickTitleSearch, unprocessedEntries, sortBy, sortDir, show])
 
-  const handleQuickTitleSearchChange = React.useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
+  const handleQuickTitleSearchChange = useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateQuickTitleSearch(escapeRegExp(event.target.value));
   }, []);
 
@@ -141,7 +146,7 @@ export function FilmEntryTabs({
         <FormControl sx={{ marginBottom: 2 }}>
           <TextField size="small" label="Quick Title Filter" value={quickTitleSearch} onChange={handleQuickTitleSearchChange} />
         </FormControl>
-        <EntriesTable entries={processedEntries} />
+        <EntriesTable entries={processedEntries} isLoading={isReloading || isProcessing} />
       </TabPanel>
       <TabPanel value={value} index={1}>
         {activeFilterCount === 0 ? <Typography>No blindspots for these filters.</Typography> : <MissingMovieList movies={missing} />}

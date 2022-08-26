@@ -10,6 +10,7 @@ import { FilmEntry } from '../db/entities';
 
 interface EntriesTableProps {
   entries: FilmEntry[] | undefined;
+  isLoading: boolean;
 }
 
 function EntryCard({ entry }: { entry: FilmEntry }) {
@@ -55,13 +56,14 @@ function EntryCard({ entry }: { entry: FilmEntry }) {
   );
 }
 
-export function EntriesTable({ entries = [] }: EntriesTableProps) {
+export function EntriesTable({ entries = [], isLoading }: EntriesTableProps) {
   const getRowId = React.useCallback((row: typeof entries[number]) => row.name + '-' + row.movie?.releaseDate, []);
   
   return (
     <DisplayTable<FilmEntry>
       getRowId={getRowId}
-      items={entries}
+      isLoading={isLoading}
+      items={isLoading ? [] : entries}
       columns={[
         {
           name: 'ratings-card',
@@ -71,7 +73,8 @@ export function EntriesTable({ entries = [] }: EntriesTableProps) {
       sx={{
         py: "10px",
         backgroundColor: "inherit",
-        backgroundImage: "none"
+        backgroundImage: "none",
+        boxShadow: "none"
       }}
     />
   );

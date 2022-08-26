@@ -13,6 +13,7 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
   const { user } = useCurrentUser();
   const [entries, setEntries] = useState<FilmEntry[]>([]);
   const { globalFilters } = useGlobalFilters();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (details === null || !user) {
@@ -22,6 +23,7 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
       if (!user) {
         return;
       }
+      setIsLoading(true);
       const queries: string[] = [];
       if (type === "actors") {
         queries.push(`minCastOrder=${user.settings.statsMinCastOrder}`);
@@ -42,6 +44,7 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
         : response.data.entries;
       
       setEntries(entries);
+      setIsLoading(false);
     }
     retrieve(details.id);
   }, [details, type, user, globalFilters]);
@@ -60,6 +63,7 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
       <Close sx={{ cursor: "pointer", position: "absolute", top: 20, right: 20 }} onClick={() => setDetails(null) } />
       <EntriesTable
         entries={entries}
+        isLoading={isLoading}
       />
     </Drawer>
   )

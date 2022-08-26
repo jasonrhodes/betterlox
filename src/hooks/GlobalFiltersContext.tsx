@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react';
+import EventEmitter from 'events';
+import React, { useCallback, useContext, useState } from 'react';
 import { GlobalFilters } from '../common/types/api';
 
 const GlobalFiltersContext = React.createContext<{ 
@@ -6,7 +7,7 @@ const GlobalFiltersContext = React.createContext<{
   setGlobalFilters: (f: GlobalFilters) => void;
 }>({
   globalFilters: {},
-  setGlobalFilters: () => null
+  setGlobalFilters: () => null,
 });
 
 const GlobalFiltersContextConsumer = GlobalFiltersContext.Consumer;

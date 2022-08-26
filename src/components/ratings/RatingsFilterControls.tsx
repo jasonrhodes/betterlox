@@ -12,7 +12,7 @@ export function RatingsFilterControls() {
   return (
     <Grid item container spacing={2} sx={{ paddingBottom: 2 }}>
       <Grid item xs={12}>
-        <Typography variant="body1"><b>Advanced Filters</b></Typography>
+        <Typography variant="body1"><b>Filters</b></Typography>
       </Grid>
       <Grid item xs={12}>
         <CurrentFilters />

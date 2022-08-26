@@ -53,7 +53,7 @@ function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
     options,
     inputValue,
     onChange: (e, incoming) => {
-      const existing = globalFilters[filterKey] as number[];
+      const existing = globalFilters[filterKey] || [];
       if (incoming && Array.isArray(existing)) {
         setGlobalFilters({ ...globalFilters, [filterKey]: [...existing, incoming.id]})
       }
@@ -72,7 +72,6 @@ export function RatingsFilterFieldLookup<T extends Person | SearchCollection>({
   inputLabel = `Filter by ${String(filterKey)}`,
   AutocompleteSx,
   limit = 100,
-  isOptionEqualToValue,
   getOptionLabel
 }: { 
   id?: string;
@@ -96,7 +95,6 @@ export function RatingsFilterFieldLookup<T extends Person | SearchCollection>({
     <FieldLookup 
       acProps={{
         ...acProps,
-        isOptionEqualToValue,
         getOptionLabel
       }}
       id={id}
@@ -125,6 +123,7 @@ function FieldLookup<T>({
       sx={sx}
       open={isOpen}
       clearOnBlur={true}
+      value={null}
       onOpen={() => {
         setIsOpen(true);
       }}

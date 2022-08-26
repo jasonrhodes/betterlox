@@ -14,13 +14,16 @@ import { useGlobalFilters } from '../hooks/GlobalFiltersContext';
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedEntries, updateUnprocessedEntries] = useState<FilmEntry[]>([]);
   const { globalFilters, setGlobalFilters } = useGlobalFilters();
+  const [isReloading, setIsReloading] = useState<boolean>(false);
 
   useEffect(() => {
     async function retrieve() {
+      setIsReloading(true);
       const qs = convertFiltersToQueryString(globalFilters);
       const url = `/api/users/${userId}/entries?${qs}`;
       const response = await callApi<{ entries: FilmEntry[] }>(url);
       updateUnprocessedEntries(response.data.entries);
+      setIsReloading(false);
     }
     retrieve();
   }, [globalFilters, userId]);
@@ -39,6 +42,7 @@ function PageContent({ userId }: { userId: number }) {
             <FilmEntryTabs 
               unprocessedEntries={unprocessedEntries} 
               filters={globalFilters}
+              isReloading={isReloading}
             />
           </Grid>
           <Grid container item xs={0} md={6} lg={7} sx={{ display: { xs: 'none', md: 'inherit' } }}>

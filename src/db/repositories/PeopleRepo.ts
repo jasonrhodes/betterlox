@@ -254,7 +254,6 @@ function andWhereRatingExists(query: SelectQueryBuilder<Person>, { orderBy }: { 
 }
 
 function andWhereMovieInDateRange(query: SelectQueryBuilder<Person>, { dateRange }: { dateRange: string[] }) {
-  console.log("Evaluating Date Range", dateRange.join(','));
   if (dateRange.length === 2) {
     return query.andWhere('movie.releaseDate BETWEEN :start AND :end', {
       start: dateRange[0],

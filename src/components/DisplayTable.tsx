@@ -1,4 +1,4 @@
-import { Box, Paper, SxProps } from "@mui/material";
+import { Box, LinearProgress, Paper, SxProps } from "@mui/material";
 import React from "react";
 
 interface DisplayTableColumnBase<T> {
@@ -22,6 +22,7 @@ export interface DisplayTableProps<T = unknown> {
   getRowId: (item: T) => string | number;
   getRowSx?: (item: T, i: number) => SxProps;
   sx?: SxProps;
+  isLoading: boolean;
 }
 
 export function DisplayTable<T>({
@@ -29,7 +30,8 @@ export function DisplayTable<T>({
   getRowId,
   getRowSx,
   columns,
-  sx
+  sx,
+  isLoading
 }: DisplayTableProps<T>) {
   const rows = items.map((item, i) => ({
     id: getRowId(item),
@@ -42,6 +44,7 @@ export function DisplayTable<T>({
 
   return (
     <Paper className="displayTable" sx={sx}>
+      {isLoading ? <Box sx={{ py: 1 }}><LinearProgress color="primary" /></Box> : null}
       <Box>
         {rows.map((row) => (
           <Box className="displayTable_Row" key={row.id} sx={row.sx}>

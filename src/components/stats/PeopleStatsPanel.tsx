@@ -74,7 +74,7 @@ function PeopleStatFilters() {
       >
         <AccordionSummary expandIcon={<AddBox />}>
           <Box display="flex">
-            <Box sx={{ mr: 1 }}><Typography>QUICK FILTERS</Typography></Box>
+            <Box sx={{ mr: 1 }}><Typography><b>Filters</b></Typography></Box>
           </Box>
         </AccordionSummary>
         <AccordionDetails>

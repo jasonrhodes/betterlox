@@ -54,7 +54,7 @@ export function MobileRatingsFilterControls({
               <RatingsFilterControls />
               <Grid item>
                 <Button 
-                  disabled={appliedFilters === updatedFilters} 
+                  disabled={updatedFilters === appliedFilters}
                   onClick={() => handleApplyClick(updatedFilters)}
                 >Apply Changes</Button>
               </Grid>

@@ -18,7 +18,7 @@ const LoginPage: NextPage = () => {
             return <p>An error occurred while trying to load this page.</p>;
           }
           if (context.user) {
-            router.push('/');
+            router.push('/films');
             return;
           }
           return <LoginForm userContext={context} />
