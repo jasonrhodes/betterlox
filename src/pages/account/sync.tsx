@@ -57,7 +57,7 @@ const AccountSyncPage: NextPage = () => {
   const handleSyncClick = async (userId: number) => {
     setResyncState("syncing");
     try {
-      const response = await callApi<UserRatingsSyncApiResponse | ApiErrorResponse>(`/api/users/${userId}/ratings/sync`, {
+      const response = await callApi<UserRatingsSyncApiResponse | ApiErrorResponse>(`/api/users/${userId}/entries/sync`, {
         method: 'POST'
       });
       if (response.success && 'synced' in response.data) {
