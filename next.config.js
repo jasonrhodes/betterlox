@@ -6,9 +6,14 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/ratings',
-        permanent: true,
+        destination: '/films',
+        permanent: false,
       },
+      {
+        source: '/ratings',
+        destination: '/films',
+        permanent: true
+      }
     ]
   },
   reactStrictMode: true,

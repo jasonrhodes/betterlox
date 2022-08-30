@@ -29,3 +29,5 @@ export enum SyncTrigger {
   SYSTEM = "system",
   USER = "user"
 }
+
+export type TypeOrmEntityMethods = 'hasId' | 'remove' | 'save' | 'softRemove' | 'recover' | 'reload';

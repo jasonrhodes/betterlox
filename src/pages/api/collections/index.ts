@@ -34,14 +34,14 @@ const CollectionsApiRoute = createApiRoute<CollectionsApiResponse>({
       const query = CollectionsRepo.createQueryBuilder('collection')
         .select('collection.id', 'id')
         .addSelect('collection.name', 'name')
-        .addSelect('COUNT(rating.movieId) as ratingCount')
+        .addSelect('COUNT(entry.movieId) as entryCount')
         .where(where)
         .leftJoin("collection.movies", "movie")
-        .leftJoin("movie.ratings", "rating")
+        .leftJoin("movie.entries", "entry")
         .groupBy('collection.id')
         .addGroupBy('collection.name')
-        .having('COUNT(rating.movieId) > 0')
-        .orderBy('ratingCount', 'DESC')
+        .having('COUNT(entry.movieId) > 0')
+        .orderBy('entryCount', 'DESC')
         .take(limit ? Number(limit) : undefined);
 
       const collections = await query.getRawMany<Pick<Collection, 'id' | 'name'>>();

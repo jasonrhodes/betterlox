@@ -22,18 +22,18 @@ export function CurrentFilters() {
 
   return (
     <Box>
-      {globalFilters.releaseDateRange ? <Chip
+      {globalFilters.releaseDateRange?.length ? <Chip
         icon={<CalendarMonth />}
-        label={'Released in ' + globalFilters.releaseDateRange.replace(/^Decade: /, '')}
+        label={'Released: ' + globalFilters.releaseDateRange.replace(/^Decade: /, '')}
         onDelete={() => setGlobalFilters({ ...globalFilters, releaseDateRange: null })}
         sx={ChipSx}
       /> : null}
-      {globalFilters.genres ? <Chip
+      {globalFilters.genres?.length ? <Chip
         icon={<FilterAlt color="secondary" />}
         label={`Genres: ${globalFilters.genres.join(' + ')}`}
         sx={ChipSx}
       /> : null}
-      {globalFilters.excludedGenres ? <Chip
+      {globalFilters.excludedGenres?.length ? <Chip
         icon={<DoNotDisturbOn />}
         label={'Excluded Genres: ' + globalFilters.excludedGenres?.join(', ')}
         sx={ChipSx}

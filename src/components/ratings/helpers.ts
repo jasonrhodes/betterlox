@@ -1,10 +1,11 @@
+import { EntryApiResponse } from "../../common/types/api";
 import { FilmEntry } from "../../db/entities";
 import { getErrorAsString } from "../../lib/getErrorAsString";
 
 export type SortBy = 'dateRated' | 'stars' | 'movie.title';
 export type SortDir = 'ASC' | 'DESC';
 
-export function applyTitleFilter(filterString: string, entries?: FilmEntry[]) {
+export function applyTitleFilter(filterString: string, entries?: EntryApiResponse[]) {
   if (!entries) {
     return [];
   }
@@ -18,7 +19,7 @@ export function applyTitleFilter(filterString: string, entries?: FilmEntry[]) {
   });
 }
 
-export function applySort(sortBy: SortBy, sortDir: SortDir, entries: FilmEntry[]) {
+export function applySort(sortBy: SortBy, sortDir: SortDir, entries: EntryApiResponse[]) {
   if (!Array.isArray(entries)) {
     return [];
   }

@@ -31,7 +31,7 @@ function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
   const [options, setOptions] = useState<T[]>([]);
   let apiEndpoint = `/api/search?searchType=${searchType}&limit=${limit}&role=${String(filterKey)}`;
   const encoded = encodeURIComponent(inputValue);
-  apiEndpoint += encoded ? `&${encoded}` : '';
+  apiEndpoint += `&name=${encoded}`;
   const response = useApi<SearchApiResponse<T[]>>(apiEndpoint, [inputValue, limit, filterKey]);
 
   useEffect(() => {
@@ -54,6 +54,7 @@ function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
     inputValue,
     onChange: (e, incoming) => {
       const existing = globalFilters[filterKey] || [];
+      console.log('change', existing, incoming);
       if (incoming && Array.isArray(existing)) {
         setGlobalFilters({ ...globalFilters, [filterKey]: [...existing, incoming.id]})
       }
@@ -84,7 +85,6 @@ export function RatingsFilterFieldLookup<T extends Person | SearchCollection>({
   isOptionEqualToValue?: (option: T, value: T) => boolean;
   getOptionLabel?: (option: T) => string;
 }) {
-  const { globalFilters, setGlobalFilters } = useGlobalFilters();
   const acProps = useAutocompleteFilterOptions<T>({
     searchType,
     limit,
@@ -122,8 +122,8 @@ function FieldLookup<T>({
       id={id}
       sx={sx}
       open={isOpen}
-      clearOnBlur={true}
       value={null}
+      clearOnBlur={true}
       onOpen={() => {
         setIsOpen(true);
       }}

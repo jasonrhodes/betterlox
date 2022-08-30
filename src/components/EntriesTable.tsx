@@ -6,14 +6,14 @@ import { DisplayTable } from './DisplayTable';
 import { Box, Typography } from '@mui/material';
 import { useCurrentUser } from '../hooks/UserContext';
 import { ImdbLink, LetterboxdLink } from './externalServiceLinks';
-import { FilmEntry } from '../db/entities';
+import { EntryApiResponse } from '../common/types/api';
 
 interface EntriesTableProps {
-  entries: FilmEntry[] | undefined;
+  entries: EntryApiResponse[] | undefined;
   isLoading: boolean;
 }
 
-function EntryCard({ entry }: { entry: FilmEntry }) {
+function EntryCard({ entry }: { entry: EntryApiResponse }) {
   const { user } = useCurrentUser();
   const sharedProps: Partial<ImageProps> = {
     height: 100,
@@ -60,7 +60,7 @@ export function EntriesTable({ entries = [], isLoading }: EntriesTableProps) {
   const getRowId = React.useCallback((row: typeof entries[number]) => row.name + '-' + row.movie?.releaseDate, []);
   
   return (
-    <DisplayTable<FilmEntry>
+    <DisplayTable<EntryApiResponse>
       getRowId={getRowId}
       isLoading={isLoading}
       items={isLoading ? [] : entries}

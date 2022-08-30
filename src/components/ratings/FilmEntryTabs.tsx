@@ -1,21 +1,21 @@
 import { TextField, Box, Tabs, Tab, FormControl, Typography } from "@mui/material";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { GlobalFilters } from "../../common/types/api";
+import { EntryApiResponse, GlobalFilters } from "../../common/types/api";
 import { FilmEntry } from "../../db/entities";
 import { escapeRegExp } from "../../lib/escapeRegex";
 import { EntriesTable } from "../EntriesTable";
 import { TabPanel, a11yTabProps } from "../TabPanel";
-import { MissingMovie, getMissingMoviesForFilters, MissingMovieList } from "../UserMissingMovies";
+import { MissingMovie, getBlindspotsForFilters, BlindspotList, Blindspots } from "../UserBlindspots";
 import { SortBy, SortDir, applyTitleFilter, applySort } from "./helpers";
 import { FilmEntryShowAndSortControls } from "./FilmEntryShowAndSortControls";
 
 interface FilmEntryTabsOptions {
-  unprocessedEntries: FilmEntry[];
+  unprocessedEntries: EntryApiResponse[];
   filters: GlobalFilters;
   isReloading: boolean;
 }
 
-function removeInvalidEntries(entries: FilmEntry[], sortBy: SortBy) {
+function removeInvalidEntries(entries: EntryApiResponse[], sortBy: SortBy) {
   switch (sortBy) {
     case 'dateRated':
       entries = entries.filter((e) => Boolean(e.dateRated));
@@ -45,27 +45,7 @@ export function FilmEntryTabs({
   const [show, setShow] = useState<"all" | number>(100);
   const [sortBy, setSortBy] = useState<SortBy>("dateRated");
   const [sortDir, setSortDir] = useState<SortDir>("DESC");
-  const [processedEntries, updateProcessedEntries] = useState<FilmEntry[]>([]);
-
-  // const validated = useMemo(
-  //   () => removeInvalidEntries(unprocessedEntries, sortBy), 
-  //   [unprocessedEntries, sortBy]
-  // );
-
-  // const filtered = useMemo(
-  //   () => applyTitleFilter(quickTitleSearch, validated),
-  //   [quickTitleSearch, validated]
-  // );
-
-  // const filteredSorted = useMemo(
-  //   () => { console.log('sort'); return applySort(sortBy, sortDir, filtered) },
-  //   [sortBy, sortDir, filtered]
-  // );
-
-  // const processedEntries = useMemo(
-  //   () => { console.log('slice'); return show === "all" ? filteredSorted : filteredSorted.slice(0, show) },
-  //   [filteredSorted, show]
-  // );
+  const [processedEntries, updateProcessedEntries] = useState<EntryApiResponse[]>([]);
 
   useEffect(() => {
     setIsProcessing(true);
@@ -105,7 +85,7 @@ export function FilmEntryTabs({
 
   useEffect(() => {
     async function retrieve() {
-      const missing = await getMissingMoviesForFilters({ entries: unprocessedEntries, filters });
+      const missing = await getBlindspotsForFilters({ entries: unprocessedEntries, filters });
       setMissing(missing);
     }
     const filterKeys = Object.keys(filters) as Array<keyof GlobalFilters>;
@@ -134,7 +114,7 @@ export function FilmEntryTabs({
           <Tab label="Blindspots" {...a11yTabProps(1)} />
         </Tabs>
       </Box>
-      <TabPanel value={value} index={0}>
+      <TabPanel value={value} index={0} sx={{ paddingLeft: 0 }}>
         <FilmEntryShowAndSortControls
           show={show}
           handleShowChange={handleShowChange}
@@ -149,7 +129,8 @@ export function FilmEntryTabs({
         <EntriesTable entries={processedEntries} isLoading={isReloading || isProcessing} />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        {activeFilterCount === 0 ? <Typography>No blindspots for these filters.</Typography> : <MissingMovieList movies={missing} />}
+        <Blindspots entries={unprocessedEntries} />
+        {/* {activeFilterCount === 0 ? <Typography>No blindspots for these filters.</Typography> : <BlindspotList movies={missing} />} */}
       </TabPanel>
     </Box>
   );

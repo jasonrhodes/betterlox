@@ -1,7 +1,7 @@
 import { Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings, FilmEntry } from "../../db/entities";
 import { TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "../../lib/tmdb";
 import { CREW_JOB_MAP } from "../constants";
-import { RatedMovie, RatedTmdbCast } from "./db";
+import { RatedMovie, RatedTmdbCast, TypeOrmEntityMethods } from "./db";
 
 export type OrderDirection = "ASC" | "DESC";
 export type ImageConfig = TmdbConfigurationResponse["images"];
@@ -142,3 +142,32 @@ export interface UpdateUserSettingsResponse extends ApiSuccessResponse {
   settings: UserSettings | undefined;
 }
 
+export interface EntryQueryResult {
+  entry_letterboxdSlug: string;
+  entry_movieId: number;
+  entry_name: string;
+  entry_unsyncable: false;
+  entry_userId: number;
+  entry_stars?: number;
+  entry_dateRated?: Date;
+  movie_id: number;
+  movie_backdropPath: string;
+  movie_imdbId: string;
+  movie_originalLanguage: string;
+  movie_originalTitle: string;
+  movie_posterPath: string;
+  movie_popularity: number;
+  movie_runtime: number;
+  movie_releaseDate: string;
+  movie_letterboxdSlug: string;
+  movie_title: string;
+  movie_genres: string[];
+  movie_tagline: string;
+}
+
+export type EntryMovie = Omit<Movie, 'overview' | 'syncedCredits' | 'syncedProductionCompanies' | 'syncedCollections' | 'productionCompanies' | 'productionCountries' | 'cast' | 'crew' | 'collections' | 'status' | 'entries' | TypeOrmEntityMethods>;
+export type EntryApiResponse = Omit<FilmEntry, 'user' | 'movie'> & { movie: EntryMovie };
+
+export interface EntriesApiResponse extends ApiSuccessResponse {
+  entries: EntryApiResponse[];
+}

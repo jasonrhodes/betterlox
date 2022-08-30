@@ -10,9 +10,10 @@ import { MobileRatingsFilterControls } from '../components/ratings/MobileRatings
 import { FilmEntryTabs } from '../components/ratings/FilmEntryTabs';
 import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
 import { useGlobalFilters } from '../hooks/GlobalFiltersContext';
+import { EntriesApiResponse, EntryApiResponse } from '../common/types/api';
 
 function PageContent({ userId }: { userId: number }) {
-  const [unprocessedEntries, updateUnprocessedEntries] = useState<FilmEntry[]>([]);
+  const [unprocessedEntries, updateUnprocessedEntries] = useState<EntryApiResponse[]>([]);
   const { globalFilters, setGlobalFilters } = useGlobalFilters();
   const [isReloading, setIsReloading] = useState<boolean>(false);
 
@@ -21,7 +22,7 @@ function PageContent({ userId }: { userId: number }) {
       setIsReloading(true);
       const qs = convertFiltersToQueryString(globalFilters);
       const url = `/api/users/${userId}/entries?${qs}`;
-      const response = await callApi<{ entries: FilmEntry[] }>(url);
+      const response = await callApi<EntriesApiResponse>(url);
       updateUnprocessedEntries(response.data.entries);
       setIsReloading(false);
     }
