@@ -1,5 +1,5 @@
 import { SyncRounded } from "@mui/icons-material";
-import { ApiErrorResponse, UserRatingsSyncApiResponse } from "../../../../../common/types/api";
+import { ApiErrorResponse, UserEntriesSyncApiResponse } from "../../../../../common/types/api";
 import { SyncStatus, SyncTrigger, SyncType } from "../../../../../common/types/db";
 import { getSyncRepository, getUserRepository } from "../../../../../db/repositories";
 import { handleGenericError } from "../../../../../lib/apiErrorHandler";
@@ -8,7 +8,7 @@ import { numericQueryParam } from "../../../../../lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
 import { syncAllEntriesForUser, SyncLetterboxdError } from "../../../../../lib/syncAllEntriesForUser";
 
-const UserSyncRoute = createApiRoute<UserRatingsSyncApiResponse | ApiErrorResponse>({
+const UserSyncRoute = createApiRoute<UserEntriesSyncApiResponse | ApiErrorResponse>({
   handlers: {
     post: async (req, res) => {
       const { userId = '' } = req.query;

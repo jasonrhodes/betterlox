@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppBar, Container, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Button, Tooltip, Avatar, Divider, Grid } from "@mui/material";
-import MenuIcon from '@mui/icons-material/Menu';
+import { Lock, Menu as MenuIcon } from '@mui/icons-material';
 import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
 import { UserPublic } from '../common/types/db';
@@ -14,7 +14,7 @@ const pages = [
 ];
 
 const adminPages = [
-  { label: 'Manage Syncs', route: '/admin/syncs' }
+  { label: 'Admin', route: '/admin' }
 ];
 
 const loggedOutMenuItems = [

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
-import { Box, Grid, MenuItem, MenuList, Paper, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Grid, IconButton, MenuItem, MenuList, Paper, Tooltip, Typography } from '@mui/material';
 import { DataGrid, GridValueFormatterParams } from '@mui/x-data-grid';
 import { Sync } from '../../db/entities';
-import { callApi } from '../../hooks/useApi';
-import { SyncsManagementGetResponse } from '../../common/types/api';
+import { callApi, useApi } from '../../hooks/useApi';
+import { SyncsManagementGetResponse, UsersApiResponse } from '../../common/types/api';
+import { useCurrentUser } from '../../hooks/UserContext';
+import { UserPublicSafe } from '../../common/types/db';
+import { SupervisorAccount, SwitchAccessShortcut } from '@mui/icons-material';
 
 function SyncHistoryTable() {
   const [syncs, setSyncs] = useState<Sync[]>([]);
@@ -89,32 +92,86 @@ function SyncHistoryTable() {
   )
 }
 
-type TabName = 'history' | 'un-ratings-movies' | 'un-movies-cast' | 'un-movies-crew' | 'un-cast-people' | 'un-crew-people';
+function UserManagementPage() {
+  const response = useApi<UsersApiResponse>('/api/users?limit=250');
+  return (
+    <Box>
+      <Typography variant="h6" sx={{ py: 2 }}>User Management</Typography>
+      <ManageUsersList data={response?.data} />
+    </Box>
+  );
+}
 
-function SyncMenu({ currentTab, setCurrentTab }: { currentTab: TabName, setCurrentTab: (t: TabName) => void }) {
+function ManageUsersList({ data }: { data?: UsersApiResponse }) {
+  const { user: currentUser, switchUser } = useCurrentUser();
+
+  if (data && !data.success) {
+    return <Typography>{data.message}</Typography>
+  }
+
+  return (
+    <DataGrid
+      sx={{
+        minHeight: 700
+      }}
+      loading={!data}
+      rows={data?.users || []}
+      columns={[
+        {
+          field: 'id',
+          headerName: 'ID',
+          width: 75
+        },
+        {
+          field: 'name',
+          headerName: 'Name',
+          width: 200
+        },
+        {
+          field: 'username',
+          headerName: 'Username',
+          width: 200
+        },
+        {
+          field: 'isAdmin',
+          headerName: '',
+          width: 100,
+          sortable: false,
+          renderCell: ({ row }) => row.isAdmin ? (
+            <SupervisorAccount />
+          ) : ''
+        },
+        {
+          field: '',
+          headerName: '',
+          sortable: false,
+          width: 100,
+          renderCell: ({ row }) => row.id !== currentUser?.id ? (
+            <IconButton onClick={() => switchUser(row.id)}><SwitchAccessShortcut /></IconButton>
+          ) : ''
+        }
+      ]}
+    />
+  )
+}
+
+type TabName = 'sync-history' | 'unsynced' | 'user-management';
+
+function AdminMenu({ currentTab, setCurrentTab }: { currentTab: TabName, setCurrentTab: (t: TabName) => void }) {
   const itemPadding = 1.5;
   return (
     <>
       <Typography variant="h6" sx={{ py: 2 }}>Sync Management</Typography>
       <Paper sx={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}>
         <MenuList>
-          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "history"} onClick={() => setCurrentTab("history")}>
+          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "user-management"} onClick={() => setCurrentTab("user-management")}>
+            <Typography>User Management</Typography>
+          </MenuItem>
+          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "sync-history"} onClick={() => setCurrentTab("sync-history")}>
             <Typography>Sync History</Typography>
           </MenuItem>
-          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "un-ratings-movies"} onClick={() => setCurrentTab("un-ratings-movies")}>
-            <Typography>Unsynced Ratings/Movies</Typography>
-          </MenuItem>
-          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "un-movies-cast"} onClick={() => setCurrentTab("un-movies-cast")}>
-            <Typography>Unsynced Movies/Cast</Typography>
-          </MenuItem>
-          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "un-movies-crew"} onClick={() => setCurrentTab("un-movies-crew")}>
-            <Typography>Unsynced Movies/Crew</Typography>
-          </MenuItem>
-          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "un-cast-people"} onClick={() => setCurrentTab("un-cast-people")}>
-            <Typography>Unsynced Cast/People</Typography>
-          </MenuItem>
-          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "un-crew-people"} onClick={() => setCurrentTab("un-crew-people")}>
-            <Typography>Unsynced Crew/People</Typography>
+          <MenuItem sx={{ py: itemPadding }} selected={currentTab === "unsynced"} onClick={() => setCurrentTab("unsynced")}>
+            <Typography>Unsynced Summary</Typography>
           </MenuItem>
         </MenuList>
       </Paper>
@@ -122,7 +179,7 @@ function SyncMenu({ currentTab, setCurrentTab }: { currentTab: TabName, setCurre
   )
 }
 
-function UnsyncedTable({ type }: { type: Omit<TabName, 'history'> }) {
+function UnsyncedTable({ type }: { type: Omit<TabName, 'sync-history'> }) {
   return (
     <Box>
       <Typography variant="h6" sx={{ py: 2 }}>{type}</Typography>
@@ -130,26 +187,28 @@ function UnsyncedTable({ type }: { type: Omit<TabName, 'history'> }) {
   );
 }
 
-function CurrentSyncTab({ currentTab }: { currentTab: TabName }) {
+function CurrentAdminTab({ currentTab }: { currentTab: TabName }) {
   switch (currentTab) {
-    case 'history':
+    case 'sync-history':
       return <SyncHistoryTable />;
+    case 'user-management':
+      return <UserManagementPage />;
     default:
       return <UnsyncedTable type={currentTab} />
   }
 }
 
-const AdminSyncsPage: NextPage = () => {
-  const [currentTab, setCurrentTab] = useState<TabName>('history');
+const AdminPage: NextPage = () => {
+  const [currentTab, setCurrentTab] = useState<TabName>('user-management');
   return (
-    <UserPageTemplate title="Admin | Syncs" isAdmin maxWidth='xl'>
+    <UserPageTemplate title="Admin Management" isAdmin maxWidth='xl'>
       {({ user }) => (
         <Grid container spacing={8}>
           <Grid item xs={12} md={3}>
-            <SyncMenu currentTab={currentTab} setCurrentTab={setCurrentTab} />
+            <AdminMenu currentTab={currentTab} setCurrentTab={setCurrentTab} />
           </Grid>
           <Grid item xs={12} md={9}>
-            <CurrentSyncTab currentTab={currentTab} />
+            <CurrentAdminTab currentTab={currentTab} />
           </Grid>
         </Grid>
       )}
@@ -157,4 +216,4 @@ const AdminSyncsPage: NextPage = () => {
   )
 }
 
-export default AdminSyncsPage;
+export default AdminPage;

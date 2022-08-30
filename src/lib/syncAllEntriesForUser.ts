@@ -252,6 +252,9 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
     throw new SyncLetterboxdError(message, { synced: syncedRatings, username });
   }
 
+  // set last synced date for this user
+  await UsersRepo.setLastEntriesUpdated(userId);
+
   const synced: {
     ratings: FilmEntry[];
     watches: FilmEntry[];

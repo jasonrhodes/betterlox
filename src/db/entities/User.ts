@@ -33,11 +33,14 @@ export class User {
   @Column()
   avatarUrl: string;
 
-  @Column({ nullable: true })
+  @Column({ default: 'basic' })
   letterboxdAccountLevel: 'basic' | 'pro' | 'patron';
 
+  @Column({ nullable: true })
+  lastEntriesUpdate: Date;
+
   @OneToOne(() => UserSettings, (settings) => settings.user, { cascade: true, nullable: true })
-  settings: Relation<UserSettings>;
+  settings: Relation<UserSettings> | null;
 
   @ManyToOne(() => FilmEntry, entry => entry.user)
   ratings: Relation<FilmEntry[]>;

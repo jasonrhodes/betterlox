@@ -50,17 +50,17 @@ export function BaseSettingsField({
   max
 }: BaseSettingsFieldOptions) {
   const { user, updateSettings } = useCurrentUser();
-  const [localValue, setLocalValue] = useState<any>(user?.settings[settingsKey]);
+  const [localValue, setLocalValue] = useState<any>(user?.settings && user?.settings[settingsKey]);
   const [isTempEmpty, setIsTempEmpty] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   useEffect(() => {
-    setLocalValue(user?.settings[settingsKey]);
+    setLocalValue(user?.settings ? user?.settings[settingsKey] : '');
   }, [user, settingsKey]);
 
   const debouncedUpdateSettings = useCallback(debounce(updateSettings, 200), [updateSettings]);
     
-  if (!user || typeof user.settings[settingsKey] === "undefined") {
+  if (!user || !user?.settings || typeof user?.settings[settingsKey] === "undefined") {
     return null;
   } 
 

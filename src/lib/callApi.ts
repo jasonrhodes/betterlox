@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { ApiErrorResponse, ApiSuccessResponse } from "../common/types/api";
 import { LetterboxdAccountLevel } from "../common/types/base";
-import { UserPublic } from "../common/types/db";
+import { UserPublic, UserResponse } from "../common/types/db";
 import { ApiGetLetterboxdDetailsResponse } from "../pages/api/letterboxd";
 import { CheckTokenApiRequest, CheckTokenApiResponse } from "../pages/api/users/check-token";
 
@@ -19,7 +19,7 @@ interface User {
 }
 
 interface ApiLoginResponse {
-  user: UserPublic;
+  user: UserResponse;
 }
 
 interface ApiCheckIfExistsResponse {

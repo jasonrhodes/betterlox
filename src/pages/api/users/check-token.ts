@@ -1,4 +1,4 @@
-import { UserPublic } from "../../../common/types/db";
+import { UserResponse } from "../../../common/types/db";
 import { UserRepoError, getUserRepository } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
@@ -6,7 +6,7 @@ import { createApiRoute } from "../../../lib/routes";
 
 interface CheckTokenApiResponseSuccess {
   success: true;
-  user: UserPublic;
+  user: UserResponse;
 }
 
 interface CheckTokenApiResponseFailure {

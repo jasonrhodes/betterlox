@@ -1,9 +1,12 @@
 import { TmdbCast } from "../../lib/tmdb";
 import { Movie, User, FilmEntry } from "../../db/entities";
 
-export type UserPublic = Omit<User, "password" | "salt" | "hashUserPassword" | "checkPassword"> & {
+export type UserResponse = Omit<User, "password" | "salt" | "hashUserPassword" | "checkPassword"> & {
   isAdmin?: boolean;
 };
+export type UserPublicSafe = Omit<UserResponse, "rememberMeToken">;
+export type UserPublic = UserResponse | UserPublicSafe;
+
 export type RatedMovie = Movie & Pick<FilmEntry, "stars">;
 export type RatedTmdbCast = TmdbCast & { rating?: number };
 

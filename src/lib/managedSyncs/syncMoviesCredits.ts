@@ -2,6 +2,7 @@ import { SyncType, SyncStatus } from "../../common/types/db";
 import { CastRole, CrewRole, Movie, Sync } from "../../db/entities";
 import { getSyncRepository, getMoviesRepository } from "../../db/repositories";
 import { addCast, addCrew } from "../addCredits";
+import { getErrorAsString } from "../getErrorAsString";
 import { tmdb } from "../tmdb";
 
 export async function syncOneMovieCredits(movie: Movie) {
@@ -9,18 +10,17 @@ export async function syncOneMovieCredits(movie: Movie) {
   const syncedCrewRoles: CrewRole[] = [];
   const { cast, crew } = await tmdb.movieCredits(movie.id);
   try {
+    console.log(`Syncing cast for movie:${movie.id}/${movie.title}`);
     const castRoles = await addCast({ cast, movie });
-    castRoles.forEach(c => syncedCastRoles.push(c));
-  } catch (error) {
-    console.log('Cast add error', error instanceof Error ? error.message : error);
-    throw error;
+    castRoles.forEach(c => c ? syncedCastRoles.push(c) : null);
+  } catch (error: unknown) {
+    console.log(getErrorAsString(error));
   }
   try {
     const crewRoles = await addCrew({ crew, movie });
-    crewRoles.forEach(c => syncedCrewRoles.push(c));
+    crewRoles.forEach(c => c ? syncedCrewRoles.push(c) : null);
   } catch (error) {
-    console.log('Crew add error', error instanceof Error ? error.message : error);
-    throw error;
+    console.log(getErrorAsString(error));
   }
 
   return { syncedCastRoles, syncedCrewRoles };

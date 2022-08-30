@@ -1,23 +1,13 @@
 import React, { useContext, useEffect } from 'react';
-import { UserPublic } from '../common/types/db';
+import { UserPublicSafe, UserResponse, UserPublic } from '../common/types/db';
 import api from '../lib/callApi';
 import { useCookies } from 'react-cookie';
 import { useRouter } from 'next/router';
 import { UserSettings } from '../db/entities';
 import { callApi } from './useApi';
-import { UpdateUserSettingsResponse } from '../common/types/api';
+import { UpdateUserSettingsResponse, UserApiResponse } from '../common/types/api';
 import { getErrorAsString } from '../lib/getErrorAsString';
-
-const ADMIN_USER_IDS = [1];
-
-function isAdmin(user?: UserPublic) {
-  return Boolean(user && user.id && ADMIN_USER_IDS.includes(user.id));
-}
-
-interface User {
-  id: number;
-  letterboxd: string;
-}
+import { isAdmin } from '../lib/isAdmin';
 
 interface LoginOptions {
   email: string;
@@ -25,31 +15,43 @@ interface LoginOptions {
   rememberMe?: boolean;
 }
 export interface UserContextValue {
-  user?: UserPublic;
+  user?: UserResponse | UserPublicSafe;
   errorStatus?: number;
   validating: boolean;
   login: (options: LoginOptions) => void;
   logout: () => void;
   updateSettings: (settings: Partial<UserSettings>) => void;
+  switchUser: (id: number) => void;
 }
 
 export interface ValidUserContextValue extends UserContextValue {
-  user: UserPublic;
+  user: UserResponse;
 }
 
 const UserContext = React.createContext<UserContextValue>({
   validating: true,
   login: () => null,
   logout: () => null,
-  updateSettings: () => null
+  updateSettings: () => null,
+  switchUser: () => null
 });
 const UserContextConsumer = UserContext.Consumer;
 
 const UserContextProvider: React.FC<{}> = ({ children }) => {
-  const [user, setUser] = React.useState<UserPublic | undefined>(undefined);
+  const [user, setUser] = React.useState<UserResponse | UserPublicSafe | undefined>(undefined);
   const [errorStatus, setErrorStatus] = React.useState<number | undefined>(undefined);
   const [validating, setValidating] = React.useState<boolean>(true);
   const router = useRouter();
+
+  async function switchUser(id: number) {
+    if (!user?.isAdmin) {
+      return;
+    }
+    const response = await callApi<UserApiResponse>(`/api/users/${id}`);
+    if (response.data.success && response.data.user) {
+      setUser(response.data.user);
+    }
+  }
   
   const [cookies, setCookie, removeCookie] = useCookies(['rememberMe']);
 
@@ -128,6 +130,7 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     login,
     logout,
     updateSettings,
+    switchUser,
     errorStatus,
     validating,
     user

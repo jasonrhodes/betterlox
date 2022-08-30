@@ -1,7 +1,7 @@
 import { Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings, FilmEntry } from "../../db/entities";
 import { TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "../../lib/tmdb";
 import { CREW_JOB_MAP } from "../constants";
-import { RatedMovie, RatedTmdbCast, TypeOrmEntityMethods } from "./db";
+import { RatedMovie, RatedTmdbCast, TypeOrmEntityMethods, UserPublicSafe } from "./db";
 
 export type OrderDirection = "ASC" | "DESC";
 export type ImageConfig = TmdbConfigurationResponse["images"];
@@ -80,7 +80,7 @@ export interface UnsyncedGetResponse {
   unsynced: Movie[] | Person[] | CastRole[] | CrewRole[];
 }
 
-export interface UserRatingsSyncApiResponse extends ApiSuccessResponse {
+export interface UserEntriesSyncApiResponse extends ApiSuccessResponse {
   synced: {
     ratings: FilmEntry[];
     watches: FilmEntry[];
@@ -171,3 +171,15 @@ export type EntryApiResponse = Omit<FilmEntry, 'user' | 'movie'> & { movie: Entr
 export interface EntriesApiResponse extends ApiSuccessResponse {
   entries: EntryApiResponse[];
 }
+
+export interface UserApiSuccessResponse extends ApiSuccessResponse {
+  user: UserPublicSafe | null;
+}
+
+export type UserApiResponse = UserApiSuccessResponse | ApiErrorResponse;
+
+export interface UsersApiSuccessResponse extends ApiSuccessResponse {
+  users: UserPublicSafe[];
+}
+
+export type UsersApiResponse = UsersApiSuccessResponse | ApiErrorResponse;

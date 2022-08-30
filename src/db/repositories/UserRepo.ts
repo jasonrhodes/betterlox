@@ -2,6 +2,8 @@ import { User } from "../entities/User";
 import { getDataSource } from "../orm";
 import { getRememberMeToken, hash } from "../../lib/hashPassword";
 import { LetterboxdAccountLevel } from "../../common/types/base";
+import { isAdmin } from "../../lib/isAdmin";
+import { getUserSettingsRepository } from "./UserSettingsRepo";
 
 export interface UserLetterboxdDetails {
   username: string;
@@ -22,7 +24,13 @@ export class LoginError extends UserRepoError {};
 export class RegistrationError extends UserRepoError {};
 
 function removeCredentials(user: User) {
-  const { password, salt, ...userPublic } = user;
+  const { password, salt, ...userResponse } = user;
+  return userResponse;
+}
+
+function removeCredentialsAndToken(user: User) {
+  const userResponse = removeCredentials(user);
+  const { rememberMeToken, ...userPublic } = userResponse;
   return userPublic;
 }
 
@@ -75,5 +83,27 @@ export const getUserRepository = async () => (await getDataSource()).getReposito
     }
     
     return { user: removeCredentials(user) };
+  },
+
+  async setLastEntriesUpdated(id: number, date: Date = new Date()) {
+    return await this.update({ id }, { lastEntriesUpdate: date });
+  },
+
+  async getPublicSafeUser(userId: number) {
+    const user = await this.findOneBy({ id: userId });
+    if (user === null) {
+      return null;
+    }
+    const UserSettingsRepo = await getUserSettingsRepository();
+    const settings = await UserSettingsRepo.findOneBy({ userId });
+    return { ...removeCredentialsAndToken(user), settings };
+  },
+
+  async getPublicSafeUsers({ limit, offset }: { limit?: number, offset?: number } = {}) {
+    const users = await this.find({ take: limit, skip: offset });
+    return users.map((user) => ({ 
+      ...removeCredentialsAndToken(user),
+      isAdmin: isAdmin(user)
+    }));
   }
 })

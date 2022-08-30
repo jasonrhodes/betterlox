@@ -22,16 +22,25 @@ export function applySort(sortBy: SortBy, sortDir: SortDir, entries: EntryApiRes
   if (!Array.isArray(entries)) {
     return [];
   }
-  const unrated = entries.filter((e) => e.dateRated === null || e.stars === null);
-  const rated = entries.filter((e) => e.dateRated !== null && e.stars !== null);
-  const sorted = rated.sort((a, b) => {
+  const unrated = entries.filter((e) => e.stars === null);
+  const rated = entries.filter((e) => typeof e.stars === "number");
+  rated.sort((a, b) => {
     try {
       switch (sortBy) {
-        case 'dateRated':          
+        case 'dateRated':  
+          if (!a.dateRated && !b.dateRated) {
+            return 0;
+          }
+          if (!a.dateRated) {
+            return 1;
+          }
+          if (!b.dateRated) {
+            return -1;
+          }
           if (sortDir === 'ASC') {
-            return a.dateRated! < b.dateRated! ? -1 : 1;
+            return a.dateRated < b.dateRated ? -1 : 1;
           } else {
-            return a.dateRated! > b.dateRated! ? -1 : 1;
+            return a.dateRated > b.dateRated ? -1 : 1;
           }
         case 'stars':
           if (sortDir === 'ASC') {
@@ -54,5 +63,5 @@ export function applySort(sortBy: SortBy, sortDir: SortDir, entries: EntryApiRes
     }
   });
   // return unrated;
-  return [...sorted, ...unrated];
+  return [...rated, ...unrated];
 }
