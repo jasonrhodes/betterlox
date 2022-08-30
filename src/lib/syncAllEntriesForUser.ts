@@ -175,7 +175,6 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
   }
 
   const lastWatchesPage = await findLastWatchesPage(username);
-  const results = await scrapeWatchesByPage({ username, page: 1 });
 
   try {
     if (order === "DESC") {
@@ -194,12 +193,12 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
           username,
           page
         });
-        if (syncedForPage.length === 0) {
-          // when moving through the pages forward, as soon
-          // as we encounter a page with no ratings, we can
-          // assume we don't need to continue through pages
-          break;
-        }
+        // if (syncedForPage.length === 0) {
+        //   // when moving through the pages forward, as soon
+        //   // as we encounter a page with no ratings, we can
+        //   // assume we don't need to continue through pages
+        //   break;
+        // }
         syncedWatches = syncedWatches.concat(syncedForPage);
       }
     }

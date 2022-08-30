@@ -1,5 +1,5 @@
 import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
-import { Select, SelectChangeEvent, Box, FormControl, InputLabel, MenuItem } from "@mui/material";
+import { Select, SelectChangeEvent, Box, FormControl, InputLabel, MenuItem, Switch, FormControlLabel } from "@mui/material";
 import { SortBy, SortDir } from "./helpers";
 
 type StateChanger<T> = (value: T) => void;
@@ -11,6 +11,8 @@ export interface FilmEntryShowAndSortControlsOptions {
   handleSortByChange: StateChanger<SelectChangeEvent<SortBy>>;
   sortDir: SortDir;
   handleSortDirClick: () => void;
+  hideUnrated: boolean;
+  handleHideUnratedClick: () => void;
 }
 
 export function FilmEntryShowAndSortControls({
@@ -19,7 +21,9 @@ export function FilmEntryShowAndSortControls({
   sortBy,
   handleSortByChange,
   sortDir,
-  handleSortDirClick
+  handleSortDirClick,
+  hideUnrated,
+  handleHideUnratedClick
 }: FilmEntryShowAndSortControlsOptions) {
   return (
     <Box sx={{ marginBottom: '20px' }}>
@@ -70,6 +74,7 @@ export function FilmEntryShowAndSortControls({
         <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
         <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
       </Box>
+      {/* <FormControlLabel control={<Switch />} label="Hide unrated" /> */}
     </Box>
   )
 }

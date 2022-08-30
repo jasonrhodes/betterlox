@@ -15,17 +15,21 @@ interface FilmEntryTabsOptions {
   isReloading: boolean;
 }
 
-function removeInvalidEntries(entries: EntryApiResponse[], sortBy: SortBy) {
-  switch (sortBy) {
-    case 'dateRated':
-      entries = entries.filter((e) => Boolean(e.dateRated));
-      break;
-    case 'stars':
-      entries = entries.filter((e) => Boolean(e.stars));
-      break;
-    case 'movie.title':
-      entries = entries.filter((e) => Boolean(e.movie?.title));
-      break;
+function removeInvalidEntries(entries: EntryApiResponse[], hideUnrated: boolean) {
+  // switch (sortBy) {
+  //   case 'dateRated':
+  //     entries = entries.filter((e) => Boolean(e.dateRated));
+  //     break;
+  //   case 'stars':
+  //     entries = entries.filter((e) => Boolean(e.stars));
+  //     break;
+  //   case 'movie.title':
+  //     entries = entries.filter((e) => Boolean(e.movie?.title));
+  //     break;
+  // }
+
+  if (hideUnrated) {
+    entries = entries.filter((e) => Boolean(e.dateRated) && typeof e.stars !== undefined);
   }
 
   entries = entries.filter((e) => Boolean(e.movie));
@@ -45,12 +49,13 @@ export function FilmEntryTabs({
   const [show, setShow] = useState<"all" | number>(100);
   const [sortBy, setSortBy] = useState<SortBy>("dateRated");
   const [sortDir, setSortDir] = useState<SortDir>("DESC");
+  const [hideUnrated, setHideUnrated] = useState<boolean>(false);
   const [processedEntries, updateProcessedEntries] = useState<EntryApiResponse[]>([]);
 
   useEffect(() => {
     setIsProcessing(true);
     // TODO: Look into how to avoid re-validating the same data over and over
-    const validated = removeInvalidEntries(unprocessedEntries, sortBy);
+    const validated = removeInvalidEntries(unprocessedEntries, hideUnrated);
     // TODO: Look into how to avoid re-filtering the same data with the same filter
     const filtered = applyTitleFilter(quickTitleSearch, validated);
     // TODO: Look into how to avoid re-sorting the same data over and over
@@ -65,7 +70,7 @@ export function FilmEntryTabs({
     updateQuickTitleSearch(escapeRegExp(event.target.value));
   }, []);
 
-  const handleShowChange = React.useCallback((event) => {
+  const handleShowChange = useCallback((event) => {
     const { value } = event.target;
     if (value === "all") {
       setShow("all");
@@ -74,14 +79,18 @@ export function FilmEntryTabs({
     }
   }, []);
 
-  const handleSortByChange = React.useCallback((event) => {
+  const handleSortByChange = useCallback((event) => {
     const { value } = event.target;
     setSortBy(value);
   }, []);
 
-  const handleSortDirClick = React.useCallback(() => {
+  const handleSortDirClick = useCallback(() => {
     setSortDir(sortDir === "ASC" ? "DESC" : "ASC");
   }, [sortDir]);
+
+  const toggleHideUnrated = useCallback(() => {
+    setHideUnrated(!hideUnrated);
+  }, [hideUnrated]);
 
   useEffect(() => {
     async function retrieve() {
@@ -122,6 +131,8 @@ export function FilmEntryTabs({
           handleSortByChange={handleSortByChange}
           sortDir={sortDir}
           handleSortDirClick={handleSortDirClick}
+          hideUnrated={hideUnrated}
+          handleHideUnratedClick={toggleHideUnrated}
         />
         <FormControl sx={{ marginBottom: 2 }}>
           <TextField size="small" label="Quick Title Filter" value={quickTitleSearch} onChange={handleQuickTitleSearchChange} />
