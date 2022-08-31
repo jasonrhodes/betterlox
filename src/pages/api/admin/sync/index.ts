@@ -1,12 +1,14 @@
 import { getSyncRepository } from "../../../../db/repositories";
 import { createApiRoute } from "../../../../lib/routes";
 import { SyncResponse } from "../../../../common/types/api";
-import { SyncStatus, SyncTrigger } from "../../../../common/types/db";
+import { SyncStatus, SyncTrigger, SyncType } from "../../../../common/types/db";
 import { numericQueryParam } from "../../../../lib/queryParams";
-import { syncRatingsMovies } from "../../../../lib/managedSyncs/syncRatingsMovies";
 import { syncCastPeople, syncCrewPeople } from "../../../../lib/managedSyncs/syncPeople";
 import { syncAllMoviesCredits } from "../../../../lib/managedSyncs/syncMoviesCredits";
 import { syncAllMoviesCollections } from "../../../../lib/managedSyncs/syncMoviesCollections";
+import { syncAllMoviesByYear } from "../../../../lib/managedSyncs/syncMovies";
+import { syncEntriesMovies } from "../../../../lib/managedSyncs/syncEntriesMovies";
+import { MoreThan } from "typeorm";
 
 const SyncRatingsRoute = createApiRoute<SyncResponse>({
   isAdmin: true,
@@ -28,12 +30,34 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
 
       try {
         const numericLimit = numericQueryParam(req.query.limit);
+        const now = new Date();
+        const yesterday = (new Date(now.getTime() - (1000 * 60 * 60 * 24))).toISOString().substring(0, 10);
+
+        const movieSyncsCompletedDuringPastDay = force ? [] : await SyncRepo.findBy({
+          finished: MoreThan(new Date(yesterday)),
+          status: SyncStatus.COMPLETE,
+          type: SyncType.MOVIES
+        });
+
+        console.log('Successful, completed movie syncs in the past day:', movieSyncsCompletedDuringPastDay);
+
+        if (!movieSyncsCompletedDuringPastDay.length) {
+          console.log('Syncing movies by year...');
+          // sync movies from letterboxd /by/year pages
+          const n = await syncAllMoviesByYear(sync, {
+            startYear: 1900
+          });
+
+          if (n > 0) {
+            return res.status(200).json({ success: true, type: 'movies', syncedCount: n })
+          }
+        }
 
         // Check for ratings with missing movie records
-        console.log('Syncing ratings -> movies...');
-        const syncedMovies = await syncRatingsMovies(sync, numericLimit);
+        console.log('Syncing entries -> movies...');
+        const syncedMovies = await syncEntriesMovies(sync, numericLimit);
         if (syncedMovies.length > 0) {
-          return res.status(200).json({ success: true, type: 'ratings_movies', synced: syncedMovies });
+          return res.status(200).json({ success: true, type: 'entries_movies', synced: syncedMovies });
         }
 
         console.log('Syncing movies -> credits (cast and crew)...')

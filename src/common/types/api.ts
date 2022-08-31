@@ -1,3 +1,4 @@
+import { InsertResult } from "typeorm";
 import { Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings, FilmEntry } from "../../db/entities";
 import { TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "../../lib/tmdb";
 import { CREW_JOB_MAP } from "../constants";
@@ -25,9 +26,14 @@ export interface ApiErrorResponse {
   message: string;
 }
 
-export interface SyncRatingsMoviesResponse extends ApiSuccessResponse {
-  type: 'ratings_movies';
-  synced: Array<Movie | null>;
+export interface SyncEntriesMoviesResponse extends ApiSuccessResponse {
+  type: 'entries_movies';
+  synced: Array<InsertResult | null>;
+}
+
+export interface SyncMoviesResponse extends ApiSuccessResponse {
+  type: 'movies';
+  syncedCount: number;
 }
 
 export interface SyncMoviesPeopleResponse extends ApiSuccessResponse {
@@ -53,7 +59,7 @@ export interface SyncNone {
   message?: string;
 }
 
-export type SyncResponse = SyncAllMovieCollectionsResponse | SyncRatingsMoviesResponse | SyncMoviesCreditsResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
+export type SyncResponse = SyncMoviesResponse | SyncAllMovieCollectionsResponse | SyncEntriesMoviesResponse | SyncMoviesCreditsResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
 
 export interface GlobalFilters {
   title?: string;

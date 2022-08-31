@@ -3,9 +3,10 @@ import { Movie } from "../entities";
 import { getDataSource } from "../orm";
 import { getCollectionsRepository, getGenresRepository, getProductionCompaniesRepository, getFilmEntriesRepository, getCrewRepository, getCastRepository } from ".";
 import { addCast, addCrew } from "../../lib/addCredits";
+import { InsertResult } from "typeorm";
 
 export const getMoviesRepository = async () => (await getDataSource()).getRepository(Movie).extend({
-  async createFromTmdb(movie: TmdbMovie, slug?: string | null) {
+  async createFromTmdb(movie: TmdbMovie, fields: Partial<Movie> = {}) {
     const genres = movie.genres 
       ? await Promise.all(movie.genres.map(async (genre) => (await getGenresRepository()).createFromTmdb(genre)))
       : [];
@@ -20,50 +21,55 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
 
     const tmdbGenreNames = movie.genres ? movie.genres.map(g => g.name || '').filter(n => n !== '') : [];
 
-    const created = this.create({
-      id: movie.id,
-      backdropPath: movie.backdrop_path,
-      imdbId: movie.imdb_id,
-      letterboxdSlug: slug === null ? undefined : slug,
-      originalLanguage: movie.original_language,
-      originalTitle: movie.original_title,
-      overview: movie.overview,
-      posterPath: movie.poster_path,
-      popularity: movie.popularity,
-      productionCountries: movie.production_countries,
-      runtime: movie.runtime,
-      releaseDate: movie.release_date,
-      status: movie.status,
-      tagline: movie.tagline,
-      title: movie.title,
-      genres: tmdbGenreNames,
-      productionCompanies,
-      collections
-    });
-
-    return this.save(created);
+    // https://typeorm.io/repository-api#upsert
+    return await this.upsert(
+      {
+        ...fields,
+        id: movie.id,
+        backdropPath: movie.backdrop_path,
+        imdbId: movie.imdb_id,
+        originalLanguage: movie.original_language,
+        originalTitle: movie.original_title,
+        overview: movie.overview,
+        posterPath: movie.poster_path,
+        popularity: movie.popularity,
+        productionCountries: movie.production_countries,
+        runtime: movie.runtime,
+        releaseDate: movie.release_date,
+        status: movie.status,
+        tagline: movie.tagline,
+        title: movie.title,
+        genres: tmdbGenreNames,
+        productionCompanies,
+        collections
+      },
+      {
+        conflictPaths: ['id'],
+        skipUpdateIfNoValuesChanged: true
+      }
+    );
   },
 
-  async syncMovies(movies: Array<{ movieId: number; userId: number; letterboxdSlug: string | null }>) {
+  async syncMovies(movies: Array<{ movieId: number; userId: number; letterboxdSlug: string | undefined }>) {
     const retrievedMovies = await Promise.all(movies.map(async ({ movieId, userId, letterboxdSlug }) => ({ 
       tmdbMovie: await getMovieInfoSafely(movieId), 
-      slug: letterboxdSlug,
+      letterboxdSlug,
       userId,
       movieId
     })));
 
     const FilmEntriesRepo = await getFilmEntriesRepository();
-    const saved = await Promise.all(retrievedMovies.map(async ({ tmdbMovie, userId, movieId, slug }) => {
+    const saved = await Promise.all(retrievedMovies.map(async ({ tmdbMovie, userId, movieId, letterboxdSlug }) => {
       if (tmdbMovie === null || typeof tmdbMovie.id === "undefined") {
         await FilmEntriesRepo.update({ movieId, userId }, { unsyncable: true });
         return null;
       }
 
-      const savedMovie = await this.createFromTmdb(tmdbMovie, slug);
+      const savedMovie = await this.createFromTmdb(tmdbMovie, { letterboxdSlug });
       const credits = await tmdb.movieCredits(tmdbMovie.id);
 
-      const addedCast = await addCast({ cast: credits.cast, movie: savedMovie });
-      const addedCrew = await addCrew({ crew: credits.crew, movie: savedMovie });
+      const addedCast = await addCast({ cast: credits.cast, movieId: tmdbMovie.id });
+      const addedCrew = await addCrew({ crew: credits.crew, movieId: tmdbMovie.id });
 
       const savedCastCount = await (await getCastRepository()).countBy({
         movieId: tmdbMovie.id, 
@@ -75,13 +81,13 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
       });
 
       if (addedCast.length === savedCastCount && addedCrew.length === savedCrewCount) {
-        savedMovie.syncedCredits = true;
+        await this.update({ id: tmdbMovie.id }, { syncedCredits: true });
       }
 
       return savedMovie;
     }));
 
-    return saved.filter((m) => m !== null);
+    return saved.filter((m): m is InsertResult => m !== null);
   },
   async getMissingCredits(limit?: number) {
     return this.find({

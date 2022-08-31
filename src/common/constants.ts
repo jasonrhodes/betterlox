@@ -56,3 +56,25 @@ export const GENRES = [
   "War",
   "Western"
 ];
+
+export const GENRE_ID_MAP: Record<string, number> = {
+  ["Drama"]: 18,
+	["Mystery"]: 9648,
+	["Fantasy"]: 14,
+	["Adventure"]: 12,
+	["Comedy"]: 35,
+	["History"]: 36,
+	["Horror"]: 27,
+	["Documentary"]: 99,
+	["Thriller"]: 53,
+	["Science Fiction"]: 878,
+	["Action"]: 28,
+	["Romance"]: 10749,
+	["Family"]: 10751,
+	["Western"]: 37,
+	["War"]: 10752,
+	["Crime"]: 80,
+	["Animation"]: 16,
+	["Music"]: 10402,
+	["TV Movie"]: 10770
+}

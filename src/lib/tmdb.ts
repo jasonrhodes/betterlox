@@ -14,6 +14,7 @@ import {
   Genre,
   ProductionCompany
 } from "moviedb-promise/dist/types";
+import { getUnknownItemsRepository } from "../db/repositories";
 
 if (typeof process.env.TMDB_API_KEY === "undefined") {
   throw new Error("TMDB API key required to be set using TMDB_API_KEY=yourkey");
@@ -22,7 +23,15 @@ if (typeof process.env.TMDB_API_KEY === "undefined") {
 export const tmdb = new MovieDb(process.env.TMDB_API_KEY);
 
 export async function getMovieInfoSafely(id: number): Promise<null | TmdbMovie> {
+  const UnknownItemsRepo = await getUnknownItemsRepository();
+
   if (id === 0) {
+    return null;
+  }
+
+  const isUnknown = await UnknownItemsRepo.findOneBy({ itemId: id, type: 'movie' });
+
+  if (isUnknown) {
     return null;
   }
 
@@ -31,9 +40,10 @@ export async function getMovieInfoSafely(id: number): Promise<null | TmdbMovie> 
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 404) {
-        console.log(
-          `The requested resource (Movie ID: ${id}) could not be found in the TMDB API (ignoring this error and moving on)`
+        console.debug(
+          `TMDB 404 | movieInfo(${id})`
         );
+        UnknownItemsRepo.insert({ itemId: id, type: 'movie' });
       } else {
         console.log(`TMDB API error while fetching movie ID ${id} | ${error.response?.status} | ${error.cause} | ${error.message}}`);
       }
@@ -42,6 +52,23 @@ export async function getMovieInfoSafely(id: number): Promise<null | TmdbMovie> 
       throw error;
     }
   }
+}
+
+function isProbablyATmdbMovie(val: unknown): val is TmdbMovie {
+  if (typeof val !== "object" || val === null) {
+    return false;
+  }
+
+  if ("id" in val) {
+    return true;
+  }
+
+  return false;
+}
+
+export async function getBatchOfMoviesSafely(ids: number[]): Promise<TmdbMovie[]> {
+  const movies = await Promise.all(ids.map((id) => getMovieInfoSafely(id)));
+  return movies.filter(isProbablyATmdbMovie)
 }
 
 export type TmdbMovie = MovieResponse;

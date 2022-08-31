@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
-import { FilmEntry } from "../db/entities";
+import { FilmEntry, Movie, PopularLetterboxdMovie } from "../db/entities";
 import { getDataImageTagFromUrl } from "./dataImageUtils";
 const MAX_TRIES = 5;
 
@@ -120,6 +120,57 @@ export async function findLastWatchesPage(username: string) {
   const lastPageLink = $('.paginate-pages li.paginate-page:last-child');
   const lastPage = lastPageLink.text();
   return Number(lastPage);
+}
+
+export async function scrapeMoviesByYearByPage(year: number, page: number = 1): Promise<{ movies: Array<Partial<PopularLetterboxdMovie>> }> {
+  const { data } = await tryLetterboxd(
+    `https://letterboxd.com/films/ajax/popular/year/${year}/size/small/page/${page}`
+  );
+  const $ = cheerio.load(data);
+  // console.log('HTML', $.html());
+  const elements = $('ul.poster-list li');
+
+  if (!elements.length) {
+    return { movies: [] };
+  }
+
+  const movies = await Promise.all(elements.map(async (i, item) => {
+    const m: Partial<PopularLetterboxdMovie> = {};
+
+    const containerData = $(item).data() as { averageRating: number };
+    m.averageRating = containerData.averageRating;
+
+    const poster = $(item).find('.film-poster');
+    const filmData = poster.data() as {
+      filmSlug?: string;
+      filmId?: string;
+    };
+
+    if (typeof filmData.filmSlug === "string") {
+      m.letterboxdSlug = filmData.filmSlug;
+      const id = Number(filmData.filmId);
+      if (!isNaN(id)) {
+        m.id = id;
+      }
+      
+      if (!m.id) {
+        const { data } = await tryLetterboxd(filmData.filmSlug);
+        const $$ = cheerio.load(data);
+        const { tmdbId } = $$("body").data();
+        const id = Number(tmdbId);
+        if (!isNaN(id)) {
+          m.id = id;
+        }
+      }
+    }
+
+    const name = $(item).find("img")?.attr()?.alt;
+    m.name = name;
+
+    return m;
+  }).get());
+
+  return { movies };
 }
 
 interface ScrapeByPageOptions {

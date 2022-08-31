@@ -2,7 +2,7 @@ import { SyncType, SyncStatus } from "../../common/types/db";
 import { Sync } from "../../db/entities";
 import { getSyncRepository, getFilmEntriesRepository, getMoviesRepository } from "../../db/repositories";
 
-export async function syncRatingsMovies(sync: Sync, limit?: number) {
+export async function syncEntriesMovies(sync: Sync, limit?: number) {
   const SyncRepo = await getSyncRepository();
   // Check for ratings with missing movies
   sync.type = SyncType.RATINGS_MOVIES;

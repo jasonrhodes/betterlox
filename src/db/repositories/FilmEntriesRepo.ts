@@ -17,7 +17,7 @@ export const getFilmEntriesRepository = async () => (await getDataSource()).getR
       .addOrderBy("filmEntry.date", "DESC")
       .limit(limit);
   
-    const result = await query.getRawMany<{ movieId: number; userId: number; letterboxdSlug: string | null }>();
+    const result = await query.getRawMany<{ movieId: number; userId: number; letterboxdSlug: string | undefined }>();
     return result;
   }
 });

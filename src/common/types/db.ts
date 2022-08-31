@@ -25,7 +25,8 @@ export enum SyncType {
   MOVIES_CAST = "Movies:Cast",
   MOVIES_CREW = "Movies:Crew",
   MOVIES_CREDITS = "Movies:Credits",
-  MOVIES_COLLECTIONS = "Movies:Collections"
+  MOVIES_COLLECTIONS = "Movies:Collections",
+  MOVIES ="Movies"
 }
 
 export enum SyncTrigger {

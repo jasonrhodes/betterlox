@@ -22,10 +22,10 @@ export class Movie extends BaseEntity {
   id: number;
 
   @Column({ nullable: true })
-  backdropPath: string;
+  backdropPath?: string;
 
   @Column({ nullable: true })
-  imdbId: string;
+  imdbId?: string;
 
   @Column()
   originalLanguage: string;
@@ -37,7 +37,7 @@ export class Movie extends BaseEntity {
   overview: string;
 
   @Column({ nullable: true })
-  posterPath: string;
+  posterPath?: string;
 
   @Column("float")
   popularity: number;
@@ -60,6 +60,12 @@ export class Movie extends BaseEntity {
   @Column()
   title: string;
 
+  @Column({ nullable: true, type: "float" })
+  latestAverageRating?: number;
+
+  @Column({ nullable: true })
+  latestAverageRatingDate?: Date;
+
   @Column({ default: false })
   syncedCredits: boolean;
 
@@ -67,7 +73,7 @@ export class Movie extends BaseEntity {
   syncedCollections: boolean;
 
   @Column({ nullable: true })
-  letterboxdSlug: string;
+  letterboxdSlug?: string;
 
   @Column("text", { 
     nullable: true,

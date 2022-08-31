@@ -94,6 +94,7 @@ export function FilmEntryTabs({
 
   useEffect(() => {
     async function retrieve() {
+      console.log("Retrieving blindspots", filters);
       const missing = await getBlindspotsForFilters({ entries: unprocessedEntries, filters });
       setMissing(missing);
     }
@@ -104,6 +105,7 @@ export function FilmEntryTabs({
       return count + numActive;
     }, 0);
     setActiveFilterCount(activeFilterCount);
+    console.log("Active filter count", activeFilterCount);
     if (activeFilterCount === 0) {
       setMissing([]);
     } else {

@@ -8,6 +8,8 @@ type MyDataSourceOptions = Mutable<DataSourceOptions>;
 let dataSource: DataSource | null = null;
 
 async function init() {
+  console.log(`\n\nATTN: POST GRES CONNECTION BEING REINITIALIZED\n\n`);
+  
   const { DATABASE_TYPE } = process.env;
   let dbOptions: MyDataSourceOptions = {} as MyDataSourceOptions;
 
@@ -76,7 +78,7 @@ async function init() {
     ...dbOptions,
     entities,
     logging,
-    synchronize: true
+    synchronize: process.env.SYNC_DB ? true : false
   });
 
   dataSource = await ds.initialize();

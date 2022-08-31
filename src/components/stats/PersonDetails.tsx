@@ -26,7 +26,7 @@ export function PersonDetails({ type, details, setDetails }: { type: PeopleStats
       setIsLoading(true);
       const queries: string[] = [];
       if (type === "actors") {
-        queries.push(`minCastOrder=${user.settings.statsMinCastOrder}`);
+        queries.push(`minCastOrder=${user.settings?.statsMinCastOrder}`);
       }
       queries.push(convertFiltersToQueryString({ ...globalFilters, [type]: [id] }));
       const url = `/api/users/${user.id}/entries?${queries.join('&')}`;
