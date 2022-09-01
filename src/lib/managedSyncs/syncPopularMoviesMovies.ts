@@ -13,7 +13,7 @@ export async function syncPopularMoviesMovies(sync: Sync, {
 }: Options) {
 
   const SyncRepo = await getSyncRepository();
-  sync.type = SyncType.RATINGS_MOVIES;
+  sync.type = SyncType.POPULAR_MOVIES_MOVIES;
   SyncRepo.save(sync);
 
   const PopularMoviesRepo = await getPopularLetterboxdMoviesRepository();
