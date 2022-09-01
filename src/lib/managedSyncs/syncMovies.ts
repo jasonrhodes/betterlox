@@ -4,9 +4,9 @@ import { getSyncRepository, getFilmEntriesRepository, getMoviesRepository, getPo
 import { BetterloxApiError } from "../BetterloxApiError";
 import { scrapeMoviesByYearByPage } from "../letterboxd";
 
-export interface SyncAllMoviesByYearOptions {
+export interface SyncAllMoviesByDateRangeOptions {
   startYear: number;
-  endYear?: number;
+  endYear: number;
 }
 
 function isNumber(v: unknown): v is number {
@@ -33,10 +33,10 @@ async function processPage(set: Partial<PopularLetterboxdMovie>[]) {
   return numSynced;
 }
 
-export async function syncAllMoviesByYear(sync: Sync, options: SyncAllMoviesByYearOptions) {
+export async function syncPopularMoviesByDateRange(sync: Sync, options: SyncAllMoviesByDateRangeOptions) {
   const SyncRepo = await getSyncRepository();
   const now = new Date();
-  const { startYear, endYear = now.getFullYear() } = options;
+  const { startYear, endYear } = options;
 
   let numSynced = 0;
 
@@ -57,8 +57,9 @@ export async function syncAllMoviesByYear(sync: Sync, options: SyncAllMoviesByYe
   }
 
   await SyncRepo.endSync(sync, {
-    type: SyncType.MOVIES,
+    type: SyncType.POPULAR_MOVIES_YEAR,
     status: SyncStatus.COMPLETE,
+    secondaryId: `${startYear}-${endYear}`,
     numSynced
   });
 

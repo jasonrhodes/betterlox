@@ -2,11 +2,11 @@ import { getSyncRepository } from "../../../../db/repositories";
 import { createApiRoute } from "../../../../lib/routes";
 import { SyncResponse } from "../../../../common/types/api";
 import { SyncStatus, SyncTrigger, SyncType } from "../../../../common/types/db";
-import { numericQueryParam } from "../../../../lib/queryParams";
+import { numericQueryParam, singleQueryParam } from "../../../../lib/queryParams";
 import { syncCastPeople, syncCrewPeople } from "../../../../lib/managedSyncs/syncPeople";
 import { syncAllMoviesCredits } from "../../../../lib/managedSyncs/syncMoviesCredits";
 import { syncAllMoviesCollections } from "../../../../lib/managedSyncs/syncMoviesCollections";
-import { syncAllMoviesByYear } from "../../../../lib/managedSyncs/syncMovies";
+import { syncPopularMoviesByDateRange } from "../../../../lib/managedSyncs/syncMovies";
 import { syncEntriesMovies } from "../../../../lib/managedSyncs/syncEntriesMovies";
 import { MoreThan } from "typeorm";
 
@@ -18,7 +18,8 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
       const SyncRepo = await getSyncRepository();
       const { started, sync } = await SyncRepo.queueSync({ trigger: SyncTrigger.SYSTEM });
 
-      const force = req.query.force;
+      const force = singleQueryParam(req.query.force);
+      const forceType = singleQueryParam(req.query.forceType);
 
       if (started.length > 0 && !force) {
         // sync already pending or in progress
@@ -31,60 +32,94 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
       try {
         const numericLimit = numericQueryParam(req.query.limit);
         const now = new Date();
-        const yesterday = (new Date(now.getTime() - (1000 * 60 * 60 * 24))).toISOString().substring(0, 10);
+        const hoursBetween = 1;
+        const cutoff = (new Date(now.getTime() - (1000 * 60 * 60 * hoursBetween))).toISOString();
 
-        const movieSyncsCompletedDuringPastDay = force ? [] : await SyncRepo.findBy({
-          finished: MoreThan(new Date(yesterday)),
+        const movieSyncsCompletedDuringPastDay = await SyncRepo.findBy({
+          finished: MoreThan(new Date(cutoff)),
           status: SyncStatus.COMPLETE,
-          type: SyncType.MOVIES
+          type: SyncType.POPULAR_MOVIES_YEAR
         });
 
         console.log('Successful, completed movie syncs in the past day:', movieSyncsCompletedDuringPastDay);
 
-        if (!movieSyncsCompletedDuringPastDay.length) {
-          console.log('Syncing movies by year...');
+        if ((!forceType && !movieSyncsCompletedDuringPastDay.length) || forceType === "popular_movies_decade") {
+
+          const lastPopularYearSync = await SyncRepo.find({
+            where: {
+              type: SyncType.POPULAR_MOVIES_YEAR,
+              status: SyncStatus.COMPLETE
+            },
+            order: {
+              finished: 'DESC'
+            },
+            take: 1
+          });
+
+          let startYear = 1900;
+          let endYear = 1910;
+
+          if (lastPopularYearSync.length > 0 && lastPopularYearSync[0].secondaryId) {
+            const lastRange = lastPopularYearSync[0].secondaryId;
+            startYear = Number(lastRange.substring(5));
+            const now = new Date();
+            endYear = Math.min(now.getUTCFullYear(), startYear + 20);
+          }
+          console.log('Syncing movies by range...', `(${startYear} - ${endYear})`);
           // sync movies from letterboxd /by/year pages
-          const n = await syncAllMoviesByYear(sync, {
-            startYear: 1900
+          const n = await syncPopularMoviesByDateRange(sync, {
+            startYear,
+            endYear
           });
 
           if (n > 0) {
-            return res.status(200).json({ success: true, type: 'movies', syncedCount: n })
+            return res.status(200).json({ success: true, type: 'popular_movies_decade', syncedCount: n })
           }
         }
 
         // Check for ratings with missing movie records
         console.log('Syncing entries -> movies...');
-        const syncedMovies = await syncEntriesMovies(sync, numericLimit);
-        if (syncedMovies.length > 0) {
-          return res.status(200).json({ success: true, type: 'entries_movies', synced: syncedMovies });
+
+        if (!forceType || forceType === "entries_movies") {
+          const syncedMovies = await syncEntriesMovies(sync, numericLimit);
+          if (syncedMovies.length > 0) {
+            return res.status(200).json({ success: true, type: 'entries_movies', synced: syncedMovies });
+          }
         }
 
-        console.log('Syncing movies -> credits (cast and crew)...')
-        const syncedCredits = await syncAllMoviesCredits(sync, numericLimit);
-        if (syncedCredits.cast.length > 0 || syncedCredits.crew.length > 0) {
-          return res.status(200).json({ success: true, type: 'movies_credits', synced: syncedCredits })
+        if (!forceType || forceType === "movies_credits") {
+          console.log('Syncing movies -> credits (cast and crew)...')
+          const syncedCredits = await syncAllMoviesCredits(sync, numericLimit);
+          if (syncedCredits.cast.length > 0 || syncedCredits.crew.length > 0) {
+            return res.status(200).json({ success: true, type: 'movies_credits', synced: syncedCredits })
+          }
         }
 
-        // Check for cast roles with missing people records
-        console.log('Syncing cast roles...');
-        const syncedCast = await syncCastPeople(sync, numericLimit);
-        if (syncedCast.length > 0) {
-          return res.status(200).json({ success: true, type: 'movies_cast', synced: syncedCast });
+        if (!forceType || forceType === "movies_cast") {
+          // Check for cast roles with missing people records
+          console.log('Syncing cast roles...');
+          const syncedCast = await syncCastPeople(sync, numericLimit);
+          if (syncedCast.length > 0) {
+            return res.status(200).json({ success: true, type: 'movies_cast', synced: syncedCast });
+          }
         }
 
-        // Check for crew roles with missing people records
-        console.log('Syncing crew roles...');
-        const syncedCrew = await syncCrewPeople(sync, numericLimit);
-        if (syncedCrew.length > 0) {
-          return res.status(200).json({ success: true, type: 'movies_crew', synced: syncedCrew });
+        if (!forceType || forceType === "movies_crew") {
+          // Check for crew roles with missing people records
+          console.log('Syncing crew roles...');
+          const syncedCrew = await syncCrewPeople(sync, numericLimit);
+          if (syncedCrew.length > 0) {
+            return res.status(200).json({ success: true, type: 'movies_crew', synced: syncedCrew });
+          }
         }
 
-        // Check for movies with missing collections
-        console.log('Syncing movies -> collections');
-        const { synced: syncedCollections, count } = await syncAllMoviesCollections(sync, numericLimit);
-        if (syncedCollections.length > 0) {
-          return res.status(200).json({ success: true, type: 'movies_collections', synced: syncedCollections, count });
+        if (!forceType || forceType === "movies_collections") {
+          // Check for movies with missing collections
+          console.log('Syncing movies -> collections');
+          const { synced: syncedCollections, count } = await syncAllMoviesCollections(sync, numericLimit);
+          if (syncedCollections.length > 0) {
+            return res.status(200).json({ success: true, type: 'movies_collections', synced: syncedCollections, count });
+          }
         }
 
         console.log('Nothing was synced');

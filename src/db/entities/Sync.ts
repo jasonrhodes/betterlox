@@ -20,6 +20,9 @@ export class Sync {
   })
   trigger: SyncTrigger;
 
+  @Column({ nullable: true })
+  secondaryId?: string;
+
   // letterboxd username for user syncs
   @Column({ nullable: true })
   username: string;

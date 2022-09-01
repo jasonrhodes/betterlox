@@ -31,8 +31,8 @@ export interface SyncEntriesMoviesResponse extends ApiSuccessResponse {
   synced: Array<InsertResult | null>;
 }
 
-export interface SyncMoviesResponse extends ApiSuccessResponse {
-  type: 'movies';
+export interface SyncPopularMoviesByDecadeResponse extends ApiSuccessResponse {
+  type: 'popular_movies_decade';
   syncedCount: number;
 }
 
@@ -59,7 +59,7 @@ export interface SyncNone {
   message?: string;
 }
 
-export type SyncResponse = SyncMoviesResponse | SyncAllMovieCollectionsResponse | SyncEntriesMoviesResponse | SyncMoviesCreditsResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
+export type SyncResponse = SyncPopularMoviesByDecadeResponse | SyncAllMovieCollectionsResponse | SyncEntriesMoviesResponse | SyncMoviesCreditsResponse | SyncMoviesPeopleResponse | SyncNone | ApiErrorResponse;
 
 export interface GlobalFilters {
   title?: string;

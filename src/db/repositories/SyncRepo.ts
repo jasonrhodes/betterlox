@@ -44,13 +44,9 @@ export const getSyncRepository = async () => (await getDataSource()).getReposito
     type,
     status,
     numSynced,
+    secondaryId,
     errorMessage
-  }: {
-    status: SyncStatus;
-    type?: SyncType;
-    numSynced?: number;
-    errorMessage?: string;
-  }) {
+  }: Partial<Sync>) {
     if (type) {
       sync.type = type;
     }
@@ -60,7 +56,10 @@ export const getSyncRepository = async () => (await getDataSource()).getReposito
     if (errorMessage) {
       sync.errorMessage = errorMessage;
     }
-    sync.status = status;
+    if (status) {
+      sync.status = status;
+    }
+    sync.secondaryId = secondaryId;
     sync.finished = new Date();
     return this.save(sync);
   },

@@ -3,7 +3,7 @@ import { UserPageTemplate } from '../../components/PageTemplate';
 import { Avatar, Button, Box, Typography, Link, Alert, CircularProgress, Grid, Paper } from '@mui/material';
 import React, { useState } from 'react';
 import { callApi } from '../../hooks/useApi';
-import { UserRatingsSyncApiResponse, ApiErrorResponse } from '../../common/types/api';
+import { UserEntriesSyncApiResponse, ApiErrorResponse } from '../../common/types/api';
 import { getErrorAsString } from '../../lib/getErrorAsString';
 
 type SyncingState = 'none' | 'syncing' | 'success' | 'failed';
@@ -57,7 +57,7 @@ const AccountSyncPage: NextPage = () => {
   const handleSyncClick = async (userId: number) => {
     setResyncState("syncing");
     try {
-      const response = await callApi<UserRatingsSyncApiResponse | ApiErrorResponse>(`/api/users/${userId}/entries/sync`, {
+      const response = await callApi<UserEntriesSyncApiResponse | ApiErrorResponse>(`/api/users/${userId}/entries/sync`, {
         method: 'POST'
       });
       if (response.success && 'synced' in response.data) {

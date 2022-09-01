@@ -3,7 +3,6 @@ import { getDataSource } from "../orm";
 import { getRememberMeToken, hash } from "../../lib/hashPassword";
 import { LetterboxdAccountLevel } from "../../common/types/base";
 import { isAdmin } from "../../lib/isAdmin";
-import { getUserSettingsRepository } from "./UserSettingsRepo";
 
 export interface UserLetterboxdDetails {
   username: string;
@@ -90,13 +89,18 @@ export const getUserRepository = async () => (await getDataSource()).getReposito
   },
 
   async getPublicSafeUser(userId: number) {
-    const user = await this.findOneBy({ id: userId });
+    const user = await this.findOne({
+      where: { 
+        id: userId
+      },
+      relations: {
+        settings: true
+      }
+    });
     if (user === null) {
       return null;
     }
-    const UserSettingsRepo = await getUserSettingsRepository();
-    const settings = await UserSettingsRepo.findOneBy({ userId });
-    return { ...removeCredentialsAndToken(user), settings };
+    return removeCredentialsAndToken(user);
   },
 
   async getPublicSafeUsers({ limit, offset }: { limit?: number, offset?: number } = {}) {

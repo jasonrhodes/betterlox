@@ -64,7 +64,7 @@ export function FilmEntryTabs({
 
     updateProcessedEntries(filteredSortedSliced);
     setIsProcessing(false);
-  }, [quickTitleSearch, unprocessedEntries, sortBy, sortDir, show])
+  }, [quickTitleSearch, unprocessedEntries, sortBy, sortDir, show, hideUnrated])
 
   const handleQuickTitleSearchChange = useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateQuickTitleSearch(escapeRegExp(event.target.value));

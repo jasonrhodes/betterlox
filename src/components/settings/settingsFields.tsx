@@ -58,6 +58,7 @@ export function BaseSettingsField({
     setLocalValue(user?.settings ? user?.settings[settingsKey] : '');
   }, [user, settingsKey]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedUpdateSettings = useCallback(debounce(updateSettings, 200), [updateSettings]);
     
   if (!user || !user?.settings || typeof user?.settings[settingsKey] === "undefined") {

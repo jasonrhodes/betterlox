@@ -11,13 +11,13 @@ export async function syncOneMovieCredits(movie: Movie) {
   const { cast, crew } = await tmdb.movieCredits(movie.id);
   try {
     console.log(`Syncing cast for movie:${movie.id}/${movie.title}`);
-    const castRoles = await addCast({ cast, movie });
+    const castRoles = await addCast({ cast, movieId: movie.id });
     castRoles.forEach(c => c ? syncedCastRoles.push(c) : null);
   } catch (error: unknown) {
     console.log(getErrorAsString(error));
   }
   try {
-    const crewRoles = await addCrew({ crew, movie });
+    const crewRoles = await addCrew({ crew, movieId: movie.id });
     crewRoles.forEach(c => c ? syncedCrewRoles.push(c) : null);
   } catch (error) {
     console.log(getErrorAsString(error));
