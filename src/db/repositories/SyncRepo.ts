@@ -18,14 +18,14 @@ export const getSyncRepository = async () => (await getDataSource()).getReposito
       id: Not(sync.id),
       started: MoreThan(minStart)
     };
-    const started = await this.find({
+    const syncsInProgress = await this.find({
       where: [
         { ...systemWhere, status: SyncStatus.PENDING },
         { ...systemWhere, status: SyncStatus.IN_PROGRESS }
       ]
     });
 
-    return { started, sync };
+    return { syncsInProgress, sync };
   },
 
   async skipSync(sync: Sync) {

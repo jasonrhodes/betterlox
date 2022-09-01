@@ -19,6 +19,9 @@ export class PopularLetterboxdMovie {
   @Column()
   dateUpdated: Date;
 
+  @Column({ default: false })
+  unsyncable: boolean;
+
   @OneToOne(() => Movie, { eager: true, createForeignKeyConstraints: false })
   @JoinColumn({ name: 'id' })
   movie: Relation<Movie>;

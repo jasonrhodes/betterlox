@@ -1,7 +1,7 @@
 import { tmdb, TmdbMovie, getMovieInfoSafely } from "../../lib/tmdb";
 import { Movie } from "../entities";
 import { getDataSource } from "../orm";
-import { getCollectionsRepository, getGenresRepository, getProductionCompaniesRepository, getFilmEntriesRepository, getCrewRepository, getCastRepository } from ".";
+import { getCollectionsRepository, getGenresRepository, getProductionCompaniesRepository, getFilmEntriesRepository, getCrewRepository, getCastRepository, getPopularLetterboxdMoviesRepository } from ".";
 import { addCast, addCrew } from "../../lib/addCredits";
 import { InsertResult } from "typeorm";
 
@@ -50,7 +50,7 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
     );
   },
 
-  async syncMovies(movies: Array<{ movieId: number; userId: number; letterboxdSlug: string | undefined }>) {
+  async syncMovies(movies: Array<{ movieId: number; userId?: number; letterboxdSlug: string | undefined }>) {
     const retrievedMovies = await Promise.all(movies.map(async ({ movieId, userId, letterboxdSlug }) => ({ 
       tmdbMovie: await getMovieInfoSafely(movieId), 
       letterboxdSlug,
@@ -59,9 +59,14 @@ export const getMoviesRepository = async () => (await getDataSource()).getReposi
     })));
 
     const FilmEntriesRepo = await getFilmEntriesRepository();
+    const PopularMoviesRepo = await getPopularLetterboxdMoviesRepository();
     const saved = await Promise.all(retrievedMovies.map(async ({ tmdbMovie, userId, movieId, letterboxdSlug }) => {
       if (tmdbMovie === null || typeof tmdbMovie.id === "undefined") {
-        await FilmEntriesRepo.update({ movieId, userId }, { unsyncable: true });
+        if (userId) {
+          await FilmEntriesRepo.update({ movieId, userId }, { unsyncable: true });
+        } else {
+          await PopularMoviesRepo.update({ id: movieId }, { unsyncable: true })
+        }
         return null;
       }
 

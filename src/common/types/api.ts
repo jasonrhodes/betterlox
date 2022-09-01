@@ -32,7 +32,7 @@ export interface SyncEntriesMoviesResponse extends ApiSuccessResponse {
 }
 
 export interface SyncPopularMoviesResponse extends ApiSuccessResponse {
-  type: 'popular_movies_per_year' | 'popular_movies_per_genre';
+  type: 'popular_movies_per_year' | 'popular_movies_per_genre' | 'popular_movies_movies';
   syncedCount: number;
 }
 

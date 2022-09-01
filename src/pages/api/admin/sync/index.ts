@@ -8,7 +8,7 @@ import { syncAllMoviesCredits } from "../../../../lib/managedSyncs/syncMoviesCre
 import { syncAllMoviesCollections } from "../../../../lib/managedSyncs/syncMoviesCollections";
 import { syncPopularMoviesPerYear, syncPopularMoviesPerGenre } from "../../../../lib/managedSyncs/syncMovies";
 import { syncEntriesMovies } from "../../../../lib/managedSyncs/syncEntriesMovies";
-import { MoreThan } from "typeorm";
+import { syncPopularMoviesMovies } from "../../../../lib/managedSyncs/syncPopularMoviesMovies";
 
 const SyncRatingsRoute = createApiRoute<SyncResponse>({
   isAdmin: true,
@@ -16,12 +16,13 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
     post: async (req, res) => {
       // get sync status
       const SyncRepo = await getSyncRepository();
-      const { started, sync } = await SyncRepo.queueSync({ trigger: SyncTrigger.SYSTEM });
+      const { syncsInProgress, sync } = await SyncRepo.queueSync({ trigger: SyncTrigger.SYSTEM });
 
-      const force = singleQueryParam(req.query.force);
+      const force = singleQueryParam(req.query.force) === "true";
       const forceType = singleQueryParam(req.query.forceType);
+      const numericLimit = numericQueryParam(req.query.limit);
 
-      if (started.length > 0 && !force) {
+      if (syncsInProgress.length > 0 && !force) {
         // sync already pending or in progress
         await SyncRepo.skipSync(sync);
         return res.status(200).json({ success: false, type: 'none', synced: [], message: 'Sync already pending or in progress' });
@@ -30,10 +31,12 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
       }
 
       try {
-        const numericLimit = numericQueryParam(req.query.limit);
-        
+        // Pull x years, y movies per year from letterboxd
         if (!forceType || forceType === "popular_movies_per_year") {
-          const n = await syncPopularMoviesPerYear(sync);
+          const n = await syncPopularMoviesPerYear(sync, { 
+            yearBatchSize: 20,
+            moviesPerYear: 100
+          });
           if (n > 0) {
             return res.status(200).json({ 
               success: true, 
@@ -43,9 +46,12 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
           }
         }
 
+        // Pull y movies per genre from letterboxd
         if (!forceType || forceType === "popular_movies_per_genre") {
-          sync.type = SyncType.POPULAR_MOVIES_GENRE;
-          const n = await syncPopularMoviesPerGenre(sync);
+          const n = await syncPopularMoviesPerGenre(sync, {
+            force,
+            moviesPerGenre: 100
+          });
           if (n > 0) {
             return res.status(200).json({ 
               success: true, 
@@ -61,6 +67,19 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
           const syncedMovies = await syncEntriesMovies(sync, numericLimit);
           if (syncedMovies.length > 0) {
             return res.status(200).json({ success: true, type: 'entries_movies', synced: syncedMovies });
+          }
+        }
+
+        // Check for popular movie rows with missing full movie records
+        if (!forceType || forceType === "popular_movies_movies") {
+          console.log('Syncing popular movies -> movies');
+          const synced = await syncPopularMoviesMovies(sync, { limit: numericLimit, force });
+          if (synced.length > 0) {
+            return res.status(200).json({ 
+              success: true,
+              type: 'popular_movies_movies',
+              syncedCount: synced.length
+            });
           }
         }
 

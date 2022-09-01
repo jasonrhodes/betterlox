@@ -20,9 +20,9 @@ const UserSyncRoute = createApiRoute<UserEntriesSyncApiResponse | ApiErrorRespon
       const SyncsRepo = await getSyncRepository();
       const UsersRepo = await getUserRepository();
       const user = await UsersRepo.findOneBy({ id: numericUserId });
-      const { started, sync } = await SyncsRepo.queueSync({ trigger: SyncTrigger.USER, username: user?.username });
+      const { syncsInProgress, sync } = await SyncsRepo.queueSync({ trigger: SyncTrigger.USER, username: user?.username });
 
-      if (started.length) {
+      if (syncsInProgress.length) {
         SyncsRepo.skipSync(sync);
         return res.status(200).json({
           success: false,

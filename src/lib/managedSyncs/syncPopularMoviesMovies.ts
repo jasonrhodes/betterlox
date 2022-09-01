@@ -1,14 +1,23 @@
-import { SyncType, SyncStatus } from "../../common/types/db";
+import { SyncStatus, SyncType } from "../../common/types/db";
 import { Sync } from "../../db/entities";
-import { getSyncRepository, getFilmEntriesRepository, getMoviesRepository } from "../../db/repositories";
+import { getMoviesRepository, getPopularLetterboxdMoviesRepository, getSyncRepository } from "../../db/repositories";
 
-export async function syncEntriesMovies(sync: Sync, limit?: number) {
+interface Options {
+  limit?: number;
+  force?: boolean;
+}
+
+export async function syncPopularMoviesMovies(sync: Sync, {
+  limit,
+  force
+}: Options) {
+
   const SyncRepo = await getSyncRepository();
   sync.type = SyncType.RATINGS_MOVIES;
   SyncRepo.save(sync);
 
-  const FilmEntriesRepo = await getFilmEntriesRepository();
-  const missingMovies = await FilmEntriesRepo.getFilmEntriesWithMissingMovies(limit);
+  const PopularMoviesRepo = await getPopularLetterboxdMoviesRepository();
+  const missingMovies = await PopularMoviesRepo.getPopularMoviesWithMissingMovies(limit);
 
   if (missingMovies.length === 0) {
     return [];

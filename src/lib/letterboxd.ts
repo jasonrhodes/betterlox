@@ -122,7 +122,17 @@ export async function findLastWatchesPage(username: string) {
   return Number(lastPage);
 }
 
-export async function scrapeMoviesByPage(baseUrl: string, page: number = 1): Promise<{ movies: Array<Partial<PopularLetterboxdMovie>> }> {
+interface ScrapeMoviesByPageOptions {
+  baseUrl: string;
+  page?: number;
+  maxMovies?: number;
+}
+
+export async function scrapeMoviesByPage({
+  baseUrl,
+  page = 1,
+  maxMovies
+}: ScrapeMoviesByPageOptions): Promise<{ movies: Array<Partial<PopularLetterboxdMovie>> }> {
   const { data } = await tryLetterboxd(
     `${baseUrl}/page/${page}`
   );
@@ -134,7 +144,11 @@ export async function scrapeMoviesByPage(baseUrl: string, page: number = 1): Pro
     return { movies: [] };
   }
 
-  const movies = await Promise.all(elements.map(async (i, item) => {
+  const elementsToProcess = typeof maxMovies === "number" && elements.length > maxMovies
+    ? elements.slice(0, maxMovies)
+    : elements;
+
+  const movies = await Promise.all(elementsToProcess.map(async (i, item) => {
     const m: Partial<PopularLetterboxdMovie> = {};
 
     const containerData = $(item).data() as { averageRating: number };

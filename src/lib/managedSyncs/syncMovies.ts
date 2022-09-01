@@ -14,6 +14,7 @@ import { GENRES } from "../../common/constants";
 export interface SyncAllMoviesByDateRangeOptions {
   startYear: number;
   endYear: number;
+  moviesPerYear: number;
 }
 
 function isNumber(v: unknown): v is number {
@@ -40,7 +41,16 @@ async function processPage(set: Partial<PopularLetterboxdMovie>[]) {
   return numSynced;
 }
 
-export async function syncPopularMoviesPerYear(sync: Sync) {
+export interface SyncPopularMoviesPerYearOptions {
+  yearBatchSize: number;
+  force?: boolean;
+  moviesPerYear: number;
+}
+
+export async function syncPopularMoviesPerYear(sync: Sync, {
+  yearBatchSize,
+  moviesPerYear
+}: SyncPopularMoviesPerYearOptions) {
   const SyncRepo = await getSyncRepository();
   sync.type = SyncType.POPULAR_MOVIES_YEAR;
   await SyncRepo.save(sync);
@@ -76,14 +86,15 @@ export async function syncPopularMoviesPerYear(sync: Sync) {
     const lastRange = lastPopularYearSync[0].secondaryId;
     startYear = Number(lastRange.substring(5));
     const now = new Date();
-    endYear = Math.min(now.getUTCFullYear(), startYear + 20);
+    endYear = Math.min(now.getUTCFullYear(), startYear + yearBatchSize);
   }
 
   console.log('Syncing popular movies by date range...', `(${startYear} - ${endYear})`);
   // sync movies from letterboxd /by/year pages
   const numSynced = await syncPopularMoviesByDateRange({
     startYear,
-    endYear
+    endYear,
+    moviesPerYear
   });
 
   await SyncRepo.endSync(sync, {
@@ -97,18 +108,26 @@ export async function syncPopularMoviesPerYear(sync: Sync) {
 
 export async function syncPopularMoviesByDateRange({
   startYear,
-  endYear
+  endYear,
+  moviesPerYear
 }: SyncAllMoviesByDateRangeOptions) {
   let numSynced = 0;
 
   for (let year = startYear; year < endYear; year++) {
-    console.log(`Syncing popular letterboxd movies for year: ${year}`)
+    console.log(`Syncing popular letterboxd movies for year: ${year}`);
+    const baseUrl = `https://letterboxd.com/films/ajax/popular/year/${year}/size/small`;
     try {
-      const baseUrl = `https://letterboxd.com/films/ajax/popular/year/${year}/size/small`;
-      const page1 = await scrapeMoviesByPage(baseUrl, 1);
-      numSynced += await processPage(page1.movies);
-      const page2 = await scrapeMoviesByPage(baseUrl, 2);    
-      numSynced += await processPage(page2.movies);
+      let page = 1;
+      while (numSynced < moviesPerYear) {
+        const { movies } = await scrapeMoviesByPage({
+          baseUrl, 
+          page, 
+          maxMovies: moviesPerYear - numSynced
+        });
+        numSynced += await processPage(movies);
+        page += 1;
+      }
+      
     } catch (error: unknown) {
       if (error instanceof BetterloxApiError) {
         throw error;
@@ -128,7 +147,15 @@ const genrePaths = GENRES
     return genre.toLowerCase().replace(/ /g, '-');
   });
 
-export async function syncPopularMoviesPerGenre(sync: Sync) {
+interface SyncPopularMoviesPerGenreOptions {
+  force?: boolean;
+  moviesPerGenre: number;
+}
+
+export async function syncPopularMoviesPerGenre(sync: Sync, {
+  force,
+  moviesPerGenre
+}: SyncPopularMoviesPerGenreOptions) {
   const SyncRepo = await getSyncRepository();
   sync.type = SyncType.POPULAR_MOVIES_GENRE;
   SyncRepo.save(sync);
@@ -140,24 +167,36 @@ export async function syncPopularMoviesPerGenre(sync: Sync) {
   const completedDuringPastInterval = await SyncRepo.findBy({
     finished: MoreThan(new Date(cutoff)),
     status: SyncStatus.COMPLETE,
-    type: SyncType.POPULAR_MOVIES_YEAR
+    type: SyncType.POPULAR_MOVIES_GENRE
   });
 
-  if (completedDuringPastInterval) {
+  // console.log(
+  //   'Genre Syncs Completed In Last Interval', 
+  //   JSON.stringify(completedDuringPastInterval, null, 2)
+  // );
+
+  if (completedDuringPastInterval.length > 0) {
     return 0;
   }
 
   let numSynced = 0;
 
   for (let i = 0; i < genrePaths.length; i++) {
+    let numPerGenre = 0;
     const genre = genrePaths[i];
     console.log(`Retrieving popular movies for genre: ${genre}`);
+    const baseUrl = `https://letterboxd.com/films/ajax/popular/genre/${genre}/size/small`;
+    let page = 1;
     try {
-      const baseUrl = `https://letterboxd.com/films/ajax/popular/genre/${genre}/size/small`;
-      const page1 = await scrapeMoviesByPage(baseUrl, 1);
-      numSynced += await processPage(page1.movies);
-      const page2 = await scrapeMoviesByPage(baseUrl, 2);    
-      numSynced += await processPage(page2.movies);
+      while (numPerGenre < moviesPerGenre) {
+        const { movies } = await scrapeMoviesByPage({
+          baseUrl, 
+          page,
+          maxMovies: moviesPerGenre - numPerGenre
+        });
+        numPerGenre += await processPage(movies);
+      }
+      numSynced += numPerGenre;
     } catch (error: unknown) {
       if (error instanceof BetterloxApiError) {
         throw error;

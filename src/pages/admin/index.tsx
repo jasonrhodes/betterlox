@@ -57,7 +57,6 @@ function SyncHistoryTable() {
             headerName: 'When Started',
             width: 150,
             valueFormatter: ({ value }: GridValueFormatterParams<string | Date>) => {
-              console.log(typeof value, value);
               const d = new Date(value);
               const ds = d.toLocaleDateString();
               const ts = d.toLocaleTimeString();

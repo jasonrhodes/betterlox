@@ -8,7 +8,7 @@ type MyDataSourceOptions = Mutable<DataSourceOptions>;
 let dataSource: DataSource | null = null;
 
 async function init() {
-  console.log(`\n\nATTN: POST GRES CONNECTION BEING REINITIALIZED\n\n`);
+  console.log(`\n\n[${(new Date()).toISOString()}] ATTN: POST GRES CONNECTION BEING REINITIALIZED\n\n`);
   
   const { DATABASE_TYPE } = process.env;
   let dbOptions: MyDataSourceOptions = {} as MyDataSourceOptions;
