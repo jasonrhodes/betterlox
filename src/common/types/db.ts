@@ -29,6 +29,7 @@ export enum SyncType {
   MOVIES_COLLECTIONS = "Movies:Collections",
   POPULAR_MOVIES_YEAR = "Popular_Movies:By_Year",
   POPULAR_MOVIES_GENRE = "Popular_Movies:By_Genre",
+  POPULAR_MOVIES_MOVIES = "Popular_Movies:Movies",
   DEPRECATED_MOVIES = "Movies"
 }
 
