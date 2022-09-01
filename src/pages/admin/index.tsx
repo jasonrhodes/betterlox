@@ -10,6 +10,15 @@ import { useCurrentUser } from '../../hooks/UserContext';
 import { UserPublicSafe } from '../../common/types/db';
 import { SupervisorAccount, SwitchAccessShortcut } from '@mui/icons-material';
 
+async function forceFailSync(id: number) {
+  return callApi(`/api/syncs/${id}`, {
+    method: 'PATCH',
+    data: {
+      status: 'Failed'
+    }
+  });
+}
+
 function SyncHistoryTable() {
   const [syncs, setSyncs] = useState<Sync[]>([]);
   const [refreshes, setRefreshes] = useState<number>(0);
@@ -78,6 +87,14 @@ function SyncHistoryTable() {
             field: 'numSynced',
             headerName: '# Synced',
             width: 100
+          },
+          {
+            field: '',
+            headerName: '',
+            width: 100,
+            renderCell: ({ row }) => (row.status === "In Progress" || row.status === "Pending") ? (
+              <Button onClick={() => forceFailSync(row.id)}>Force Fail</Button>
+            ) : null
           },
           {
             field: 'errorMessage',

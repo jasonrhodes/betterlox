@@ -1,13 +1,16 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
 import { EntryApiResponse, GlobalFilters, TmdbCollectionByIdResponse, TmdbPersonByIdResponse } from '../common/types/api';
-import { Movie, FilmEntry } from '../db/entities';
+import { Movie, FilmEntry, UserSettings } from '../db/entities';
 import { callApi } from '../hooks/useApi';
 import { TMDBImage } from './images';
 import { ImdbSearchLink, LetterboxdSearchLink } from './externalServiceLinks';
 import { useGlobalFilters } from '../hooks/GlobalFiltersContext';
 import { useCurrentUser } from '../hooks/UserContext';
 import { UserPublic } from '../common/types/db';
+import { DiscoverMovieRequest, DiscoverMovieResponse } from 'moviedb-promise/dist/request-types';
+import { GENRE_ID_MAP } from '../common/constants';
+import { convertYearsToRange } from '../lib/convertYearsToRange';
 
 interface GetMissingOptions {
   entries: EntryApiResponse[];
@@ -19,17 +22,15 @@ interface MissingMovieExtras {
   reason: string;
   castOrder?: number;
   voteCount?: number;
+  collectionIds: number[];
 }
 
-export type MissingMovie = Pick<Movie, 'id' | 'title' | 'imdbId' | 'posterPath' | 'popularity' | 'releaseDate'> & MissingMovieExtras;
+export type MissingMovie = Pick<Movie, 'id' | 'title' | 'imdbId' | 'posterPath' | 'popularity' | 'releaseDate' | 'genres'> & MissingMovieExtras;
 
 export function Blindspots({ entries }: { entries: EntryApiResponse[] }) {
   const { globalFilters } = useGlobalFilters();
   const { user } = useCurrentUser();
   const missing = getBlindspotsForFilters({ entries, filters: globalFilters, user });
-
-  
-
   return null;
 }
 
@@ -75,32 +76,83 @@ function BlindspotListItem({ movie }: { movie: MissingMovie }) {
   );
 }
 
-export async function getBlindspotsForFilters({ 
-  entries, 
-  filters,
-  user
-}: GetMissingOptions): Promise<MissingMovie[]> {
-  const allForPeople: MissingMovie[][] = [];
-  const currentEntryIds = entries.map(r => r.movieId);
+interface HasId {
+  id: unknown;
+};
+
+interface HasNumericId {
+  id: number;
+};
+
+function hasId(x: unknown): x is HasId {
+  return Boolean(x)
+    && typeof x === "object"
+    && x !== null
+    && ("id" in x);
+}
+
+function hasNumericId(x: unknown): x is HasNumericId {
+  return hasId(x) && typeof x.id === "number";
+}
+
+function getCollectionsFromTmdb(c: unknown) {
+  if (hasNumericId(c)) {
+    return [c.id];
+  } else {
+    return [];
+  }
+}
+
+function findMissing(seen: number[], potentials: MissingMovie[]) {
+  const missing = potentials.filter((movie) => {
+    if (seen.includes(movie.id)) {
+      return false;
+    }
+
+    const d = new Date(movie.releaseDate);
+    const now = new Date();
+    if (d.toString() !== "Invalid Date" && d.getTime() > now.getTime()) {
+      return false;
+    }
+
+    // Remove undervoted/under popular movies ...
+    const underVoted = (typeof movie.voteCount === "number") && movie.voteCount < 25;
+    const unpopular = (typeof movie.popularity === "number") && movie.popularity < 5;
+
+    if (underVoted && unpopular) {
+      return false;
+    }
+
+    return true;
+  });
+
+  missing.sort((a, b) => a.popularity > b.popularity ? -1 : 1);
+  return missing;
+}
+
+async function findPeoplePotentials(currentEntries: number[], filters: GlobalFilters, settings?: UserSettings | null) {
+  const allPeopleSets: MissingMovie[][] = [];
 
   if (filters.actors?.length) {
     const actors = (await Promise.all(filters.actors.map((actorId) => callApi<TmdbPersonByIdResponse>(`/api/tmdb/people/${actorId}`)))).map(response => response.data?.person);
 
-    const actorMovies: MissingMovie[] = [];
     actors.forEach((actor) => {
+      const actorMovies: MissingMovie[] = [];
       actor.movie_credits.cast?.forEach((credit) => {
         if (
           credit.id && 
           credit.title && 
           typeof credit.popularity === "number" &&
           typeof credit.order === "number" &&
-          credit.order <= (user?.settings.statsMinCastOrder || 10000) &&
-          !currentEntryIds.includes(credit.id)
+          credit.order <= (settings?.statsMinCastOrder || 10000) && 
+          !currentEntries.includes(credit.id)
         ) {
           actorMovies.push({
             id: credit.id,
             reason: `${actor.name} plays ${credit.character || '(unknown)'}`,
             title: credit.title,
+            genres: (credit.genres || []).map(g => g.name || 'unknown'),
+            collectionIds: getCollectionsFromTmdb(credit.belongs_to_collection),
             imdbId: credit.imdb_id || '',
             posterPath: credit.poster_path || '',
             popularity: credit.popularity,
@@ -110,20 +162,30 @@ export async function getBlindspotsForFilters({
           });
         }
       });
+      allPeopleSets.push(actorMovies);
     });
-    allForPeople.push(actorMovies);
+
   }
 
   if (filters.directors?.length) {
     const directors = (await Promise.all(filters.directors.map((personId) => callApi<TmdbPersonByIdResponse>(`/api/tmdb/people/${personId}`)))).map(response => response.data?.person);
-    const directorMovies: MissingMovie[] = [];
     directors.forEach((person) => {
+      const directorMovies: MissingMovie[] = [];
       person.movie_credits.crew?.forEach((role) => {
-        if (role.id && role.title && role.job === "Director" && typeof role.popularity === "number" && !currentEntryIds.includes(role.id)) {
+        if (
+          role.id && 
+          role.title && 
+          role.job === "Director" && 
+          typeof role.popularity === "number" && 
+          !currentEntries.includes(role.id)
+        ) {
+          const collectionId = (role.belongs_to_collection as TmdbCollection).id; 
           directorMovies.push({
             id: role.id,
             reason: `Directed by ${person.name}`,
             title: role.title,
+            genres: (role.genres || []).map(g => g.name || 'unknown'),
+            collectionIds: getCollectionsFromTmdb(role.belongs_to_collection),
             imdbId: role.imdb_id || '',
             posterPath: role.poster_path || '',
             popularity: role.popularity,
@@ -132,21 +194,69 @@ export async function getBlindspotsForFilters({
           });
         }
       });
+      allPeopleSets.push(directorMovies);
     });
-    allForPeople.push(directorMovies);
   }
 
-  const first = allForPeople.shift() || [];
-  const overlappingForPeople = allForPeople.reduce((prev, current) => {
-    const currentIds = current.map((m) => m.id);
-    const overlap = prev.filter((movie) => currentIds.includes(movie.id));
+  const overlapping = allPeopleSets.reduce<MissingMovie[]>((prev, current) => {
+    if (prev.length === 0) {
+      return current;
+    }
+    const prevIds = prev.map((m) => m.id);
+    const overlap = current.filter((movie) => prevIds.includes(movie.id));
     return overlap;
-  }, first);
+  }, []);
 
-  if (overlappingForPeople.length > 0) {
-    // apply other filters to the overlapping movies
+  return overlapping;
+}
+
+async function discoverScroll(options: DiscoverMovieRequest, numResults: number, page: number = 1) {
+
+}
+
+async function findNonPeoplePotentials(filters: GlobalFilters) {
+  const options: DiscoverMovieRequest = {
+    sort_by: 'popularity.desc',
+    region: 'US'
+  };
+  if (filters.genres?.length) {
+    options.with_genres = filters.genres.map(name => GENRE_ID_MAP[name]).join(',');
+  }
+  if (filters.excludedGenres?.length) {
+    options.without_genres = filters.excludedGenres.map(name => GENRE_ID_MAP[name]).join(',');
+  }
+  if (filters.releaseDateRange) {
+    const [start, end] = convertYearsToRange(filters.releaseDateRange);
+    options['primary_release_date.gte'] = start;
+    options['primary_release_date.lte'] = end;
+  }
+
+  const response = await callApi<DiscoverMovieResponse>('/api/tmdb/discover', {
+    method: 'POST',
+    data: options
+  });
+
+  return response.data.results || [];
+}
+
+function applyNonPeopleFiltersToPeople(movies: MissingMovie[], filters: GlobalFilters) {
+  return movies;
+}
+
+export async function getBlindspotsForFilters({ 
+  entries, 
+  filters,
+  user
+}: GetMissingOptions): Promise<MissingMovie[]> {
+  const currentEntryIds = entries.map(r => r.movieId);
+  const peoplePotentials = await findPeoplePotentials(currentEntryIds, filters, user?.settings);
+
+  if (peoplePotentials.length > 0) {
+    const combinedPotentials = await applyNonPeopleFiltersToPeople(peoplePotentials, filters);
+    return findMissing(currentEntryIds, combinedPotentials);
   } else {
-    // start with other filters
+    const nonPeoplePotentials = await findNonPeoplePotentials(filters);
+    return findMissing(currentEntryIds, nonPeoplePotentials);
   }
 
 
@@ -179,27 +289,4 @@ export async function getBlindspotsForFilters({
   //     }
   //   }
   // }
-
-  const filteredMissing = overlappingForPeople.filter((m) => {
-    // Remove unreleased movies
-    const d = new Date(m.releaseDate);
-    const now = new Date();
-    if (d.toString() !== "Invalid Date" && d.getTime() > now.getTime()) {
-      return false;
-    }
-
-    // Remove undervoted/under popular movies ...
-    const underVoted = (typeof m.voteCount === "number") && m.voteCount < 25;
-    const unpopular = (typeof m.popularity === "number") && m.popularity < 5;
-
-    if (underVoted && unpopular) {
-      return false;
-    }
-
-    return true;
-  });
-
-  filteredMissing.sort((a, b) => a.popularity > b.popularity ? -1 : 1);
-
-  return filteredMissing;
 }
