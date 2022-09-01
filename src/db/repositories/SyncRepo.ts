@@ -32,12 +32,12 @@ export const getSyncRepository = async () => (await getDataSource()).getReposito
     sync.status = SyncStatus.SKIPPED;
     sync.finished = new Date();
     sync.numSynced = 0;
-    return this.save(sync);
+    return await this.save(sync);
   },
 
   async startSync(sync: Sync) {
     sync.status = SyncStatus.IN_PROGRESS;
-    return this.save(sync);
+    return await this.save(sync);
   },
 
   async endSync(sync: Sync, {
@@ -61,7 +61,7 @@ export const getSyncRepository = async () => (await getDataSource()).getReposito
     }
     sync.secondaryId = secondaryId;
     sync.finished = new Date();
-    return this.save(sync);
+    return await this.save(sync);
   },
 
   async clearUnfinished({ trigger }: { trigger: SyncTrigger }) {

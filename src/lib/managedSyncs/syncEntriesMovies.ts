@@ -4,6 +4,8 @@ import { getSyncRepository, getFilmEntriesRepository, getMoviesRepository } from
 
 export async function syncEntriesMovies(sync: Sync, limit?: number) {
   const SyncRepo = await getSyncRepository();
+  sync.type = SyncType.RATINGS_MOVIES;
+  SyncRepo.save(sync);
   // Check for ratings with missing movies
   sync.type = SyncType.RATINGS_MOVIES;
   const FilmEntriesRepo = await getFilmEntriesRepository();

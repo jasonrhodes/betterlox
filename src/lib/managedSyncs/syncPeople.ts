@@ -22,6 +22,8 @@ export async function syncPeople(sync: Sync, peopleIds: number[]) {
   }
 
   const SyncRepo = await getSyncRepository();
+  SyncRepo.save(sync);
+
   const PeopleRepo = await getPeopleRepository();
   const synced = await PeopleRepo.syncPeople(peopleIds);
   if (synced.length > 0) {

@@ -122,9 +122,9 @@ export async function findLastWatchesPage(username: string) {
   return Number(lastPage);
 }
 
-export async function scrapeMoviesByYearByPage(year: number, page: number = 1): Promise<{ movies: Array<Partial<PopularLetterboxdMovie>> }> {
+export async function scrapeMoviesByPage(baseUrl: string, page: number = 1): Promise<{ movies: Array<Partial<PopularLetterboxdMovie>> }> {
   const { data } = await tryLetterboxd(
-    `https://letterboxd.com/films/ajax/popular/year/${year}/size/small/page/${page}`
+    `${baseUrl}/page/${page}`
   );
   const $ = cheerio.load(data);
   // console.log('HTML', $.html());

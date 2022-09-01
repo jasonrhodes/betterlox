@@ -61,6 +61,7 @@ export async function syncAllMoviesCollections(sync: Sync, limit?: number) {
   const SyncRepo = await getSyncRepository();
   // Check for ratings with missing movies
   sync.type = SyncType.MOVIES_COLLECTIONS;
+  SyncRepo.save(sync);
   const MoviesRepo = await getMoviesRepository();
   const moviesWithMissingCollections = await MoviesRepo.getMissingCollections();
   const missingCount = moviesWithMissingCollections.length;

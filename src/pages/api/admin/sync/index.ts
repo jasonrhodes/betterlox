@@ -6,7 +6,7 @@ import { numericQueryParam, singleQueryParam } from "../../../../lib/queryParams
 import { syncCastPeople, syncCrewPeople } from "../../../../lib/managedSyncs/syncPeople";
 import { syncAllMoviesCredits } from "../../../../lib/managedSyncs/syncMoviesCredits";
 import { syncAllMoviesCollections } from "../../../../lib/managedSyncs/syncMoviesCollections";
-import { syncPopularMoviesByDateRange } from "../../../../lib/managedSyncs/syncMovies";
+import { syncPopularMoviesPerYear, syncPopularMoviesPerGenre } from "../../../../lib/managedSyncs/syncMovies";
 import { syncEntriesMovies } from "../../../../lib/managedSyncs/syncEntriesMovies";
 import { MoreThan } from "typeorm";
 
@@ -31,62 +31,40 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
 
       try {
         const numericLimit = numericQueryParam(req.query.limit);
-        const now = new Date();
-        const hoursBetween = 1;
-        const cutoff = (new Date(now.getTime() - (1000 * 60 * 60 * hoursBetween))).toISOString();
-
-        const movieSyncsCompletedDuringPastDay = await SyncRepo.findBy({
-          finished: MoreThan(new Date(cutoff)),
-          status: SyncStatus.COMPLETE,
-          type: SyncType.POPULAR_MOVIES_YEAR
-        });
-
-        console.log('Successful, completed movie syncs in the past day:', movieSyncsCompletedDuringPastDay);
-
-        if ((!forceType && !movieSyncsCompletedDuringPastDay.length) || forceType === "popular_movies_decade") {
-
-          const lastPopularYearSync = await SyncRepo.find({
-            where: {
-              type: SyncType.POPULAR_MOVIES_YEAR,
-              status: SyncStatus.COMPLETE
-            },
-            order: {
-              finished: 'DESC'
-            },
-            take: 1
-          });
-
-          let startYear = 1900;
-          let endYear = 1910;
-
-          if (lastPopularYearSync.length > 0 && lastPopularYearSync[0].secondaryId) {
-            const lastRange = lastPopularYearSync[0].secondaryId;
-            startYear = Number(lastRange.substring(5));
-            const now = new Date();
-            endYear = Math.min(now.getUTCFullYear(), startYear + 20);
-          }
-          console.log('Syncing movies by range...', `(${startYear} - ${endYear})`);
-          // sync movies from letterboxd /by/year pages
-          const n = await syncPopularMoviesByDateRange(sync, {
-            startYear,
-            endYear
-          });
-
+        
+        if (!forceType || forceType === "popular_movies_per_year") {
+          const n = await syncPopularMoviesPerYear(sync);
           if (n > 0) {
-            return res.status(200).json({ success: true, type: 'popular_movies_decade', syncedCount: n })
+            return res.status(200).json({ 
+              success: true, 
+              type: 'popular_movies_per_year', 
+              syncedCount: n 
+            });
           }
         }
 
-        // Check for ratings with missing movie records
-        console.log('Syncing entries -> movies...');
+        if (!forceType || forceType === "popular_movies_per_genre") {
+          sync.type = SyncType.POPULAR_MOVIES_GENRE;
+          const n = await syncPopularMoviesPerGenre(sync);
+          if (n > 0) {
+            return res.status(200).json({ 
+              success: true, 
+              type: 'popular_movies_per_genre', 
+              syncedCount: n 
+            });
+          }
+        }
 
+        // Check for user entries with missing movie records
         if (!forceType || forceType === "entries_movies") {
+          console.log('Syncing entries -> movies...');
           const syncedMovies = await syncEntriesMovies(sync, numericLimit);
           if (syncedMovies.length > 0) {
             return res.status(200).json({ success: true, type: 'entries_movies', synced: syncedMovies });
           }
         }
 
+        
         if (!forceType || forceType === "movies_credits") {
           console.log('Syncing movies -> credits (cast and crew)...')
           const syncedCredits = await syncAllMoviesCredits(sync, numericLimit);
@@ -123,6 +101,11 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
         }
 
         console.log('Nothing was synced');
+        await SyncRepo.endSync(sync, {
+          type: SyncType.NONE,
+          status: SyncStatus.COMPLETE,
+          numSynced: 0
+        });
         res.json({ success: true, type: 'none', synced: [], message: 'Nothing was synced' });
         return;
       } catch (error: unknown) {

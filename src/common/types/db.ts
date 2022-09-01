@@ -20,6 +20,7 @@ export enum SyncStatus {
 
 export enum SyncType {
   UNKNOWN = "Unknown",
+  NONE = "None",
   USER_RATINGS = "User:Ratings",
   RATINGS_MOVIES = "Ratings:Movies",
   MOVIES_CAST = "Movies:Cast",

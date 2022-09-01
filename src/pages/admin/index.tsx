@@ -40,7 +40,7 @@ function SyncHistoryTable() {
           {
             field: 'type',
             headerName: 'Type',
-            width: 120
+            width: 200
           },
           {
             field: 'username',

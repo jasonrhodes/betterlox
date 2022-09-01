@@ -28,8 +28,8 @@ export async function syncOneMovieCredits(movie: Movie) {
 
 export async function syncAllMoviesCredits(sync: Sync, limit?: number) {
   const SyncRepo = await getSyncRepository();
-  // Check for ratings with missing movies
   sync.type = SyncType.MOVIES_CREDITS;
+  SyncRepo.save(sync);
   const MoviesRepo = await getMoviesRepository();
   const moviesWithMissingCredits = await MoviesRepo.getMissingCredits(limit);
   if (moviesWithMissingCredits.length === 0) {
