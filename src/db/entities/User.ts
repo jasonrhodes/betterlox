@@ -39,8 +39,8 @@ export class User {
   @Column({ nullable: true })
   lastEntriesUpdate: Date;
 
-  @OneToOne(() => UserSettings, (settings) => settings.user, { cascade: true, nullable: true })
-  settings: Relation<UserSettings> | null;
+  @OneToOne(() => UserSettings, (settings) => settings.user, { eager: true, cascade: true })
+  settings: Relation<UserSettings>;
 
   @ManyToOne(() => FilmEntry, entry => entry.user)
   ratings: Relation<FilmEntry[]>;

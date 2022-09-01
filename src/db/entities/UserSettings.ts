@@ -8,7 +8,7 @@ export class UserSettings {
 
   @OneToOne(() => User, (user) => user.settings)
   @JoinColumn()
-  user: Relation<User>;
+  user?: Relation<User>;
 
   @Column({ default: 3 })
   statsMinWatched: number;

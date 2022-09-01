@@ -112,8 +112,15 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
       if (!data.success) {
         throw new Error(`Update settings failed: ${data.message}`);
       }
-
-      const updated = { ...user, settings: { ...user.settings, ...data.settings }};
+      
+      if (
+        typeof data.settings?.userId === "undefined" || 
+        typeof data.settings?.statsMinCastOrder === "undefined" ||
+        typeof data.settings?.statsMinWatched === "undefined"
+      ) {
+        return;
+      }
+      const updated = { ...user, settings: { ...user.settings, ...data.settings, userId: user.id }};
       setUser(updated);
     } catch (error: unknown) {
       // TODO: some kind of toast or pop up or banner notification system?

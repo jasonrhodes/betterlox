@@ -47,13 +47,13 @@ function BlindspotListItem({ movie }: { movie: MissingMovie }) {
       marginBottom: 1
     }}>
       <Box sx={{ display: 'flex' }}>
-        <TMDBImage
+        {movie.posterPath ? <TMDBImage
           tmdbPath={movie.posterPath}
           alt={`${movie.title} poster`}
           width={33}
           height={50}
           sx={{ marginRight: 1 }}
-        />
+        /> : null}
         <Box sx={{ display: 'flex', flexDirection: 'column', marginBottom: 4 }}>
           <Box sx={{ marginBottom: 0.3 }}>
             <Typography variant="body1"><b>{movie.title}</b> ({movie.releaseDate.substring(0, 4)})</Typography>
