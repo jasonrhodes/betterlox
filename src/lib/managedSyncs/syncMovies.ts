@@ -64,9 +64,13 @@ export async function syncPopularMoviesPerYear(sync: Sync, {
     type: SyncType.POPULAR_MOVIES_YEAR
   });
 
+  // console.log(JSON.stringify(completedDuringPastInterval, null, 2));
+
   if (completedDuringPastInterval.length > 0) {
     return 0;
   }
+
+  console.log("Should continue to sync");
 
   const lastPopularYearSync = await SyncRepo.find({
     where: {
@@ -79,14 +83,19 @@ export async function syncPopularMoviesPerYear(sync: Sync, {
     take: 1
   });
 
+  // console.log(JSON.stringify(lastPopularYearSync, null, 2));
+
   let startYear = 1900;
   let endYear = 1910;
 
   if (lastPopularYearSync.length > 0 && lastPopularYearSync[0].secondaryId) {
+    const currentYear = now.getUTCFullYear();
     const lastRange = lastPopularYearSync[0].secondaryId;
-    startYear = Number(lastRange.substring(5));
-    const now = new Date();
-    endYear = Math.min(now.getUTCFullYear(), startYear + yearBatchSize);
+    const possibleStartYear = Number(lastRange.substring(5));
+    if (possibleStartYear < currentYear) {
+      startYear = possibleStartYear;
+      endYear = Math.min(currentYear, startYear + yearBatchSize);
+    }
   }
 
   console.log('Syncing popular movies by date range...', `(${startYear} - ${endYear})`);
