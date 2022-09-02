@@ -11,6 +11,7 @@ import { UserPublic } from '../common/types/db';
 import { DiscoverMovieRequest, DiscoverMovieResponse } from 'moviedb-promise/dist/request-types';
 import { GENRE_ID_MAP } from '../common/constants';
 import { convertYearsToRange } from '../lib/convertYearsToRange';
+import { TmdbCollection } from '../lib/tmdb';
 
 interface GetMissingOptions {
   entries: EntryApiResponse[];
@@ -210,33 +211,9 @@ async function findPeoplePotentials(currentEntries: number[], filters: GlobalFil
   return overlapping;
 }
 
-async function discoverScroll(options: DiscoverMovieRequest, numResults: number, page: number = 1) {
-
-}
-
 async function findNonPeoplePotentials(filters: GlobalFilters) {
-  const options: DiscoverMovieRequest = {
-    sort_by: 'popularity.desc',
-    region: 'US'
-  };
-  if (filters.genres?.length) {
-    options.with_genres = filters.genres.map(name => GENRE_ID_MAP[name]).join(',');
-  }
-  if (filters.excludedGenres?.length) {
-    options.without_genres = filters.excludedGenres.map(name => GENRE_ID_MAP[name]).join(',');
-  }
-  if (filters.releaseDateRange) {
-    const [start, end] = convertYearsToRange(filters.releaseDateRange);
-    options['primary_release_date.gte'] = start;
-    options['primary_release_date.lte'] = end;
-  }
-
-  const response = await callApi<DiscoverMovieResponse>('/api/tmdb/discover', {
-    method: 'POST',
-    data: options
-  });
-
-  return response.data.results || [];
+  // call a local movies API and request top x movies for filters
+  return [];
 }
 
 function applyNonPeopleFiltersToPeople(movies: MissingMovie[], filters: GlobalFilters) {

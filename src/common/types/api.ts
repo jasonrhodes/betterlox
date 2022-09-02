@@ -1,3 +1,4 @@
+import { ApiError } from "next/dist/server/api-utils";
 import { InsertResult } from "typeorm";
 import { Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings, FilmEntry } from "../../db/entities";
 import { TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "../../lib/tmdb";
@@ -80,6 +81,12 @@ export interface SyncsManagementGetResponse {
   success: true,
   syncs: Sync[]
 }
+
+export interface SyncManagementGetOneResponse extends ApiSuccessResponse {
+  sync: Sync;
+}
+
+export type SyncManagementApiResponse = SyncManagementGetOneResponse | ApiSuccessResponse | ApiErrorResponse;
 
 export interface UnsyncedGetResponse {
   success: true;
