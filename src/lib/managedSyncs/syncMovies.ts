@@ -64,7 +64,7 @@ export async function syncPopularMoviesPerYear(sync: Sync, {
     type: SyncType.POPULAR_MOVIES_YEAR
   });
 
-  if (completedDuringPastInterval) {
+  if (completedDuringPastInterval.length > 0) {
     return 0;
   }
 
