@@ -1,17 +1,16 @@
-import { Box, Typography } from '@mui/material';
-import React from 'react';
-import { EntryApiResponse, GlobalFilters, TmdbCollectionByIdResponse, TmdbPersonByIdResponse } from '../common/types/api';
-import { Movie, FilmEntry, UserSettings } from '../db/entities';
+import { Box, LinearProgress, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { EntryApiResponse, GlobalFilters, MoviesApiResponse, TmdbCollectionByIdResponse, TmdbPersonByIdResponse } from '../common/types/api';
+import { Movie, UserSettings } from '../db/entities';
 import { callApi } from '../hooks/useApi';
-import { TMDBImage } from './images';
-import { ImdbSearchLink, LetterboxdSearchLink } from './externalServiceLinks';
 import { useGlobalFilters } from '../hooks/GlobalFiltersContext';
 import { useCurrentUser } from '../hooks/UserContext';
 import { UserPublic } from '../common/types/db';
-import { DiscoverMovieRequest, DiscoverMovieResponse } from 'moviedb-promise/dist/request-types';
-import { GENRE_ID_MAP } from '../common/constants';
 import { convertYearsToRange } from '../lib/convertYearsToRange';
 import { TmdbCollection } from '../lib/tmdb';
+import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
+import { MoviesTable } from './MoviesTable';
+import { PartialMovie } from '../common/types/base';
 
 interface GetMissingOptions {
   entries: EntryApiResponse[];
@@ -31,50 +30,34 @@ export type MissingMovie = Pick<Movie, 'id' | 'title' | 'imdbId' | 'posterPath' 
 export function Blindspots({ entries }: { entries: EntryApiResponse[] }) {
   const { globalFilters } = useGlobalFilters();
   const { user } = useCurrentUser();
-  const missing = getBlindspotsForFilters({ entries, filters: globalFilters, user });
-  return null;
-}
+  const [blindspots, setBlindspots] = useState<PartialMovie[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-export function BlindspotList({ movies }: { movies: MissingMovie[] }) {
-  return (
-    <Box>
-      {movies.map(movie => <BlindspotListItem key={movie.id} movie={movie} />)}
-    </Box>
-  );
-}
+  useEffect(() => {
+    async function retrieve() {
+      setIsLoading(true);
+      const blindspots = await getBlindspotsForFilters({
+        entries, 
+        filters: globalFilters, 
+        user 
+      });
+      setBlindspots(blindspots);
+      setIsLoading(false);
+    }
+    retrieve();
+  }, [entries, globalFilters, user]);
 
-function BlindspotListItem({ movie }: { movie: MissingMovie }) {
+  if (isLoading) {
+    return <LinearProgress />;
+  }
+
+  if (blindspots.length === 0) {
+    return <Typography>No blindspots for these filters.</Typography>;
+  }
+  
   return (
-    <Box title={movie.title} sx={{ 
-      marginBottom: 1
-    }}>
-      <Box sx={{ display: 'flex' }}>
-        {movie.posterPath ? <TMDBImage
-          tmdbPath={movie.posterPath}
-          alt={`${movie.title} poster`}
-          width={33}
-          height={50}
-          sx={{ marginRight: 1 }}
-        /> : null}
-        <Box sx={{ display: 'flex', flexDirection: 'column', marginBottom: 4 }}>
-          <Box sx={{ marginBottom: 0.3 }}>
-            <Typography variant="body1"><b>{movie.title}</b> ({movie.releaseDate.substring(0, 4)})</Typography>
-          </Box>
-          <Box sx={{ display: 'flex' }}>
-            <Box sx={{ marginRight: 1 }}>
-              <LetterboxdSearchLink title={movie.title} releaseDate={movie.releaseDate} size={15} />
-            </Box>
-            <Box sx={{ marginRight: 1 }}>
-              <ImdbSearchLink title={movie.title} releaseDate={movie.releaseDate} size={15} />
-            </Box>
-            <Box sx={{ marginRight: 1, marginTop: '-3px' }}>
-              <Typography variant="caption">{movie.reason}</Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-    </Box>
-  );
+    <MoviesTable movies={blindspots} isLoading={false} />
+  )
 }
 
 interface HasId {
@@ -104,7 +87,9 @@ function getCollectionsFromTmdb(c: unknown) {
   }
 }
 
-function findMissing(seen: number[], potentials: MissingMovie[]) {
+function findMissing(seen: number[], potentials: MissingMovie[]): MissingMovie[];
+function findMissing(seen: number[], potentails: Movie[]): Movie[];
+function findMissing(seen: number[], potentials:(MissingMovie | Movie)[]) {
   const missing = potentials.filter((movie) => {
     if (seen.includes(movie.id)) {
       return false;
@@ -117,7 +102,7 @@ function findMissing(seen: number[], potentials: MissingMovie[]) {
     }
 
     // Remove undervoted/under popular movies ...
-    const underVoted = (typeof movie.voteCount === "number") && movie.voteCount < 25;
+    const underVoted = ('voteCount' in movie && typeof movie.voteCount === "number") && movie.voteCount < 25;
     const unpopular = (typeof movie.popularity === "number") && movie.popularity < 5;
 
     if (underVoted && unpopular) {
@@ -211,20 +196,62 @@ async function findPeoplePotentials(currentEntries: number[], filters: GlobalFil
   return overlapping;
 }
 
-async function findNonPeoplePotentials(filters: GlobalFilters) {
+async function findNonPeoplePotentials(filters: GlobalFilters, userId?: number) {
   // call a local movies API and request top x movies for filters
+  let qs = convertFiltersToQueryString(filters);
+  if (userId) {
+    qs += `&blindspotsForUser=${userId}`;
+  }
+  qs += '&limit=100';
+
+  const { data } = await callApi<MoviesApiResponse>(`/api/movies?${qs}`);
+  if ('movies' in data) {
+    return data.movies;
+  }
   return [];
 }
 
 function applyNonPeopleFiltersToPeople(movies: MissingMovie[], filters: GlobalFilters) {
-  return movies;
+  const {
+    genres = [],
+    excludedGenres = []
+  } = filters;
+  const dateRange = convertYearsToRange(filters.releaseDateRange || undefined);
+  const startTime = (new Date(dateRange[0])).getTime();
+  const endTime = (new Date(dateRange[1])).getTime();
+
+  return movies.filter((movie) => {
+    if (genres.length > 0) {
+      if (movie.genres.some((g) => !genres.includes(g))) {
+        return false;
+      }
+    }
+
+    if (excludedGenres.length > 0) {
+      if (movie.genres.some((g) => excludedGenres.includes(g))) {
+        return false;
+      }
+    }
+
+    if (dateRange.length === 2) {
+      const movieReleaseTime = (new Date(movie.releaseDate)).getTime();
+      if (movieReleaseTime < startTime) {
+        return false;
+      }
+      if (movieReleaseTime > endTime) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 }
 
 export async function getBlindspotsForFilters({ 
   entries, 
   filters,
   user
-}: GetMissingOptions): Promise<MissingMovie[]> {
+}: GetMissingOptions): Promise<PartialMovie[]> {
   const currentEntryIds = entries.map(r => r.movieId);
   const peoplePotentials = await findPeoplePotentials(currentEntryIds, filters, user?.settings);
 
@@ -232,8 +259,8 @@ export async function getBlindspotsForFilters({
     const combinedPotentials = await applyNonPeopleFiltersToPeople(peoplePotentials, filters);
     return findMissing(currentEntryIds, combinedPotentials);
   } else {
-    const nonPeoplePotentials = await findNonPeoplePotentials(filters);
-    return findMissing(currentEntryIds, nonPeoplePotentials);
+    const nonPeoplePotentials = await findNonPeoplePotentials(filters, user?.id);
+    return nonPeoplePotentials;
   }
 
 

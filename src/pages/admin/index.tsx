@@ -89,6 +89,11 @@ function SyncHistoryTable() {
             width: 100
           },
           {
+            field: 'secondaryId',
+            headerName: 'Note',
+            width: 150
+          },
+          {
             field: '',
             headerName: '',
             width: 100,

@@ -45,7 +45,7 @@ function EntryCard({ entry }: { entry: EntryApiResponse }) {
         {entry.dateRated ? <Box><Typography variant="caption">{(new Date(entry.dateRated)).toLocaleDateString()}</Typography></Box> : null}
         <Box sx={{ display: "flex", py: 1 }}>
           <Box sx={{ marginRight: 1 }}>
-            <LetterboxdLink username={user?.username} slug={slug} />
+            <LetterboxdLink slug={slug} />
           </Box>
           <Box sx={{ marginRight: 1 }}>
             <ImdbLink id={entry.movie?.imdbId} />

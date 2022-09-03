@@ -1,11 +1,11 @@
 import { TextField, Box, Tabs, Tab, FormControl, Typography } from "@mui/material";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { EntryApiResponse, GlobalFilters } from "../../common/types/api";
-import { FilmEntry } from "../../db/entities";
+import { FilmEntry, Movie } from "../../db/entities";
 import { escapeRegExp } from "../../lib/escapeRegex";
 import { EntriesTable } from "../EntriesTable";
 import { TabPanel, a11yTabProps } from "../TabPanel";
-import { MissingMovie, getBlindspotsForFilters, BlindspotList, Blindspots } from "../UserBlindspots";
+import { Blindspots } from "../UserBlindspots";
 import { SortBy, SortDir, applyTitleFilter, applySort } from "./helpers";
 import { FilmEntryShowAndSortControls } from "./FilmEntryShowAndSortControls";
 
@@ -44,7 +44,6 @@ export function FilmEntryTabs({
   const [value, setValue] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [activeFilterCount, setActiveFilterCount] = useState<number>(0);
-  const [missing, setMissing] = useState<MissingMovie[]>([]);
   const [quickTitleSearch, updateQuickTitleSearch] = useState<string>('');
   const [show, setShow] = useState<"all" | number>(100);
   const [sortBy, setSortBy] = useState<SortBy>("dateRated");
@@ -92,27 +91,6 @@ export function FilmEntryTabs({
     setHideUnrated(!hideUnrated);
   }, [hideUnrated]);
 
-  useEffect(() => {
-    async function retrieve() {
-      console.log("Retrieving blindspots", filters);
-      const missing = await getBlindspotsForFilters({ entries: unprocessedEntries, filters });
-      setMissing(missing);
-    }
-    const filterKeys = Object.keys(filters) as Array<keyof GlobalFilters>;
-    const activeFilterCount = filterKeys.reduce((count, key) => {
-      const f = filters[key];
-      const numActive = Array.isArray(f) ? f.length : (f !== undefined && f !== null) ? 1 : 0;
-      return count + numActive;
-    }, 0);
-    setActiveFilterCount(activeFilterCount);
-    console.log("Active filter count", activeFilterCount);
-    if (activeFilterCount === 0) {
-      setMissing([]);
-    } else {
-      retrieve();
-    }
-  }, [unprocessedEntries, filters]);
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -141,9 +119,8 @@ export function FilmEntryTabs({
         </FormControl>
         <EntriesTable entries={processedEntries} isLoading={isReloading || isProcessing} />
       </TabPanel>
-      <TabPanel value={value} index={1}>
+      <TabPanel value={value} index={1} sx={{ paddingLeft: 0 }}>
         <Blindspots entries={unprocessedEntries} />
-        {/* {activeFilterCount === 0 ? <Typography>No blindspots for these filters.</Typography> : <BlindspotList movies={missing} />} */}
       </TabPanel>
     </Box>
   );

@@ -85,18 +85,18 @@ export async function syncPopularMoviesPerYear(sync: Sync, {
 
   // console.log(JSON.stringify(lastPopularYearSync, null, 2));
 
+  const currentYear = now.getUTCFullYear();
   let startYear = 1900;
-  let endYear = 1910;
 
   if (lastPopularYearSync.length > 0 && lastPopularYearSync[0].secondaryId) {
-    const currentYear = now.getUTCFullYear();
     const lastRange = lastPopularYearSync[0].secondaryId;
     const possibleStartYear = Number(lastRange.substring(5));
     if (possibleStartYear < currentYear) {
       startYear = possibleStartYear;
-      endYear = Math.min(currentYear, startYear + yearBatchSize);
     }
   }
+
+  const endYear = Math.min(currentYear, startYear + yearBatchSize);
 
   console.log('Syncing popular movies by date range...', `(${startYear} - ${endYear})`);
   // sync movies from letterboxd /by/year pages
@@ -123,19 +123,21 @@ export async function syncPopularMoviesByDateRange({
   let numSynced = 0;
 
   for (let year = startYear; year < endYear; year++) {
+    let numPerYear = 0;
     console.log(`Syncing popular letterboxd movies for year: ${year}`);
     const baseUrl = `https://letterboxd.com/films/ajax/popular/year/${year}/size/small`;
     try {
       let page = 1;
-      while (numSynced < moviesPerYear) {
+      while (numPerYear < moviesPerYear) {
         const { movies } = await scrapeMoviesByPage({
           baseUrl, 
           page, 
-          maxMovies: moviesPerYear - numSynced
+          maxMovies: moviesPerYear - numPerYear
         });
-        numSynced += await processPage(movies);
+        numPerYear += await processPage(movies);
         page += 1;
       }
+      numSynced += numPerYear;
       
     } catch (error: unknown) {
       if (error instanceof BetterloxApiError) {

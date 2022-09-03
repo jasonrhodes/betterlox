@@ -63,9 +63,7 @@ async function syncWatchesForPage({ userId, username, page }: SyncPageOptions) {
       };
       const found = await FilmEntriesRepo.findOneBy(watchInfo);
       if (found) {
-        // we have come across a rating that we already have in the db
-        // so we don't need to continue processing this page
-        break;
+        continue;
       }
       const watchToInsert = FilmEntriesRepo.create(watchInfo);
       const saved = await FilmEntriesRepo.save(watchToInsert);
@@ -177,7 +175,7 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
   const lastWatchesPage = await findLastWatchesPage(username);
 
   try {
-    if (order === "DESC") {
+    // if (order === "DESC") {
       for (let page = lastWatchesPage; page > 0; page--) {
         const syncedForPage = await syncWatchesForPage({
           userId,
@@ -186,22 +184,22 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
         });
         syncedWatches = syncedWatches.concat(syncedForPage);
       }
-    } else if (order === "ASC") {
-      for (let page = 0; page <= lastWatchesPage; page++) {
-        const syncedForPage = await syncWatchesForPage({
-          userId,
-          username,
-          page
-        });
-        // if (syncedForPage.length === 0) {
-        //   // when moving through the pages forward, as soon
-        //   // as we encounter a page with no ratings, we can
-        //   // assume we don't need to continue through pages
-        //   break;
-        // }
-        syncedWatches = syncedWatches.concat(syncedForPage);
-      }
-    }
+    // } else if (order === "ASC") {
+    //   for (let page = 0; page <= lastWatchesPage; page++) {
+    //     const syncedForPage = await syncWatchesForPage({
+    //       userId,
+    //       username,
+    //       page
+    //     });
+    //     // if (syncedForPage.length === 0) {
+    //     //   // when moving through the pages forward, as soon
+    //     //   // as we encounter a page with no ratings, we can
+    //     //   // assume we don't need to continue through pages
+    //     //   break;
+    //     // }
+    //     syncedWatches = syncedWatches.concat(syncedForPage);
+    //   }
+    // }
   } catch (error) {
     let message = "Unknown error occurred";
     if (error instanceof Error) {

@@ -196,3 +196,9 @@ export interface UsersApiSuccessResponse extends ApiSuccessResponse {
 }
 
 export type UsersApiResponse = UsersApiSuccessResponse | ApiErrorResponse;
+
+interface MoviesApiFindResponse extends ApiSuccessResponse {
+  movies: Movie[];
+}
+
+export type MoviesApiResponse = MoviesApiFindResponse | ApiSuccessResponse | ApiErrorResponse;

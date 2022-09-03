@@ -3,10 +3,25 @@ import Image from 'next/image';
 
 const DEFAULT_ICON_SIZE = 20;
 
-export function LetterboxdLink({ username, slug, size = DEFAULT_ICON_SIZE }: { url?: string; username?: string; slug?: string; size?: number; }) {
-  if (!username || !slug) {
+export function LetterboxdLink({ 
+  slug, 
+  title,
+  releaseDate,
+  size = DEFAULT_ICON_SIZE
+}: { 
+  slug?: string; 
+  size?: number; 
+  title?: string;
+  releaseDate?: string;
+}) {
+  if (!slug) {
+    if (title) {
+      return (
+        <LetterboxdSearchLink size={size} title={title} releaseDate={releaseDate} />
+      );
+    }
     return (
-      <Tooltip title="Movie data is still loading..." arrow>
+      <Tooltip title="Movie data unavailable" arrow>
         <Box>
           <Image height={size} width={size} style={{ opacity: 0.4 }} src="/img/letterboxd-icon-2.webp" alt="Letterboxd.com logo" />
         </Box>
@@ -14,7 +29,7 @@ export function LetterboxdLink({ username, slug, size = DEFAULT_ICON_SIZE }: { u
     )
   }
 
-  return <LetterboxdIconLink url={`https://letterboxd.com/${username}${slug}`} size={size} />;
+  return <LetterboxdIconLink url={`https://letterboxd.com${slug}`} size={size} />;
 }
 
 export function LetterboxdIconLink({ size = DEFAULT_ICON_SIZE, url }: { size?: number; url: string; }) {
@@ -25,17 +40,38 @@ export function LetterboxdIconLink({ size = DEFAULT_ICON_SIZE, url }: { size?: n
   );
 }
 
-export function LetterboxdSearchLink({ size = DEFAULT_ICON_SIZE, title, releaseDate }: { title: string; releaseDate: string; size?: number;  }) {
+export function LetterboxdSearchLink({ 
+  size = DEFAULT_ICON_SIZE, 
+  title, 
+  releaseDate = 'none'
+}: { 
+  title: string; 
+  releaseDate?: string; 
+  size?: number; 
+}) {
   const d = new Date(releaseDate);
   const year = (d.toString() === "Invalid Date") ? '' : `(${d.getFullYear()})`;
   const url = encodeURI(`https://letterboxd.com/search/films/${title} ${year}/`);
   return <LetterboxdIconLink url={url} size={size} />
 }
 
-export function ImdbLink({id, size = DEFAULT_ICON_SIZE }: { id?: string; size?: number; }) {
+export function ImdbLink({
+  id, 
+  size = DEFAULT_ICON_SIZE,
+  title,
+  releaseDate
+}: { 
+  id?: string; 
+  size?: number; 
+  title?: string;
+  releaseDate?: string;
+}) {
   if (!id) {
+    if (title) {
+      return <ImdbSearchLink size={size} title={title} releaseDate={releaseDate} />;
+    }
     return (
-      <Tooltip title="Movie data is still loading..." arrow>
+      <Tooltip title="Movie data unavailable" arrow>
         <Box>
           <Image height={size} width={size} style={{ opacity: 0.4 }} src="/img/imdb-icon.png" alt="Letterboxd.com logo" />
         </Box>
@@ -54,7 +90,15 @@ export function ImdbIconLink({ url, size = DEFAULT_ICON_SIZE }: { url: string; s
   );
 }
 
-export function ImdbSearchLink({ size, title, releaseDate }: { title: string; releaseDate: string; size?: number;  }) {
+export function ImdbSearchLink({ 
+  size, 
+  title, 
+  releaseDate = 'none'
+}: { 
+  title: string; 
+  releaseDate?: string; 
+  size?: number; 
+}) {
   const d = new Date(releaseDate);
   const year = (d.toString() === "Invalid Date") ? '' : `(${d.getFullYear()})`;
   const url = encodeURI(`https://www.imdb.com/find?q=${title} ${year}&s=tt&ttype=ft`);
