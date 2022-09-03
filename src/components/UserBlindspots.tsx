@@ -165,13 +165,12 @@ async function findPeoplePotentials(currentEntries: number[], filters: GlobalFil
           typeof role.popularity === "number" && 
           !currentEntries.includes(role.id)
         ) {
-          const collectionId = (role.belongs_to_collection as TmdbCollection).id; 
           directorMovies.push({
             id: role.id,
             reason: `Directed by ${person.name}`,
             title: role.title,
             genres: (role.genres || []).map(g => g.name || 'unknown'),
-            collectionIds: getCollectionsFromTmdb(role.belongs_to_collection),
+            collectionIds: [],
             imdbId: role.imdb_id || '',
             posterPath: role.poster_path || '',
             popularity: role.popularity,
