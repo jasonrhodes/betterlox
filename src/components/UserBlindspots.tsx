@@ -1,5 +1,5 @@
-import { Box, LinearProgress, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Box, FormControl, InputLabel, LinearProgress, MenuItem, Select, Typography } from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EntryApiResponse, GlobalFilters, MoviesApiResponse, TmdbCollectionByIdResponse, TmdbPersonByIdResponse } from '../common/types/api';
 import { Movie, UserSettings } from '../db/entities';
 import { callApi } from '../hooks/useApi';
@@ -11,11 +11,14 @@ import { TmdbCollection } from '../lib/tmdb';
 import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
 import { MoviesTable } from './MoviesTable';
 import { PartialMovie } from '../common/types/base';
+import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
 
 interface GetMissingOptions {
   entries: EntryApiResponse[];
   filters: GlobalFilters;
   user?: UserPublic;
+  sortBy: SortBy;
+  sortDir: SortDir;
 }
 
 interface MissingMovieExtras {
@@ -27,11 +30,16 @@ interface MissingMovieExtras {
 
 export type MissingMovie = Pick<Movie, 'id' | 'title' | 'imdbId' | 'posterPath' | 'popularity' | 'releaseDate' | 'genres'> & MissingMovieExtras;
 
+type SortBy = 'popularity' | 'releaseDate' | 'title';
+type SortDir = 'ASC' | 'DESC';
+
 export function Blindspots({ entries }: { entries: EntryApiResponse[] }) {
   const { globalFilters } = useGlobalFilters();
   const { user } = useCurrentUser();
   const [blindspots, setBlindspots] = useState<PartialMovie[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<SortBy>('popularity');
+  const [sortDir, setSortDir] = useState<SortDir>('DESC')
 
   useEffect(() => {
     async function retrieve() {
@@ -39,13 +47,24 @@ export function Blindspots({ entries }: { entries: EntryApiResponse[] }) {
       const blindspots = await getBlindspotsForFilters({
         entries, 
         filters: globalFilters, 
-        user 
+        user,
+        sortBy,
+        sortDir
       });
       setBlindspots(blindspots);
       setIsLoading(false);
     }
     retrieve();
-  }, [entries, globalFilters, user]);
+  }, [entries, globalFilters, user, sortBy, sortDir]);
+
+  const handleSortByChange = useCallback((event) => {
+    const { value } = event.target;
+    setSortBy(value);
+  }, []);
+
+  const handleSortDirClick = useCallback(() => {
+    setSortDir(sortDir === "ASC" ? "DESC" : "ASC");
+  }, [sortDir]);
 
   if (isLoading) {
     return <LinearProgress />;
@@ -54,9 +73,35 @@ export function Blindspots({ entries }: { entries: EntryApiResponse[] }) {
   if (blindspots.length === 0) {
     return <Typography>No blindspots for these filters.</Typography>;
   }
-  
+
   return (
-    <MoviesTable movies={blindspots} isLoading={false} />
+    <Box>
+      <Box sx={{ marginBottom: 2 }}>
+        <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
+          <InputLabel id="select-sort-by-label">Sort By</InputLabel>
+          <Select
+            labelId="select-sort-by"
+            id="select-sort-by"
+            value={sortBy}
+            label="Sort By"
+            autoWidth
+            onChange={handleSortByChange}
+          >
+            <MenuItem selected={sortBy === "popularity"} value="popularity">Popularity</MenuItem>
+            <MenuItem selected={sortBy === "releaseDate"} value="releaseDate">Release Date</MenuItem>
+            <MenuItem selected={sortBy === "title"} value="title">Movie Title</MenuItem>
+          </Select>
+        </FormControl>
+        <Box 
+          sx={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: "middle", marginRight: '10px' }} 
+          onClick={handleSortDirClick}
+        >
+          <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
+          <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
+        </Box>
+      </Box>
+      <MoviesTable movies={blindspots} isLoading={false} />
+    </Box>
   )
 }
 
@@ -249,47 +294,35 @@ function applyNonPeopleFiltersToPeople(movies: MissingMovie[], filters: GlobalFi
 export async function getBlindspotsForFilters({ 
   entries, 
   filters,
-  user
+  user,
+  sortBy,
+  sortDir
 }: GetMissingOptions): Promise<PartialMovie[]> {
   const currentEntryIds = entries.map(r => r.movieId);
   const peoplePotentials = await findPeoplePotentials(currentEntryIds, filters, user?.settings);
 
+  let blindspots: PartialMovie[] = [];
+
   if (peoplePotentials.length > 0) {
     const combinedPotentials = await applyNonPeopleFiltersToPeople(peoplePotentials, filters);
-    return findMissing(currentEntryIds, combinedPotentials);
+    blindspots = findMissing(currentEntryIds, combinedPotentials);
   } else {
-    const nonPeoplePotentials = await findNonPeoplePotentials(filters, user?.id);
-    return nonPeoplePotentials;
+    blindspots = await findNonPeoplePotentials(filters, user?.id);
   }
 
+  const sorted = blindspots.sort((a, b) => {
+    const aVal = a[sortBy];
+    const bVal = b[sortBy];
+    if (typeof aVal === 'undefined' || typeof bVal === "undefined") {
+      return 0;
+    }
+    const val = (aVal > bVal) ? -1 : 1;
+    const finalVal = (sortDir === 'ASC') ? (val * -1) : val;
+    // console.log(aVal, bVal, sortDir, val, finalVal);
+    return finalVal;
+  });
 
-  // if (filters.collections?.length) {
-  //   const collections = (await Promise.all(
-  //     filters.collections.map(
-  //       (collectionId) => callApi<TmdbCollectionByIdResponse>(`/api/tmdb/collections/${collectionId}`)
-  //     )
-  //   ))
-  //   .map(response => response.data?.collection);
-    
-  //   for (const collection of collections) {
-  //     if (!collection.parts) {
-  //       continue;
-  //     }
-  //     for (const movie of collection.parts) {
-  //       if (!movie.id || !movie.title || typeof movie.popularity !== "number" || currentEntryIds.includes(movie.id)) {
-  //         continue;
-  //       }
-  //       missing.push({
-  //         id: movie.id,
-  //         reason: `One of the ${collection.name}`,
-  //         title: movie.title,
-  //         imdbId: movie.imdb_id || '',
-  //         posterPath: movie.poster_path || '',
-  //         popularity: movie.popularity,
-  //         releaseDate: movie.release_date || '',
-  //         voteCount: movie.vote_count
-  //       });
-  //     }
-  //   }
-  // }
+  // console.log('SORT APPLIED:', sortBy, sortDir, JSON.stringify(sorted[0]));
+
+  return sorted;
 }

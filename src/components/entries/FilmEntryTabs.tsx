@@ -115,7 +115,12 @@ export function FilmEntryTabs({
           handleHideUnratedClick={toggleHideUnrated}
         />
         <FormControl sx={{ marginBottom: 2 }}>
-          <TextField size="small" label="Quick Title Filter" value={quickTitleSearch} onChange={handleQuickTitleSearchChange} />
+          <TextField 
+            size="small" 
+            label="Quick Title Filter" 
+            value={quickTitleSearch} 
+            onChange={handleQuickTitleSearchChange} 
+          />
         </FormControl>
         <EntriesTable entries={processedEntries} isLoading={isReloading || isProcessing} />
       </TabPanel>

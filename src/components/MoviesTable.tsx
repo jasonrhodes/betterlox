@@ -60,29 +60,13 @@ function ReleaseYear({ releaseDate }: { releaseDate?: string }) {
 }
 
 export function MoviesTable({ movies = [], isLoading }: MoviesTableProps) {
-  const [fullMovies, setFullMovies] = useState<PartialMovie[]>([]);
   const getRowId = React.useCallback((row: PartialMovie) => row.id, []);
-
-  useEffect(() => {
-    async function retrieve() {
-      const ids = movies.map(m => m.id);
-      const { data } = await callApi<MoviesApiResponse>(`/api/movies?ids=${ids.join(',')}`);
-      if ('movies' in data) {
-        const enriched = movies.map(partial => {
-          const found = data.movies.find(full => full.id === partial.id);
-          return found ? found : partial;
-        });
-        setFullMovies(enriched);
-      }
-    }
-    retrieve();
-  }, [movies]);
   
   return (
     <DisplayTable<PartialMovie>
       getRowId={getRowId}
       isLoading={isLoading}
-      items={isLoading ? [] : fullMovies.length > 0 ? fullMovies : movies}
+      items={isLoading ? [] : movies}
       columns={[
         {
           name: 'ratings-card',

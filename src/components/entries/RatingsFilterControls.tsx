@@ -33,6 +33,7 @@ export function RatingsFilterControls() {
           AutocompleteSx={{ width: 300 }}
           isOptionEqualToValue={(option, value) => value && option.id === value.id}
           getOptionLabel={(option) => option.name}
+          getId={(options) => options.id}
         />
       </Grid>
       <Grid item xs={12}>
@@ -42,6 +43,7 @@ export function RatingsFilterControls() {
           AutocompleteSx={{ width: 300 }}
           isOptionEqualToValue={(option, value) => value && option.id === value.id}
           getOptionLabel={(option) => option.name}
+          getId={(options) => options.id}
         />
       </Grid>
       <Grid item xs={12}>
@@ -51,6 +53,7 @@ export function RatingsFilterControls() {
           AutocompleteSx={{ width: 300 }}
           isOptionEqualToValue={(option, value) => value && option.id === value.id}
           getOptionLabel={(option) => option.name}
+          getId={(options) => options.id}
         />
       </Grid>
       <Grid item xs={12}>
