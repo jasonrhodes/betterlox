@@ -18,7 +18,10 @@ interface AutocompleteFilterProps<T> {
   getOptionLabel: (option: T) => string;
   getId: GetIdFunction<T>;
   loading: boolean;
+  loadingCount: number;
 }
+
+let retrievalCount = 0;
 
 function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
   searchType,
@@ -40,6 +43,7 @@ function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
   
   useEffect(() => {
     async function retrieve() {
+      console.log(retrievalCount++, isLoadingCount);
       setIsLoadingCount((count) => count + 1);
       try {
         const encodedInputValue = encodeURIComponent(inputValue);
@@ -58,13 +62,14 @@ function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
         });
         setOptions(filtered);
       } catch (error) {
-        setIsLoadingCount((count) => count - 1);
+        setIsLoadingCount((count) => Math.max(0, count - 1));
         throw error;
       }
-      setIsLoadingCount((count) => count - 1);
+      setIsLoadingCount((count) => Math.max(0, count - 1));
     }
 
-    const handle = setTimeout(retrieve, 300);
+    // DEBOUNCE retrieval of new data to avoid oversearching on type
+    const handle = setTimeout(retrieve, 200);
 
     return () => {
       clearTimeout(handle);
@@ -75,6 +80,7 @@ function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
     options,
     inputValue,
     loading: isLoadingCount > 0,
+    loadingCount: isLoadingCount,
     getId,
     getOptionLabel,
     onChange: (e, incoming) => {
@@ -119,7 +125,7 @@ export function RatingsFilterFieldLookup<T extends Person | SearchCollection>({
     getId,
     getOptionLabel
   });
-
+  
   return (
     <FieldLookup 
       acProps={acProps}
@@ -127,7 +133,7 @@ export function RatingsFilterFieldLookup<T extends Person | SearchCollection>({
       inputLabel={inputLabel}
       sx={AutocompleteSx}
     />
-  )
+  );
 }
 
 function isPerson(value: any): value is Person {
@@ -152,7 +158,7 @@ function FieldLookup<T>({
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
-    <Autocomplete
+    <Autocomplete<T>
       {...acProps}
       id={id}
       sx={sx}

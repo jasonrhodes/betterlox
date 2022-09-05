@@ -223,46 +223,8 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
       .addSelect('((COUNT(e."movieId") / 10) + p.popularity) as pop_score')
       .groupBy('p.id')
       .orderBy('pop_score', 'DESC');
-
-    console.log('xyzabc', query.getSql());
     
     return await query.getMany();
-
-    // const options: FindManyOptions<Person> = {};
-
-    // if (limit) {
-    //   options.take = Number(limit);
-    // }
-
-    // const where: FindOptionsWhere<Person> = {};
-    
-    // if (ids) {
-    //   where.id = In(ids);
-    // }
-    
-    // if (role === "actors") {
-    //   where.castRoles = true;
-    // } else if (role) {
-    //   where.crewRoles = {
-    //     job: ILike(role.slice(0, -1)) // TODO: this removes plural "s", so hacky oof, make it better plz
-    //   }
-    // }
-    
-    // if (namePattern) {
-    //   where.name = ILike(`%${namePattern.replace(' ', '%')}%`);
-    // }
-
-    
-    // if (exactName) {
-    //   where.name = exactName;
-    // }
-
-    // options.where = where;
-    // options.order = {
-    //   popularity: 'DESC'
-    // };
-
-    // return this.find(options);
   }
 });
 
