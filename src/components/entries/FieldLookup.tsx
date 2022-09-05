@@ -1,5 +1,5 @@
 import { Autocomplete, Box, SxProps, TextField, Typography } from '@mui/material';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { GlobalFilters, SearchApiResponse, SearchCollection } from '../../common/types/api';
 import { Person } from '../../db/entities';
 import { useGlobalFilters } from '../../hooks/GlobalFiltersContext';
@@ -17,6 +17,7 @@ interface AutocompleteFilterProps<T> {
   isOptionEqualToValue?: (option: T, value: T) => boolean;
   getOptionLabel: (option: T) => string;
   getId: GetIdFunction<T>;
+  loading: boolean;
 }
 
 function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
@@ -35,32 +36,45 @@ function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
   const { globalFilters, setGlobalFilters } = useGlobalFilters();
   const [inputValue, setInputValue] = useState<string>('');
   const [options, setOptions] = useState<T[]>([]);
+  const [isLoadingCount, setIsLoadingCount] = useState<number>(0);
   
   useEffect(() => {
     async function retrieve() {
-      const encodedInputValue = encodeURIComponent(inputValue);
-      const apiEndpoint = `/api/search?searchType=${searchType}&limit=${limit}&role=${String(filterKey)}&name=${encodedInputValue}`;
-      const response = await callApi<SearchApiResponse<T[]>>(apiEndpoint);
-      if (response === null) {
-        // TODO: Should we return and ignore here or set to empty [] first?
-        return;
-      }
-      const existing = globalFilters[filterKey] as number[];
-      const filtered = response?.data.results.filter((r) => {
-        if (!Array.isArray(existing)) {
-          return true;
+      setIsLoadingCount((count) => count + 1);
+      try {
+        const encodedInputValue = encodeURIComponent(inputValue);
+        const apiEndpoint = `/api/search?searchType=${searchType}&limit=${limit}&role=${String(filterKey)}&name=${encodedInputValue}`;
+        const response = await callApi<SearchApiResponse<T[]>>(apiEndpoint);
+        if (response === null) {
+          // TODO: Should we return and ignore here or set to empty [] first?
+          return;
         }
-        return !existing.includes(r.id);
-      });
-      setOptions(filtered);
+        const existing = globalFilters[filterKey] as number[];
+        const filtered = response?.data.results.filter((r) => {
+          if (!Array.isArray(existing)) {
+            return true;
+          }
+          return !existing.includes(r.id);
+        });
+        setOptions(filtered);
+      } catch (error) {
+        setIsLoadingCount((count) => count - 1);
+        throw error;
+      }
+      setIsLoadingCount((count) => count - 1);
     }
 
-    retrieve();
+    const handle = setTimeout(retrieve, 300);
+
+    return () => {
+      clearTimeout(handle);
+    }
   }, [inputValue, searchType, limit, globalFilters, filterKey]);
 
   return {
     options,
     inputValue,
+    loading: isLoadingCount > 0,
     getId,
     getOptionLabel,
     onChange: (e, incoming) => {

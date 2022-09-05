@@ -185,45 +185,84 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
   async searchForApi({
     limit,
     ids,
-    role,
+    role = "actors",
     namePattern,
     exactName
   }: PeopleSearchOptions) {
-    const options: FindManyOptions<Person> = {};
 
-    if (limit) {
-      options.take = Number(limit);
-    }
-
-    const where: FindOptionsWhere<Person> = {};
+    let query = this.createQueryBuilder('p');
     
     if (ids) {
-      where.id = In(ids);
-    }
-    
-    if (role === "actors") {
-      where.castRoles = true;
-    } else if (role) {
-      where.crewRoles = {
-        job: ILike(role.slice(0, -1)) // TODO: this removes plural "s", so hacky oof, make it better plz
-      }
-    }
-    
-    if (namePattern) {
-      where.name = ILike(`%${namePattern.replace(' ', '%')}%`);
+      query = query.andWhere(`p.id IN (${ids.join(',')})`);
     }
 
+    if (typeof limit === "number") {
+      query = query.limit(limit);
+    }
+
+    if (role === "actors") {
+      query = query.innerJoin('join_movies_cast', 'cr', 'cr."personId" = p.id')
+        .andWhere('cr IS NOT NULL')
+        .andWhere('cr."castOrder" <= 10');
+    } else {
+      const job = role.slice(0, -1);
+      query = query.innerJoin('join_movies_crew', 'cr', 'cr."personId" = p.id')
+        .andWhere('cr IS NOT NULL')
+        .andWhere(`cr.job ILIKE '${job}'`);
+    }
+
+    if (namePattern) {
+      query = query.andWhere(`p.name ILIKE '%${namePattern.replace(' ', '%')}%'`);
+    }
     
     if (exactName) {
-      where.name = exactName;
+      query = query.andWhere('p.name = :exactName', { exactName });
     }
 
-    options.where = where;
-    options.order = {
-      popularity: 'DESC'
-    };
+    query = query.innerJoin('film_entries', 'e', 'e."movieId" = cr."movieId"')
+      .addSelect('((COUNT(e."movieId") / 10) + p.popularity) as pop_score')
+      .groupBy('p.id')
+      .orderBy('pop_score', 'DESC');
 
-    return this.find(options);
+    console.log('xyzabc', query.getSql());
+    
+    return await query.getMany();
+
+    // const options: FindManyOptions<Person> = {};
+
+    // if (limit) {
+    //   options.take = Number(limit);
+    // }
+
+    // const where: FindOptionsWhere<Person> = {};
+    
+    // if (ids) {
+    //   where.id = In(ids);
+    // }
+    
+    // if (role === "actors") {
+    //   where.castRoles = true;
+    // } else if (role) {
+    //   where.crewRoles = {
+    //     job: ILike(role.slice(0, -1)) // TODO: this removes plural "s", so hacky oof, make it better plz
+    //   }
+    // }
+    
+    // if (namePattern) {
+    //   where.name = ILike(`%${namePattern.replace(' ', '%')}%`);
+    // }
+
+    
+    // if (exactName) {
+    //   where.name = exactName;
+    // }
+
+    // options.where = where;
+    // options.order = {
+    //   popularity: 'DESC'
+    // };
+
+    // return this.find(options);
   }
 });
 

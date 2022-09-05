@@ -45,6 +45,7 @@ const SearchApiRoute = createApiRoute<SearchApiResponse>({
           });
 
           res.json({ success: true, results });
+          break;
         }
 
 
