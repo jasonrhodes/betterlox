@@ -4,7 +4,7 @@ import { Collection } from "../../db/entities";
 import { useTmdbImageBaseUrl } from "../images";
 import { getTitleByMode } from "./helpers";
 
-export function CollectionsStatsPanel({ collections, mode }: { collections: Collection[]; mode: StatMode; }) {
+export function CollectionsStatsPanel({ collections, mode, isLoading }: { collections: Collection[]; mode: StatMode; isLoading: boolean; }) {
   const tmdbBasePath = useTmdbImageBaseUrl({ size: "large" });
   return (
     <Box>

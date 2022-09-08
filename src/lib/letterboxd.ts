@@ -1,7 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
-import { FilmEntry, Movie, PopularLetterboxdMovie } from "../db/entities";
+import { ScrapedLetterboxdList } from "../common/types/api";
+import { FilmEntry, LetterboxdList, Movie, PopularLetterboxdMovie } from "../db/entities";
 import { getDataImageTagFromUrl } from "./dataImageUtils";
+import { isNumber } from "./typeGuards";
 const MAX_TRIES = 5;
 
 interface FoundLetterboxdAccount {
@@ -285,4 +287,117 @@ export async function scrapeRatingsByPage({
   }).get());
 
   return { ratings };
+}
+
+interface ScrapedList {
+  details: Partial<LetterboxdList>;
+  movieIds: number[];
+}
+
+interface ScrapeListsForUserOptions {
+  username: string;
+  processPage: (lists: ScrapedList[]) => Promise<{ continue: boolean; }>;
+}
+
+export async function scrapeListsForUser(
+  options: ScrapeListsForUserOptions,
+  count: number = 0,
+  page: number = 1
+): Promise<number> {
+  const { data } = await tryLetterboxd(
+    `https://letterboxd.com/${options.username}/lists/public/by/created-oldest/page/${page}`
+  );
+  const $ = cheerio.load(data);
+  const items = $("section.list-set > section.list");
+
+  if (items.length === 0) {
+    return count;
+  }
+
+  const batch = (await Promise.all(items.map(async (i, item) => {
+    const itemData = $(item).data();
+
+    if (!('filmListId' in itemData) || (typeof itemData.filmListId !== 'number')) {
+      throw new Error('No film list ID in letterboxd list of lists page');
+    }
+    
+    if (!('person' in itemData) || (typeof itemData.person !== 'string')) {
+      throw new Error(`Person data not found on Letterboxd listing page ${options.username}/${page} for list index ${i}`)
+    }
+
+    const listLink = $(item).find('a.list-link');
+    const listUrl = listLink.attr('href');
+    
+    if (!listUrl) {
+      throw new Error(`URL data not found for list index ${i} on Letterboxd lists page ${options.username}/${page}`)
+    }
+
+    const { data } = await tryLetterboxd(`https://letterboxd.com${listUrl}`);
+    const $$ = cheerio.load(data);
+
+    const $published = $$("#content-nav .list-date > .published time");
+    const pubDate = $published.attr("datetime");
+
+    const $lastUpdated = $$("#content-nav .list-date > .updated time");
+    const luDate = $lastUpdated.attr("datetime");
+
+    const $listIntroSection = $$(".list-title-intro");
+    const title = $listIntroSection.find("h1");
+    const description = $listIntroSection.find(".body-text");
+
+    const $filmsItems = $$(".poster-list.film-list .film-poster");
+    const filmIds = await Promise.all($filmsItems.map(async (i, item) => {
+      const itemData = $$(item).data();
+      if (!('filmSlug' in itemData)) {
+        return null;
+      }
+
+      const { data } = await tryLetterboxd(`https://letterboxd.com${itemData.filmSlug}`);
+      const $filmPage = cheerio.load(data);
+      const filmPageData = $filmPage('body').data();
+
+      if (!('tmdbId' in filmPageData)) {
+        console.log('no tmdbId in film page');
+        return null;
+      }
+
+      const numId = Number(filmPageData.tmdbId);
+      if (isNaN(numId)) {
+        return null;
+      }
+
+      return numId;
+    }).get());
+
+    const filteredFilmIds = filmIds.filter(isNumber);
+    const rankedItems = $$(".poster-list.film-list .poster-container.numbered-list-item");
+    const isRanked = rankedItems.length > 0;
+    const publishDate = pubDate ? new Date(pubDate) : undefined;
+    const lastUpdated = luDate ? new Date(luDate) : publishDate;
+
+    const details: Partial<LetterboxdList> = {
+      letterboxdListId: itemData.filmListId,
+      publishDate,
+      lastUpdated,
+      title: title.text().trim(),
+      description: description.text().trim(),
+      letterboxdUsername: itemData.person,
+      url: listUrl,
+      isRanked,
+      visibility: 'public'
+    };
+
+    return {
+      details,
+      movieIds: filteredFilmIds
+    };
+  })));
+
+  const result = await options.processPage(batch);
+  
+  if (result.continue) {
+    return await scrapeListsForUser(options, count + batch.length, page + 1);
+  }
+
+  return count + batch.length;
 }

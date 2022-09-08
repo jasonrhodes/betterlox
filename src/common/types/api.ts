@@ -1,6 +1,6 @@
 import { ApiError } from "next/dist/server/api-utils";
 import { InsertResult } from "typeorm";
-import { Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings, FilmEntry } from "../../db/entities";
+import { Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings, FilmEntry, LetterboxdList } from "../../db/entities";
 import { TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "../../lib/tmdb";
 import { CREW_JOB_MAP } from "../constants";
 import { RatedMovie, RatedTmdbCast, TypeOrmEntityMethods, UserPublicSafe } from "./db";
@@ -202,3 +202,56 @@ interface MoviesApiFindResponse extends ApiSuccessResponse {
 }
 
 export type MoviesApiResponse = MoviesApiFindResponse | ApiSuccessResponse | ApiErrorResponse;
+
+export interface LetterboxdListsManagementGetResponse extends ApiSuccessResponse {
+  lists: LetterboxdList[];
+}
+
+export type LetterboxdListsManagementApiResponse = ApiResponse<LetterboxdListsManagementGetResponse>;
+
+
+export interface LetterboxdListsForUserGetResponse extends ApiSuccessResponse {
+  lists: LetterboxdList[];
+}
+
+export interface ScrapedLetterboxdList {
+  letterboxdListId: number;
+  publishDate?: string;
+  lastUpdated?: string;
+  title: string;
+  description?: string;
+  username: string;
+  url: string;
+  movies: number[];
+  isRanked: boolean;
+  visibility: 'public' | 'private'
+}
+export interface LetterboxdListsForUserPostResponse extends ApiSuccessResponse {
+  synced: number;
+}
+
+export type LetterboxdListsForUserApiResponse = ApiResponse<LetterboxdListsForUserGetResponse | LetterboxdListsForUserPostResponse>;
+
+export type ApiResponse<T extends ApiSuccessResponse = ApiSuccessResponse> = T | ApiSuccessResponse | ApiErrorResponse;
+
+
+export interface ListUserStats {
+  watched: number;
+  entries: FilmEntry[];
+  movies: number;
+}
+export interface UserListStatsGetResponse extends ApiSuccessResponse {
+  stats: ListUserStats;
+}
+
+export type UserListStatsApiResponse = ApiResponse<UserListStatsGetResponse>;
+
+export interface UserListsPostResponse extends ApiSuccessResponse {
+  synced: number;
+}
+
+export interface UserListsGetResponse extends ApiSuccessResponse {
+  lists: LetterboxdList[];
+}
+
+export type UserListsApiResponse = ApiResponse<UserListsGetResponse | UserListsPostResponse>;

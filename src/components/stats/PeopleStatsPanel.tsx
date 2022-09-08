@@ -16,6 +16,7 @@ interface PeopleStatsPanelOptions {
   people: PersonStats[]; 
   type: PeopleStatsType; 
   mode: StatMode;
+  isLoading: boolean;
 }
 
 function StatsFilterChip({ label }: { label: string }) {
@@ -111,7 +112,7 @@ function PeopleStatFilters() {
   )
 }
 
-export function PeopleStatsPanel({ people, type, mode }: PeopleStatsPanelOptions) {
+export function PeopleStatsPanel({ people, type, mode, isLoading }: PeopleStatsPanelOptions) {
   const [details, setDetails] = useState<PersonStats | null>(null);
   const PRESENTATION_SPLIT = 24;
   const PRESENTATION_MAX = 50;
@@ -129,13 +130,13 @@ export function PeopleStatsPanel({ people, type, mode }: PeopleStatsPanelOptions
         <StatsSettings showMinCastOrder={showMinCastOrder} showMinWatched={showMinWatched} />
       </Box>
       <PeopleStatFilters />
-      {people.length === 0 ?
+      {!isLoading && people.length === 0 ?
         <Box>
           <Typography>No results match this set of criteria.</Typography>
         </Box> :
         <>
-          <CardsPersonStats people={topStats} setDetails={setDetails} />
-          <ListPersonStats people={bottomStats} setDetails={setDetails} splitNumber={PRESENTATION_SPLIT} />
+          <CardsPersonStats isLoading={isLoading} people={topStats} setDetails={setDetails} />
+          <ListPersonStats isLoading={isLoading} people={bottomStats} setDetails={setDetails} splitNumber={PRESENTATION_SPLIT} />
         </>
       }
       <PersonDetails type={type} details={details} setDetails={setDetails} />

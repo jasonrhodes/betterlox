@@ -1,5 +1,5 @@
 import { Star, Visibility } from "@mui/icons-material";
-import { Box, Badge, Typography } from "@mui/material";
+import { Box, Badge, Typography, LinearProgress } from "@mui/material";
 import { PersonStats } from "../../common/types/api";
 import { round } from "../../lib/round";
 import { PersonImage } from "./PersonImage";
@@ -7,12 +7,13 @@ import { PersonImage } from "./PersonImage";
 export interface StatsDisplayOptions {
   people: PersonStats[];
   setDetails: (person: PersonStats) => void;
+  isLoading: boolean;
 }
 
-export function CardsPersonStats({ people, setDetails }: StatsDisplayOptions) {
+export function CardsPersonStats({ people, setDetails, isLoading }: StatsDisplayOptions) {
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-      {people.map((person, i) => (
+      {isLoading ? <LinearProgress /> : people.map((person, i) => (
         <Box 
           key={person.id} 
           sx={{ 
@@ -59,11 +60,12 @@ export function CardsPersonStats({ people, setDetails }: StatsDisplayOptions) {
 export function ListPersonStats({ 
   people, 
   setDetails, 
-  splitNumber 
+  splitNumber,
+  isLoading
 }: StatsDisplayOptions & { splitNumber: number }) {
   return (
     <Box>
-      {people.map((person, i) => (
+      {isLoading ? <LinearProgress /> : people.map((person, i) => (
         <Box 
           key={person.id} 
           sx={{ 

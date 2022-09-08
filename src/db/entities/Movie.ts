@@ -7,7 +7,8 @@ import {
   JoinTable,
   OneToMany,
   Relation,
-  PrimaryColumn
+  PrimaryColumn,
+  ManyToOne
 } from "typeorm";
 import { CastRole } from "./CastRole";
 import { Collection } from "./Collection";
@@ -15,6 +16,7 @@ import { CrewRole } from "./CrewRole";
 import { Genre } from "./Genre";
 import { ProductionCompany } from "./ProductionCompany";
 import { FilmEntry } from "./FilmEntry";
+import { LetterboxdList } from "./LetterboxdList";
 
 @Entity('movies')
 export class Movie extends BaseEntity {
@@ -111,4 +113,8 @@ export class Movie extends BaseEntity {
 
   @OneToMany(() => FilmEntry, (entry) => entry.movie)
   entries: Relation<FilmEntry[]>;
+
+  @ManyToMany(() => LetterboxdList)
+  movies: Relation<LetterboxdList>[];
+
 }

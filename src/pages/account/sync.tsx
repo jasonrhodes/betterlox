@@ -1,100 +1,181 @@
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
-import { Avatar, Button, Box, Typography, Link, Alert, CircularProgress, Grid, Paper } from '@mui/material';
+import { Button, Box, Typography, Link, Alert, CircularProgress, Paper } from '@mui/material';
 import React, { useState } from 'react';
 import { callApi } from '../../hooks/useApi';
-import { UserEntriesSyncApiResponse, ApiErrorResponse } from '../../common/types/api';
+import { UserEntriesSyncApiResponse, ApiErrorResponse, UserListsApiResponse } from '../../common/types/api';
 import { getErrorAsString } from '../../lib/getErrorAsString';
+import { FormatListNumbered, Tv } from '@mui/icons-material';
+import { UserPublic } from '../../common/types/db';
 
 type SyncingState = 'none' | 'syncing' | 'success' | 'failed';
 
-interface NumSynced {
+interface WatchDataNumSynced {
   watches: number;
   ratings: number;
 }
 
-interface ResponseMessageProps {
-  resyncState: SyncingState;
-  numSynced: NumSynced;
-  syncError: string | null;
-}
-
-function ResponseMessage({ resyncState, numSynced, syncError }: ResponseMessageProps) {
-  if (resyncState === "none") {
-    return null;
-  }
-  const alertVariant = "filled";
-  if (resyncState === "syncing") {
-    return (
-      <Alert severity="info" variant={alertVariant} action={<CircularProgress color="primary" size="small" />}>
-        Sync in progress, please wait.
-      </Alert>
-    );
-  }
-  if (resyncState === "success") {
-    return (
-      <Alert severity="success" variant={alertVariant}>
-        <Typography>Sync complete! {numSynced.ratings} ratings and {numSynced.watches} watches synced.</Typography>
-      </Alert>
-    );
-  }
-  if (resyncState === "failed") {
-    return (
-      <Alert severity="error" variant={alertVariant}>
-        <Typography>Sync failed. {syncError}</Typography>
-      </Alert>
-    );
-  }
-
-  return null;
-}
-
 const AccountSyncPage: NextPage = () => {
-  const [resyncState, setResyncState] = useState<SyncingState>('none');
-  const [numSynced, setNumSynced] = useState<NumSynced>({ watches: 0, ratings: 0 });
-  const [syncError, setSyncError] = useState<string | null>(null);
+  const [syncMessage, setSyncMessage] = useState<string>('');
+  const [syncState, setSyncState] = useState<SyncingState>('none');
 
+  return (
+    <UserPageTemplate title="Account Sync" maxWidth='md'>
+      {({ user }) => (
+        <>
+          <ProgressMessage state={syncState} message={syncMessage} />
+          <SyncWatchData user={user} setSyncMessage={setSyncMessage} setSyncState={setSyncState} syncState={syncState} />
+          <SyncListData user={user} setSyncMessage={setSyncMessage} setSyncState={setSyncState} syncState={syncState}  />
+        </>
+      )}
+    </UserPageTemplate>
+  );
+}
+
+interface SyncPanelOptions {
+  user: UserPublic;
+  setSyncMessage: (v: string) => void;
+  syncState: SyncingState; 
+  setSyncState: (v: SyncingState) => void;
+}
+
+function SyncWatchData({
+  user,
+  setSyncMessage,
+  setSyncState,
+  syncState
+}: SyncPanelOptions) {
   const handleSyncClick = async (userId: number) => {
-    setResyncState("syncing");
+    setSyncState("syncing");
     try {
       const response = await callApi<UserEntriesSyncApiResponse | ApiErrorResponse>(`/api/users/${userId}/entries/sync`, {
         method: 'POST'
       });
       if (response.success && 'synced' in response.data) {
         const { synced } = response.data;
-        setResyncState("success");
-        setNumSynced({ ratings: synced.ratings.length, watches: synced.watches.length });
+        setSyncState("success");
+        setSyncMessage(`${synced.ratings.length} ratings and ${synced.watches.length} watches have been updated.`);
       } else {
-        setResyncState("failed");
-        setSyncError("Sync may have failed")
+        setSyncState("failed");
+        setSyncMessage("Sync request failed due to a system error. Please try again.")
       }
     } catch (error: unknown) {
       const message = getErrorAsString(error);
-      setResyncState("failed");
-      setSyncError(message);
+      setSyncState("failed");
+      setSyncMessage(message);
     }
   };
 
   return (
-    <UserPageTemplate title="Sync Data" maxWidth='md'>
-      {({ user }) => (
-        <Paper elevation={5} sx={{ p: 5 }}>
-          <Avatar src={user.avatarUrl} sx={{ height: 100, width: 100, mb: 2, boxShadow: "0 0 1px rgba(0,0,0,0.8)" }} />
-          <Typography sx={{ mb: 5 }} variant="body1" component="div">Syncing your data will gather your latest <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/by/date`}>watches</Link>, <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/ratings`}>ratings</Link>, and <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/lists`}>lists</Link> (coming soon) from Letterboxd and make them available here.</Typography>
+    <Paper elevation={5} sx={{ p: 4, mb: 2 }}>
+      <Box sx={{ display: 'flex', mb: 1, verticalAlign: 'middle' }}>
+        <Box sx={{ mr: 2, position: 'relative', top: '-1px' }}>
+          <Tv fontSize="large" />
+        </Box>
+        <Box sx={{ pb: 1 }}>
+          <Typography variant="h5">Watch Data</Typography>
+        </Box>
+      </Box>
+      <Typography sx={{ mb: 1 }} variant="body1" component="div">Manually sync your watch data to retrieve your latest <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/by/date`}>watches</Link> and <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/ratings`}>ratings</Link> from Letterboxd.</Typography>
 
-          <ResponseMessage resyncState={resyncState} numSynced={numSynced} syncError={syncError} />
+      <Box sx={{ py: 3 }}>
+        <Button 
+          disabled={syncState === "syncing"}
+          onClick={() => handleSyncClick(user.id)} 
+          variant="contained" 
+          sx={{ mr: 2 }}
+        >
+          Sync My Watch Data
+        </Button>
+      </Box>
+    </Paper>
+  );
+}
 
-          <Box sx={{ py: 5 }}>
-            {resyncState === "syncing" ? 
-              <Button disabled variant="contained" sx={{ mr: 2 }}>Syncing...</Button> : 
-              <Button onClick={() => handleSyncClick(user.id)} variant="contained" sx={{ mr: 2 }}>Sync My Letterboxd Data</Button>
-            }
-            {/* <Button disabled={true}>Remove My Data</Button> */}
-          </Box>
-        </Paper>
-      )}
-    </UserPageTemplate>
-  )
+function SyncListData({
+  user,
+  setSyncMessage,
+  setSyncState,
+  syncState
+}: SyncPanelOptions) {
+  const handleSyncClick = async (userId: number) => {
+    setSyncState("syncing");
+    try {
+      const response = await callApi<UserListsApiResponse>(`/api/users/${userId}/lists`, {
+        method: 'POST'
+      });
+      if (response.success && 'synced' in response.data) {
+        const { synced } = response.data;
+        setSyncState("success");
+        setSyncMessage(`${synced} lists have been updated.`);
+      } else {
+        setSyncState("failed");
+        setSyncMessage("Sync failed due to a system error.");
+      }
+    } catch (error: unknown) {
+      const message = getErrorAsString(error);
+      setSyncState("failed");
+      setSyncMessage(message);
+    }
+  };
+
+  return (
+    <Paper elevation={5} sx={{ p: 4 }}>
+      <Box sx={{ display: 'flex', mb: 1, verticalAlign: 'middle' }}>
+        <Box sx={{ mr: 2, position: 'relative', top: '-1px' }}>
+          <FormatListNumbered fontSize="large" />
+        </Box>
+        <Box sx={{ pb: 1 }}>
+          <Typography variant="h5">List Data</Typography>
+        </Box>
+      </Box>
+      <Typography sx={{ mb: 1 }} variant="body1" component="div">Manually sync your list data to retrieve your latest <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/lists`}>lists</Link> from Letterboxd.</Typography>
+
+      <Box sx={{ py: 3 }}>
+        <Button 
+          disabled={syncState === "syncing"} 
+          onClick={() => handleSyncClick(user.id)} 
+          variant="contained" 
+          sx={{ mr: 2 }}
+        >
+          Sync My List Data
+        </Button>
+      </Box>
+    </Paper>
+  );
+}
+
+function ProgressMessage({ state, message = '' }: { state: SyncingState; message?: string; }) {
+  if (state === "none") {
+    return null;
+  }
+
+  const alertVariant = "filled";
+  let alert: JSX.Element | null = null;
+
+  if (state === "syncing") {
+    alert = (
+      <Alert severity="info" variant={alertVariant} action={<CircularProgress color="primary" size="small" />}>
+        Sync in progress, please wait.
+      </Alert>
+    );
+  }
+  if (state === "success") {
+    alert = (
+      <Alert severity="success" variant={alertVariant}>
+        <Typography>Sync complete. {message}</Typography>
+      </Alert>
+    );
+  }
+  if (state === "failed") {
+    alert = (
+      <Alert severity="error" variant={alertVariant}>
+        <Typography>Sync failed. {message}</Typography>
+      </Alert>
+    );
+  }
+
+  return alert === null ? null : <Box sx={{ mb: 2 }}>{alert}</Box>;
 }
 
 export default AccountSyncPage;

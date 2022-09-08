@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique, Relation, OneToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert, Unique, Relation, OneToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from "typeorm";
+import { LetterboxdList, LetterboxdListFollow } from ".";
 import { getSalt, hash, getRememberMeToken } from "../../lib/hashPassword";
 import { FilmEntry } from "./FilmEntry";
 import { UserSettings } from "./UserSettings";
@@ -44,6 +45,16 @@ export class User {
 
   @ManyToOne(() => FilmEntry, entry => entry.user)
   ratings: Relation<FilmEntry[]>;
+
+  @OneToMany(() => LetterboxdListFollow, (follow) => follow.user)
+  followedLists: Relation<LetterboxdListFollow>[];
+
+  @OneToMany(() => LetterboxdList, (list) => list.owner)
+  ownedLists: Relation<LetterboxdList>[];
+
+  @ManyToMany(() => LetterboxdList, (list) => list.trackers)
+  @JoinTable()
+  trackedLists: Relation<LetterboxdList>[];
 
   @BeforeInsert()
   hashUserPassword() {

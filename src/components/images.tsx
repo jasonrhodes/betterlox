@@ -15,6 +15,7 @@ export interface TMDBImageProps extends Omit<ImageProps, 'src'> {
   type?: ImageType;
   tmdbPath: string;
   sx?: SxProps;
+  imageStyles?: React.CSSProperties;
   urlOverride?: string;
 }
 
@@ -37,6 +38,7 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
   size = "medium", 
   shape = "default", 
   sx = {}, 
+  imageStyles = {},
   urlOverride,
   ...rest
 }) => {
@@ -60,7 +62,8 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
         onError={() => setSrc("/img/no-poster.png")}
         src={src} 
         style={{ 
-          borderRadius: "3%" 
+          borderRadius: "3%",
+          ...imageStyles
         }}
       />
     </Box>

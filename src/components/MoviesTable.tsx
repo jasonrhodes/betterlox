@@ -34,7 +34,7 @@ function MovieCard({ movie }: { movie: PartialMovie }) {
 
   return (
     <Box className="entryCard" sx={{ display: "flex", paddingBottom: "15px" }}>
-      <Box width="80px" sx={{ paddingRight: "15px" }}>
+      <Box width="80px" sx={{ flexShrink: 0, paddingRight: "15px" }}>
         {poster}
       </Box>
       <Box>

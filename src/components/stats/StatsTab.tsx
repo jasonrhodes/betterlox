@@ -17,6 +17,7 @@ interface StatsTabOptions {
 export function StatsTab({ type, mode }: StatsTabOptions) {
   const [results, setResults] = useState<(PersonStats[] | Collection[])>([]);
   const { globalFilters, setGlobalFilters } = useGlobalFilters();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useCurrentUser();
 
   useEffect(() => {
@@ -24,12 +25,14 @@ export function StatsTab({ type, mode }: StatsTabOptions) {
       if (!user) {
         return;
       }
+      setIsLoading(true);
       // Hard-code allGenres to true, not implementing "ANY" for genres at this time
       globalFilters.allGenres = true;
       const filtersQueryString = convertFiltersToQueryString(globalFilters);
       const { statsMinWatched, statsMinCastOrder } = user.settings;
       const { data } = await callApi<UserStatsResponse>(`/api/users/${user.id}/stats?type=${type}&mode=${mode}&minCastOrder=${statsMinCastOrder}&minWatched=${statsMinWatched}&${filtersQueryString}`);
       setResults(data.stats);
+      setIsLoading(false);
     }
     retrieve();
   }, [type, user, mode, globalFilters]);
@@ -39,13 +42,14 @@ export function StatsTab({ type, mode }: StatsTabOptions) {
       <PeopleStatsPanel 
         people={results} 
         type={type as PeopleStatsType} 
-        mode={mode} 
+        mode={mode}
+        isLoading={isLoading}
       />
     );
   }
 
   if (user && isCollections(results, type)) {
-    return <CollectionsStatsPanel collections={results} mode={mode} />
+    return <CollectionsStatsPanel collections={results} mode={mode} isLoading={isLoading} />
   }
 
   return null;

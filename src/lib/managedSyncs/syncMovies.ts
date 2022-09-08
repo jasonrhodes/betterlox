@@ -17,9 +17,7 @@ export interface SyncAllMoviesByDateRangeOptions {
   moviesPerYear: number;
 }
 
-function isNumber(v: unknown): v is number {
-  return typeof v === "number";
-}
+
 
 async function processPage(set: Partial<PopularLetterboxdMovie>[]) {
   const PopularLetterboxdMoviesRepo = await getPopularLetterboxdMoviesRepository();

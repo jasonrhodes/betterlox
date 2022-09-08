@@ -12,13 +12,12 @@ import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString'
 import { MoviesTable } from './MoviesTable';
 import { PartialMovie } from '../common/types/base';
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
+import { SortControls, useSorting } from '../hooks/useSorting';
 
-interface GetMissingOptions {
+interface GetBlindspotsForUserOptions {
   entries: EntryApiResponse[];
   filters: GlobalFilters;
   user?: UserPublic;
-  sortBy: SortBy;
-  sortDir: SortDir;
 }
 
 interface MissingMovieExtras {
@@ -30,43 +29,40 @@ interface MissingMovieExtras {
 
 export type MissingMovie = Pick<Movie, 'id' | 'title' | 'imdbId' | 'posterPath' | 'popularity' | 'releaseDate' | 'genres'> & MissingMovieExtras;
 
-type SortBy = 'popularity' | 'releaseDate' | 'title';
-type SortDir = 'ASC' | 'DESC';
+type BlindspotsSortBy = 'popularity' | 'releaseDate' | 'title';
 
-export function Blindspots({ entries }: { entries: EntryApiResponse[] }) {
-  const { globalFilters } = useGlobalFilters();
-  const { user } = useCurrentUser();
-  const [blindspots, setBlindspots] = useState<PartialMovie[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<SortBy>('popularity');
-  const [sortDir, setSortDir] = useState<SortDir>('DESC')
+
+export function Blindspots({ blindspots, isLoading }: { blindspots: PartialMovie[]; isLoading?: boolean }) {
+  const [sorted, setSorted] = useState<PartialMovie[]>([]);
+  const [isSorting, setIsSorting] = useState<boolean>(false);
+  // const [sortBy, setSortBy] = useState<SortBy>('popularity');
+  // const [sortDir, setSortDir] = useState<SortDir>('DESC')
+
+  const sorting = useSorting<BlindspotsSortBy>('popularity', 'DESC');
+  const { sortBy, sortDir } = sorting;
 
   useEffect(() => {
     async function retrieve() {
-      setIsLoading(true);
-      const blindspots = await getBlindspotsForFilters({
-        entries, 
-        filters: globalFilters, 
-        user,
-        sortBy,
-        sortDir
+      setIsSorting(true);
+
+      const sorted = blindspots.sort((a, b) => {
+        const aVal = a[sortBy];
+        const bVal = b[sortBy];
+        if (typeof aVal === 'undefined' || typeof bVal === "undefined") {
+          return 0;
+        }
+        const val = (aVal > bVal) ? -1 : 1;
+        const finalVal = (sortDir === 'ASC') ? (val * -1) : val;
+        // console.log(aVal, bVal, sortDir, val, finalVal);
+        return finalVal;
       });
-      setBlindspots(blindspots);
-      setIsLoading(false);
+      setSorted(blindspots);
+      setIsSorting(false);
     }
     retrieve();
-  }, [entries, globalFilters, user, sortBy, sortDir]);
+  }, [blindspots, sortBy, sortDir]);
 
-  const handleSortByChange = useCallback((event) => {
-    const { value } = event.target;
-    setSortBy(value);
-  }, []);
-
-  const handleSortDirClick = useCallback(() => {
-    setSortDir(sortDir === "ASC" ? "DESC" : "ASC");
-  }, [sortDir]);
-
-  if (isLoading) {
+  if (isLoading || isSorting) {
     return <LinearProgress />;
   }
 
@@ -76,31 +72,14 @@ export function Blindspots({ entries }: { entries: EntryApiResponse[] }) {
 
   return (
     <Box>
-      <Box sx={{ marginBottom: 2 }}>
-        <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
-          <InputLabel id="select-sort-by-label">Sort By</InputLabel>
-          <Select
-            labelId="select-sort-by"
-            id="select-sort-by"
-            value={sortBy}
-            label="Sort By"
-            autoWidth
-            onChange={handleSortByChange}
-          >
-            <MenuItem selected={sortBy === "popularity"} value="popularity">Popularity</MenuItem>
-            <MenuItem selected={sortBy === "releaseDate"} value="releaseDate">Release Date</MenuItem>
-            <MenuItem selected={sortBy === "title"} value="title">Movie Title</MenuItem>
-          </Select>
-        </FormControl>
-        <Box 
-          sx={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: "middle", marginRight: '10px' }} 
-          onClick={handleSortDirClick}
-        >
-          <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
-          <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
-        </Box>
+      <Box sx={{ mb: 2 }}>
+        <SortControls<BlindspotsSortBy> {...sorting} sortByOptions={{
+          popularity: 'Popularity',
+          releaseDate: 'Release Date',
+          title: 'Movie Title'
+        }} />
       </Box>
-      <MoviesTable movies={blindspots} isLoading={false} />
+      <MoviesTable movies={sorted} isLoading={false} />
     </Box>
   )
 }
@@ -294,10 +273,8 @@ function applyNonPeopleFiltersToPeople(movies: MissingMovie[], filters: GlobalFi
 export async function getBlindspotsForFilters({ 
   entries, 
   filters,
-  user,
-  sortBy,
-  sortDir
-}: GetMissingOptions): Promise<PartialMovie[]> {
+  user
+}: GetBlindspotsForUserOptions): Promise<PartialMovie[]> {
   const currentEntryIds = entries.map(r => r.movieId);
   const peoplePotentials = await findPeoplePotentials(currentEntryIds, filters, user?.settings);
 
@@ -310,19 +287,5 @@ export async function getBlindspotsForFilters({
     blindspots = await findNonPeoplePotentials(filters, user?.id);
   }
 
-  const sorted = blindspots.sort((a, b) => {
-    const aVal = a[sortBy];
-    const bVal = b[sortBy];
-    if (typeof aVal === 'undefined' || typeof bVal === "undefined") {
-      return 0;
-    }
-    const val = (aVal > bVal) ? -1 : 1;
-    const finalVal = (sortDir === 'ASC') ? (val * -1) : val;
-    // console.log(aVal, bVal, sortDir, val, finalVal);
-    return finalVal;
-  });
-
-  // console.log('SORT APPLIED:', sortBy, sortDir, JSON.stringify(sorted[0]));
-
-  return sorted;
+  return blindspots;
 }

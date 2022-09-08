@@ -1,0 +1,104 @@
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation, Unique } from "typeorm";
+import { Movie } from "./Movie";
+import { User } from "./User";
+
+@Entity()
+export class LetterboxdList {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  title: string;
+
+  @Column({ nullable: true })
+  description?: string;
+
+  @Column({ unique: true })
+  url: string;
+
+  @Column()
+  letterboxdUsername: string;
+
+  @Column()
+  letterboxdListId: number;
+
+  @ManyToOne(() => User, (user) => user.ownedLists)
+  owner: Relation<User>;
+
+  @Column({ default: true })
+  followable: boolean;
+
+  @Column({ nullable: true })
+  publishDate?: Date;
+
+  @Column({ nullable: true })
+  lastUpdated?: Date;
+
+  @Column()
+  lastSynced: Date;
+
+  @Column({ default: 'public' })
+  visibility: 'public' | 'private';
+
+  @Column({ default: false })
+  isRanked: boolean;
+
+  @OneToMany(() => LetterboxdListFollow, (follow) => follow.list, { cascade: true })
+  follows: Relation<LetterboxdListFollow>;
+
+  @OneToMany(() => LetterboxdListMovieEntry, (entry) => entry.list, { eager: true, cascade: true })
+  movies: Relation<LetterboxdListMovieEntry>[];
+
+  @ManyToMany(() => User, (user) => user.trackedLists)
+  trackers: Relation<User>[];
+}
+
+@Entity()
+export class LetterboxdListFollow {
+  @PrimaryColumn()
+  listId: number;
+
+  @PrimaryColumn()
+  userId: number;
+
+  @ManyToOne(() => LetterboxdList, (list) => list.follows)
+  @JoinColumn({
+    name: 'listId',
+    referencedColumnName: 'id'
+  })
+  list: Relation<LetterboxdList>;
+
+  @ManyToOne(() => User)
+  @JoinColumn({
+    name: 'userId',
+    referencedColumnName: 'id'
+  })
+  user: Relation<User>;
+}
+
+@Entity()
+@Unique('order_check', ['listId', 'movieId', 'order'])
+export class LetterboxdListMovieEntry {
+  @PrimaryColumn()
+  listId: number;
+
+  @PrimaryColumn()
+  movieId: number;
+
+  @Column({ nullable: true })
+  order?: number;
+
+  @ManyToOne(() => LetterboxdList, (list) => list.movies)
+  @JoinColumn({
+    name: 'listId',
+    referencedColumnName: 'id'
+  })
+  list: Relation<LetterboxdList>;
+
+  @ManyToOne(() => Movie, { createForeignKeyConstraints: false })
+  @JoinColumn({
+    name: 'movieId',
+    referencedColumnName: 'id'
+  })
+  movie: Relation<Movie>;
+}

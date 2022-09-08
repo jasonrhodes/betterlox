@@ -1,39 +1,23 @@
 import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
 import { Select, SelectChangeEvent, Box, FormControl, InputLabel, MenuItem, Switch, FormControlLabel } from "@mui/material";
-import { SortBy, SortDir } from "./helpers";
+import { SortControls, SortManagement } from "../../hooks/useSorting";
+import { FilmEntrySortBy } from "./helpers";
 
 type StateChanger<T> = (value: T) => void;
 
 export interface FilmEntryShowAndSortControlsOptions {
   show: number | "all";
   handleShowChange: StateChanger<SelectChangeEvent<number | "all">>;
-  sortBy: SortBy;
-  handleSortByChange: StateChanger<SelectChangeEvent<SortBy>>;
-  sortDir: SortDir;
-  handleSortDirClick: () => void;
-  hideUnrated: boolean;
-  handleHideUnratedClick: () => void;
+  sorting: SortManagement<FilmEntrySortBy>;
 }
 
 export function FilmEntryShowAndSortControls({
   show,
   handleShowChange,
-  sortBy,
-  handleSortByChange,
-  sortDir,
-  handleSortDirClick,
-  hideUnrated,
-  handleHideUnratedClick
+  sorting
 }: FilmEntryShowAndSortControlsOptions) {
   return (
     <Box sx={{ marginBottom: '20px' }}>
-      {/* <Box sx={{ display: { xs: 'none', md: 'inline-block' }}}>
-        <Chip 
-          color="secondary" 
-          label={`${processedRatings.length} of ${unprocessedRatings.length}`} 
-          sx={{ marginRight: '10px' }} 
-        />
-      </Box> */}
       <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
         <InputLabel id="select-show-per-page-label">Show</InputLabel>
         <Select
@@ -52,7 +36,12 @@ export function FilmEntryShowAndSortControls({
           <MenuItem selected={show === "all"} value={"all"}>{"all"}</MenuItem>
         </Select>
       </FormControl>
-      <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
+      <SortControls<FilmEntrySortBy> {...sorting} sortByOptions={{
+        dateRated: 'Date Rated',
+        stars: 'Your Rating',
+        ['movie.title']: 'Movie Title'
+      }} />
+      {/* <FormControl sx={{ marginRight: "10px", minWidth: 80, verticalAlign: "middle" }} size="small">
         <InputLabel id="select-sort-by-label">Sort By</InputLabel>
         <Select
           labelId="select-sort-by"
@@ -73,7 +62,7 @@ export function FilmEntryShowAndSortControls({
       >
         <ArrowUpward color={sortDir === "DESC" ? "secondary" : "disabled"} />
         <ArrowDownward color={sortDir === "ASC" ? "secondary" : "disabled"} />
-      </Box>
+      </Box> */}
       {/* <FormControlLabel control={<Switch />} label="Hide unrated" /> */}
     </Box>
   )
