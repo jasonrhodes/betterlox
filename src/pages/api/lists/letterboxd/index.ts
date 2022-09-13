@@ -1,5 +1,6 @@
 import { LetterboxdListsManagementApiResponse } from "../../../../common/types/api";
-import { getLetterboxdListsRepository } from "../../../../db/repositories";
+import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getUserRepository } from "../../../../db/repositories";
+import { scrapeListByUrl } from "../../../../lib/letterboxd";
 import { singleQueryParam } from "../../../../lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
 
@@ -16,21 +17,43 @@ const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse
     },
     post: async (req, res) => {
       const url = singleQueryParam(req.body.url);
-      const title = singleQueryParam(req.body.title);
-      const description = singleQueryParam(req.body.description);
-      
-      const ListsRepo = await getLetterboxdListsRepository();
-      const found = await ListsRepo.findOneBy({ title });
-      if (found) {
-        res.json({ success: true });
+      if (!url) {
+        res.status(400).json({ success: false, code: 400, message: 'url is required and must be a valid Letterboxd list url' });
         return;
       }
-      const created = await ListsRepo.create({
-        url,
-        title,
-        description
+      const LetterboxdListsRepo = await getLetterboxdListsRepository();
+      const UsersRepo = await getUserRepository();
+      const MovieEntriesRepo = await getLetterboxdListMovieEntriesRepository();
+
+      const { details, movieIds, owner } = await scrapeListByUrl(url);
+      const user = await UsersRepo.findOneBy({ username: owner });
+
+      details.lastSynced = new Date();
+      
+      if (user) {
+        details.owner = user;
+      }
+
+      const found = await LetterboxdListsRepo.findOneBy({ url: details.url });
+      const updated = found 
+        ? await LetterboxdListsRepo.preload({ ...details, id: found.id }) 
+        : LetterboxdListsRepo.create(details);
+
+      if (!updated) {
+        throw new Error('Could not upsert list into DB');
+      }
+
+      const saved = await LetterboxdListsRepo.save(updated);
+
+      const movieEntries = movieIds.map((id, i) => {
+        return {
+          movieId: id,
+          listId: saved.id,
+          order: i
+        }
       });
-      await ListsRepo.save(created);
+      await MovieEntriesRepo.delete({ listId: saved.id });
+      await MovieEntriesRepo.upsert(movieEntries, ['movieId', 'listId']);
       res.json({ success: true });
     }
   }

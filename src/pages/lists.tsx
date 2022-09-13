@@ -1,4 +1,4 @@
-import { LinearProgress } from "@mui/material";
+import { Alert, LinearProgress } from "@mui/material";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { LetterboxdListsForUserApiResponse } from "../common/types/api";
@@ -45,11 +45,11 @@ function PageContent({ user }: { user: UserResponse }) {
     },
     {
       label: 'Followed Lists',
-      content: <>Following these ones</>
+      content: <Alert severity="info">Coming Soon</Alert>
     },
     {
       label: 'Explore',
-      content: <>Explore will be where you add other people's lists and search through all the Lox-loaded lists for ones to follow or track</>
+      content: <Alert severity="info">Coming Soon</Alert>
     }
   ];
 

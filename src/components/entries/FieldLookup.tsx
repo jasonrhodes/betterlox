@@ -43,7 +43,6 @@ function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
   
   useEffect(() => {
     async function retrieve() {
-      console.log(retrievalCount++, isLoadingCount);
       setIsLoadingCount((count) => count + 1);
       try {
         const encodedInputValue = encodeURIComponent(inputValue);

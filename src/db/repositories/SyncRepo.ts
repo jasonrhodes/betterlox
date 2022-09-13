@@ -9,9 +9,9 @@ function minutesAgo(min: number, date: Date = new Date()) {
 
 export const getSyncRepository = async () => (await getDataSource()).getRepository(Sync).extend({
   async queueSync({ trigger = SyncTrigger.SYSTEM, username }: { trigger: SyncTrigger, username?: string }) {
-    const created = this.create({ username });
+    const created = this.create({ username, trigger });
     const sync = await this.save(created);
-    const minStart = minutesAgo(15); // wait 15 min for a rogue sync before we close that and start a new one
+    const minStart = minutesAgo(10); // wait for a rogue sync before we close that and start a new one
     const systemWhere = {
       trigger,
       username,

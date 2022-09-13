@@ -1,19 +1,23 @@
-import { CalendarMonth, FormatListBulleted, FormatListNumbered, Theaters } from "@mui/icons-material";
-import { Badge, Box, Chip, ChipProps, FormControlLabel, LinearProgress, Link, Switch, Typography } from "@mui/material";
+import { CalendarMonth, Theaters } from "@mui/icons-material";
+import { Alert, AlertTitle, Box, FormControlLabel, LinearProgress, Link, Switch, TextField, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { LetterboxdListsForUserApiResponse } from "../../common/types/api";
-import { UserPublic, UserPublicSafe } from "../../common/types/db";
+import { UserPublicSafe } from "../../common/types/db";
+import { escapeRegExp } from "../../lib/escapeRegex";
 import { LetterboxdList, LetterboxdListMovieEntry, Movie } from "../../db/entities";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";
 import { SortControls, useSorting } from "../../hooks/useSorting";
 import { TMDBImage } from "../images";
+import { AppLink } from "../AppLink";
 
 type ListSortBy = 'publishDate' | 'lastUpdated' | 'title' | 'filmCount';
 
 export function MyLists() {
   const [lists, setLists] = useState<LetterboxdList[]>([]);
+  const [filteredLists, setFilteredLists] = useState<LetterboxdList[]>(lists);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [quickSearchValue, updateQuickSearchValue] = useState<string>('');
   const sorting = useSorting<ListSortBy>('lastUpdated', 'DESC');
   const { user } = useCurrentUser();
 
@@ -30,15 +34,43 @@ export function MyLists() {
       setIsLoading(false);
     }
     retrieve();
-  }, [user, sorting.sortDir]);
+  }, [user, sorting.sortDir, sorting.sortBy]);
+
+  useEffect(() => {
+    const filtered = lists.filter((list) => (new RegExp(quickSearchValue)).test(list.title));
+    setFilteredLists(filtered);
+  }, [lists, quickSearchValue]);
+
+  const handleQuickSearchChange = useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
+    updateQuickSearchValue(escapeRegExp(event.target.value));
+  }, []);
 
   if (isLoading) {
     return <LinearProgress />;
   }
 
+  if (filteredLists.length === 0) {
+    return (
+      <Box sx={{ maxWidth: 600 }}>
+        <Typography variant="h6" component="h2">No Lists Synced</Typography>
+        <Typography sx={{ my: 2 }} variant="body1">To sync your lists from Letterboxd, visit <AppLink href="/account/sync">your sync page</AppLink>.</Typography>
+        <Alert severity="info"><AlertTitle>Coming Soon</AlertTitle>Add and follow other people&apos;s lists instead of or in addition to your own...</Alert>
+      </Box>
+    )
+  }
+
   return (
     <Box sx={{ maxWidth: 600 }}>
       <Box sx={{ mb: 2 }}>
+        <TextField 
+          size="small" 
+          label="Quick Search" 
+          value={quickSearchValue} 
+          onChange={handleQuickSearchChange} 
+          sx={{
+            mr: 1
+          }}
+        />
         <SortControls<ListSortBy> {...sorting} sortByOptions={{
           lastUpdated: 'Last Updated',
           publishDate: 'Publish Date',
@@ -46,7 +78,7 @@ export function MyLists() {
           filmCount: 'Film Count'
         }} />
       </Box>
-      {lists.map(list => (
+      {filteredLists.map(list => (
         <Box key={list.id} sx={{ mb: 3 }}>
           <Link color="secondary" underline="hover" href={`https://letterboxd.com${list.url}`} target="_blank" rel="noreferrer">
             <Typography variant="h6" component="h2" sx={{ mb: 1 }}>{list.title}</Typography>
@@ -77,9 +109,9 @@ function ListMoviePosterPreview({ movieEntries, n }: ListMoviePosterPreviewOptio
   const posters = movieEntries.map(e => e.movie).filter(isMovie).map(m => m.posterPath).filter(isString);
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-      {posters.slice(0, n).map(poster => (
-        <Box sx={{ my: 1, marginRight: 1 }}>
-          <TMDBImage tmdbPath={poster} width={50} height={80} />
+      {posters.slice(0, n).map(posterPath => (
+        <Box key={posterPath} sx={{ my: 1, marginRight: 1 }}>
+          <TMDBImage tmdbPath={posterPath} width={50} height={80} />
         </Box>
       ))}
     </Box>
@@ -100,7 +132,7 @@ function ListMeta({ list, user, sortBy }: { list: LetterboxdList; user?: UserPub
     await callApi(`/api/users/${user.id}/lists/${list.id}/${action}`, { method: 'POST' });
     setIsTracked(!isTracked);
     setIsLoading(false);
-  }, [isTracked]);
+  }, [isTracked, user, list.id]);
 
   return (
     <Box sx={{ my: 1 }}>

@@ -1,7 +1,10 @@
 import { In } from "typeorm";
 import { LetterboxdListsForUserApiResponse } from "../../../../../common/types/api";
+import { SyncStatus, SyncTrigger, SyncType } from "../../../../../common/types/db";
 import { LetterboxdListMovieEntry } from "../../../../../db/entities";
-import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getMoviesRepository, getUserRepository, getUserSettingsRepository } from "../../../../../db/repositories";
+import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getMoviesRepository, getSyncRepository, getUserRepository, getUserSettingsRepository } from "../../../../../db/repositories";
+import { handleGenericError } from "../../../../../lib/apiErrorHandler";
+import { getErrorAsString } from "../../../../../lib/getErrorAsString";
 import { scrapeListsForUser } from "../../../../../lib/letterboxd";
 import { numericQueryParam, singleQueryParam } from "../../../../../lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
@@ -70,16 +73,42 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
       const userId = numericQueryParam(req.query.userId)!
       const UsersRepo = await getUserRepository();
       const user = await UsersRepo.findOneBy({ id: userId });
+
       if (!user) {
-        return res.status(401).json({ success: false, code: 401, message: 'User does not exist or does not have access to perform this operation.' })
+        console.log("No user exists in user list request");
+        return res.status(401).json({ 
+          success: false, 
+          code: 401,
+          message: 'User does not exist or does not have access to perform this operation.' 
+        });
       }
-      const LetterboxdListsRepo = await getLetterboxdListsRepository();
-      const MovieEntriesRepo = await getLetterboxdListMovieEntriesRepository();
-      const numListsSynced = await scrapeListsForUser({
-        username: user.username,
-        processPage: async (lists) => {
-          for (let i = 0; i < lists.length; i++) {
-            const { details, movieIds } = lists[i];
+
+      const SyncsRepo = await getSyncRepository();
+      const { syncsInProgress, sync } = await SyncsRepo.queueSync({ trigger: SyncTrigger.USER, username: user.username });
+
+      if (syncsInProgress.length) {
+        SyncsRepo.skipSync(sync);
+        return res.status(429).json({
+          success: false,
+          code: 429,
+          message: "Sync already in progress for this user"
+        });
+      }
+
+      sync.type = SyncType.USER_LISTS;
+      SyncsRepo.startSync(sync);
+
+      res.status(200).json({
+        success: true
+      });
+
+      try {
+        const LetterboxdListsRepo = await getLetterboxdListsRepository();
+        const MovieEntriesRepo = await getLetterboxdListMovieEntriesRepository();
+        
+        const numListsSynced = await scrapeListsForUser({
+          username: user.username,
+          processList: async ({ details, movieIds }) => {
             details.lastSynced = new Date();
             details.owner = user;
     
@@ -93,6 +122,7 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
             }
 
             const saved = await LetterboxdListsRepo.save(updated);
+
             const movieEntries = movieIds.map((id, i) => {
               return {
                 movieId: id,
@@ -101,16 +131,20 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
               }
             });
             await MovieEntriesRepo.delete({ listId: saved.id });
-            await MovieEntriesRepo.upsert(movieEntries, ['movieId', 'listId']);
+            const result = await MovieEntriesRepo.upsert(movieEntries, ['movieId', 'listId']);
           }
+        });
 
-          return {
-            continue: true
-          };
-        }
-      });
-            
-      res.status(200).json({ success: true, synced: numListsSynced });
+        SyncsRepo.endSync(sync, { status: SyncStatus.COMPLETE, numSynced: numListsSynced });
+      } catch (error: unknown) {
+        SyncsRepo.endSync(sync, { 
+          status: SyncStatus.FAILED,
+          numSynced: 0,
+          errorMessage: getErrorAsString(error) 
+        });
+        const message = getErrorAsString(error);
+        console.log('ERROR CAUGHT AFTER RESPONSE', message);
+      }
     }
   }
 });

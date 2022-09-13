@@ -35,11 +35,11 @@ export function SortControls<T extends string>({
   const handleSortByChange = useCallback((event) => {
     const { value } = event.target;
     setSortBy(value);
-  }, []);
+  }, [setSortBy]);
 
   const handleSortDirClick = useCallback(() => {
     setSortDir(sortDir === "ASC" ? "DESC" : "ASC");
-  }, [sortDir]);
+  }, [sortDir, setSortDir]);
 
   return (
     <>

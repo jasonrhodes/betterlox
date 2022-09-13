@@ -19,7 +19,7 @@ export class LetterboxdList {
   @Column()
   letterboxdUsername: string;
 
-  @Column()
+  @Column({ nullable: true })
   letterboxdListId: number;
 
   @ManyToOne(() => User, (user) => user.ownedLists)

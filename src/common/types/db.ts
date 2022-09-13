@@ -22,6 +22,7 @@ export enum SyncType {
   UNKNOWN = "Unknown",
   NONE = "None",
   USER_RATINGS = "User:Ratings",
+  USER_LISTS = "User:Lists",
   RATINGS_MOVIES = "Ratings:Movies",
   MOVIES_CAST = "Movies:Cast",
   MOVIES_CREW = "Movies:Crew",

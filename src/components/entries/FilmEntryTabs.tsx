@@ -1,12 +1,11 @@
 import { TextField, Box, Tabs, Tab, FormControl, Typography } from "@mui/material";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { EntryApiResponse, GlobalFilters } from "../../common/types/api";
-import { FilmEntry, Movie } from "../../db/entities";
 import { escapeRegExp } from "../../lib/escapeRegex";
 import { EntriesTable } from "../EntriesTable";
 import { TabPanel, a11yTabProps } from "../TabPanel";
 import { Blindspots, getBlindspotsForFilters } from "../UserBlindspots";
-import { FilmEntrySortBy, SortDir, applyTitleFilter, applySort } from "./helpers";
+import { FilmEntrySortBy, applyTitleFilter, applySort } from "./helpers";
 import { FilmEntryShowAndSortControls } from "./FilmEntryShowAndSortControls";
 import { PartialMovie } from "../../common/types/base";
 import { useCurrentUser } from "../../hooks/UserContext";

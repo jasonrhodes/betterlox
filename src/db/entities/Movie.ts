@@ -114,7 +114,6 @@ export class Movie extends BaseEntity {
   @OneToMany(() => FilmEntry, (entry) => entry.movie)
   entries: Relation<FilmEntry[]>;
 
-  @ManyToMany(() => LetterboxdList)
-  movies: Relation<LetterboxdList>[];
-
+  @ManyToMany(() => LetterboxdList, (list) => list.movies)
+  lists?: Relation<LetterboxdList>[];
 }

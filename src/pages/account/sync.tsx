@@ -1,12 +1,14 @@
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
 import { Button, Box, Typography, Link, Alert, CircularProgress, Paper } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { callApi } from '../../hooks/useApi';
 import { UserEntriesSyncApiResponse, ApiErrorResponse, UserListsApiResponse } from '../../common/types/api';
 import { getErrorAsString } from '../../lib/getErrorAsString';
 import { FormatListNumbered, Tv } from '@mui/icons-material';
 import { UserPublic } from '../../common/types/db';
+import axios from 'axios';
+import { response } from 'express';
 
 type SyncingState = 'none' | 'syncing' | 'success' | 'failed';
 
@@ -54,7 +56,7 @@ function SyncWatchData({
       if (response.success && 'synced' in response.data) {
         const { synced } = response.data;
         setSyncState("success");
-        setSyncMessage(`${synced.ratings.length} ratings and ${synced.watches.length} watches have been updated.`);
+        setSyncMessage(`Sync complete. ${synced.ratings.length} ratings and ${synced.watches.length} watches have been updated.`);
       } else {
         setSyncState("failed");
         setSyncMessage("Sync request failed due to a system error. Please try again.")
@@ -92,6 +94,31 @@ function SyncWatchData({
   );
 }
 
+interface AxiosErrorWithResponseData<T> {
+  response: {
+    data: T
+  }
+}
+
+function isAxiosErrorWithResponseData<T extends ApiErrorResponse = ApiErrorResponse>(
+  error: unknown
+): error is AxiosErrorWithResponseData<T> {
+  if (!axios.isAxiosError(error)) {
+    return false;
+  }
+  if (!error.response) {
+    return false;
+  }
+  if (!error.response.data || typeof error.response.data !== "object") {
+    return false;
+  }
+  if (!("message" in error.response.data)) {
+    return false;
+  }
+
+  return true;
+}
+
 function SyncListData({
   user,
   setSyncMessage,
@@ -104,18 +131,26 @@ function SyncListData({
       const response = await callApi<UserListsApiResponse>(`/api/users/${userId}/lists`, {
         method: 'POST'
       });
-      if (response.success && 'synced' in response.data) {
-        const { synced } = response.data;
+      if (response.success) {
         setSyncState("success");
-        setSyncMessage(`${synced} lists have been updated.`);
+        if ("synced" in response.data) {
+          const { synced } = response.data;
+          setSyncMessage(`Sync complete. ${synced} lists have been updated.`);
+        } else {
+          setSyncMessage(`List sync successfully started. Refresh the page to view the status.`);
+        }
       } else {
         setSyncState("failed");
         setSyncMessage("Sync failed due to a system error.");
       }
     } catch (error: unknown) {
-      const message = getErrorAsString(error);
       setSyncState("failed");
-      setSyncMessage(message);
+      if (isAxiosErrorWithResponseData(error)) {
+        setSyncMessage(error.response.data.message);
+      } else {
+        const message = getErrorAsString(error);
+        setSyncMessage(message);
+      }
     }
   };
 
@@ -163,7 +198,7 @@ function ProgressMessage({ state, message = '' }: { state: SyncingState; message
   if (state === "success") {
     alert = (
       <Alert severity="success" variant={alertVariant}>
-        <Typography>Sync complete. {message}</Typography>
+        <Typography>{message}</Typography>
       </Alert>
     );
   }

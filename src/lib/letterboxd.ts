@@ -3,6 +3,7 @@ import * as cheerio from "cheerio";
 import { ScrapedLetterboxdList } from "../common/types/api";
 import { FilmEntry, LetterboxdList, Movie, PopularLetterboxdMovie } from "../db/entities";
 import { getDataImageTagFromUrl } from "./dataImageUtils";
+import { getErrorAsString } from "./getErrorAsString";
 import { isNumber } from "./typeGuards";
 const MAX_TRIES = 5;
 
@@ -124,69 +125,130 @@ export async function findLastWatchesPage(username: string) {
   return Number(lastPage);
 }
 
+export interface ScrapedMovie {
+  id?: number;
+  averageRating?: number;
+  letterboxdSlug?: string;
+  name?: string;
+}
+
+// recursively calls scrapeMoviesByPage for you
+export async function scrapeMoviesOverPages({
+  baseUrl,
+  maxMovies,
+  maxPages = 50,
+  page = 1,
+  movies = [],
+  processPage
+}: {
+  baseUrl: string;
+  maxMovies?: number;
+  maxPages?: number;
+  page?: number;
+  movies?: ScrapedMovie[];
+  processPage?: (set: ScrapedMovie[]) => Promise<ScrapedMovie[]>;
+}): Promise<ScrapedMovie[]> {
+  const maxMoviesForPage = typeof maxMovies === "number" ? maxMovies - movies.length : undefined;
+  const result = await scrapeMoviesByPage({ baseUrl, maxMoviesForPage, page });
+  const batch = (typeof processPage === "function") ? (await processPage(result.movies)) : result.movies;
+  const accumulator = [ ...movies, ...batch ];
+  
+  if (
+      batch.length === 0 ||
+      (typeof maxPages === "number" && page === maxPages) || 
+      (typeof maxMovies === "number" && accumulator.length >= maxMovies)
+    ) {
+    return accumulator;
+  }
+  return await scrapeMoviesOverPages({
+    baseUrl,
+    maxMovies,
+    maxPages,
+    page: page + 1,
+    movies: accumulator
+  });
+}
+
 interface ScrapeMoviesByPageOptions {
   baseUrl: string;
   page?: number;
-  maxMovies?: number;
+  maxMoviesForPage?: number;
 }
 
 export async function scrapeMoviesByPage({
   baseUrl,
   page = 1,
-  maxMovies
-}: ScrapeMoviesByPageOptions): Promise<{ movies: Array<Partial<PopularLetterboxdMovie>> }> {
+  maxMoviesForPage
+}: ScrapeMoviesByPageOptions): Promise<{ movies: Partial<ScrapedMovie>[] }> {
   const { data } = await tryLetterboxd(
     `${baseUrl}/page/${page}`
   );
-  const $ = cheerio.load(data);
-  // console.log('HTML', $.html());
-  const elements = $('ul.poster-list li');
+  const $ = cheerio.load(data); 
+  const elements = $('.col-main > ul.poster-list > li');
 
   if (!elements.length) {
     return { movies: [] };
   }
 
-  const elementsToProcess = typeof maxMovies === "number" && elements.length > maxMovies
-    ? elements.slice(0, maxMovies)
+  const elementsToProcess = typeof maxMoviesForPage === "number" && elements.length > maxMoviesForPage
+    ? elements.slice(0, maxMoviesForPage)
     : elements;
 
   const movies = await Promise.all(elementsToProcess.map(async (i, item) => {
-    const m: Partial<PopularLetterboxdMovie> = {};
+    const m: Partial<ScrapedMovie> = {};
 
-    const containerData = $(item).data() as { averageRating: number };
-    m.averageRating = containerData.averageRating;
-
+    const containerData = $(item).data() as { averageRating?: number };
+    if (containerData.averageRating) {
+      m.averageRating = containerData.averageRating;
+    }
+    
     const poster = $(item).find('.film-poster');
-    const filmData = poster.data() as {
+    const filmData = poster.data() as undefined | {
       filmSlug?: string;
       filmId?: string;
+      filmName?: string;
     };
 
-    if (typeof filmData.filmSlug === "string") {
+    if (filmData && 'filmName' in filmData) {
+      m.name = filmData.filmName;
+    }
+
+    if (filmData && typeof filmData.filmSlug === "string") {
       m.letterboxdSlug = filmData.filmSlug;
-      const id = Number(filmData.filmId);
-      if (!isNaN(id)) {
+      
+      const { id, name } = await scrapeMovieByUrl(filmData.filmSlug);
+      if (id) {
         m.id = id;
       }
-      
-      if (!m.id) {
-        const { data } = await tryLetterboxd(filmData.filmSlug);
-        const $$ = cheerio.load(data);
-        const { tmdbId } = $$("body").data();
-        const id = Number(tmdbId);
-        if (!isNaN(id)) {
-          m.id = id;
-        }
+
+      if (name) {
+        m.name = name;
       }
     }
 
-    const name = $(item).find("img")?.attr()?.alt;
-    m.name = name;
+    if (!m.name) {
+      const name = $(item).find("img")?.attr()?.alt;
+      m.name = name;
+    } 
 
     return m;
   }).get());
 
   return { movies };
+}
+
+export async function scrapeMovieByUrl(url: string): Promise<ScrapedMovie> {
+  const { data } = await tryLetterboxd(url);
+  const $$ = cheerio.load(data);
+  const { tmdbId } = $$("body").data();
+  const _id = Number(tmdbId);
+  const id = isNaN(_id) ? _id : undefined;
+  const name = $$("h1.headline-1").text();
+  return {
+    id,
+    name,
+    letterboxdSlug: url
+  };
 }
 
 interface ScrapeByPageOptions {
@@ -292,11 +354,12 @@ export async function scrapeRatingsByPage({
 interface ScrapedList {
   details: Partial<LetterboxdList>;
   movieIds: number[];
+  owner?: string;
 }
 
 interface ScrapeListsForUserOptions {
   username: string;
-  processPage: (lists: ScrapedList[]) => Promise<{ continue: boolean; }>;
+  processList: (list: ScrapedList) => void;
 }
 
 export async function scrapeListsForUser(
@@ -308,96 +371,76 @@ export async function scrapeListsForUser(
     `https://letterboxd.com/${options.username}/lists/public/by/created-oldest/page/${page}`
   );
   const $ = cheerio.load(data);
-  const items = $("section.list-set > section.list");
+  const listsOnPage = $("section.list-set > section.list");
 
-  if (items.length === 0) {
+  if (listsOnPage.length === 0) {
     return count;
   }
 
-  const batch = (await Promise.all(items.map(async (i, item) => {
-    const itemData = $(item).data();
+  let batchCount = 0;
 
-    if (!('filmListId' in itemData) || (typeof itemData.filmListId !== 'number')) {
-      throw new Error('No film list ID in letterboxd list of lists page');
-    }
-    
-    if (!('person' in itemData) || (typeof itemData.person !== 'string')) {
-      throw new Error(`Person data not found on Letterboxd listing page ${options.username}/${page} for list index ${i}`)
-    }
+  for (let i = 0; i < listsOnPage.length; i ++) {
+    const list = listsOnPage[i];
+    const listData = $(list).data();
 
-    const listLink = $(item).find('a.list-link');
+    const listLink = $(list).find('a.list-link');
     const listUrl = listLink.attr('href');
     
     if (!listUrl) {
       throw new Error(`URL data not found for list index ${i} on Letterboxd lists page ${options.username}/${page}`)
     }
 
-    const { data } = await tryLetterboxd(`https://letterboxd.com${listUrl}`);
-    const $$ = cheerio.load(data);
+    const fullListUrl = `https://letterboxd.com${listUrl}`;
+    const { details, movieIds } = await scrapeListByUrl(fullListUrl);
+    await options.processList({ details, movieIds });
 
-    const $published = $$("#content-nav .list-date > .published time");
-    const pubDate = $published.attr("datetime");
-
-    const $lastUpdated = $$("#content-nav .list-date > .updated time");
-    const luDate = $lastUpdated.attr("datetime");
-
-    const $listIntroSection = $$(".list-title-intro");
-    const title = $listIntroSection.find("h1");
-    const description = $listIntroSection.find(".body-text");
-
-    const $filmsItems = $$(".poster-list.film-list .film-poster");
-    const filmIds = await Promise.all($filmsItems.map(async (i, item) => {
-      const itemData = $$(item).data();
-      if (!('filmSlug' in itemData)) {
-        return null;
-      }
-
-      const { data } = await tryLetterboxd(`https://letterboxd.com${itemData.filmSlug}`);
-      const $filmPage = cheerio.load(data);
-      const filmPageData = $filmPage('body').data();
-
-      if (!('tmdbId' in filmPageData)) {
-        console.log('no tmdbId in film page');
-        return null;
-      }
-
-      const numId = Number(filmPageData.tmdbId);
-      if (isNaN(numId)) {
-        return null;
-      }
-
-      return numId;
-    }).get());
-
-    const filteredFilmIds = filmIds.filter(isNumber);
-    const rankedItems = $$(".poster-list.film-list .poster-container.numbered-list-item");
-    const isRanked = rankedItems.length > 0;
-    const publishDate = pubDate ? new Date(pubDate) : undefined;
-    const lastUpdated = luDate ? new Date(luDate) : publishDate;
-
-    const details: Partial<LetterboxdList> = {
-      letterboxdListId: itemData.filmListId,
-      publishDate,
-      lastUpdated,
-      title: title.text().trim(),
-      description: description.text().trim(),
-      letterboxdUsername: itemData.person,
-      url: listUrl,
-      isRanked,
-      visibility: 'public'
-    };
-
-    return {
-      details,
-      movieIds: filteredFilmIds
-    };
-  })));
-
-  const result = await options.processPage(batch);
+    batchCount++;
+  }
   
-  if (result.continue) {
-    return await scrapeListsForUser(options, count + batch.length, page + 1);
+  return await scrapeListsForUser(options, count + batchCount, page + 1);
+}
+
+export async function scrapeListByUrl(url: string): Promise<ScrapedList> {
+  const { data } = await tryLetterboxd(url);
+  const $$ = cheerio.load(data);
+
+  const body = $$("body");
+  const bodyData = body.data();
+  const owner = typeof bodyData.owner === "string" ? bodyData.owner : undefined;
+
+  const $published = body.find("#content-nav .list-date > .published time");
+  const pubDate = $published.attr("datetime");
+
+  const $lastUpdated = body.find("#content-nav .list-date > .updated time");
+  const luDate = $lastUpdated.attr("datetime");
+
+  const $listIntroSection = body.find(".list-title-intro");
+  const title = $listIntroSection.find("h1");
+  const description = $listIntroSection.find(".body-text");
+  const rankedItems = body.find(".poster-list.film-list .poster-container.numbered-list-item");
+  const isRanked = rankedItems.length > 0;
+  const publishDate = pubDate ? new Date(pubDate) : undefined;
+  const lastUpdated = luDate ? new Date(luDate) : publishDate;
+
+  let movieIds: number[] = [];
+  try {
+    const films = await scrapeMoviesOverPages({ baseUrl: url });
+    movieIds = films.map(f => f.id).filter(isNumber);    
+  } catch (error) {
+    console.log("error while scrapeMoviesOverPages", getErrorAsString(error));
+    throw error;
   }
 
-  return count + batch.length;
+  const details: Partial<LetterboxdList> = {
+    publishDate,
+    lastUpdated,
+    title: title.text().trim(),
+    description: description.text().trim(),
+    letterboxdUsername: owner,
+    url: url,
+    isRanked,
+    visibility: 'public'
+  };
+
+  return { details, movieIds, owner };
 }
