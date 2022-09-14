@@ -10,12 +10,13 @@ const UserUnfollowListRoute = createApiRoute<ApiSuccessResponse | ApiErrorRespon
       const userId = numericQueryParam(req.query.userId)!;
       const listId = numericQueryParam(req.query.listId)!;
 
-      const response = await ds.query(`
-        DELETE FROM letterboxd_list_follow llf
-        WHERE llf."listId" = ${listId}
-        AND llf."userId" = ${userId}`
+      await ds.query(`
+          DELETE FROM users_followed_lists_letterboxd_list
+          WHERE "usersId" = $1
+          AND "letterboxdListId" = $2
+        `, 
+        [userId, listId]
       );
-
       res.json({ success: true });
     }
   }

@@ -9,14 +9,13 @@ const UserTrackListRoute = createApiRoute<ApiSuccessResponse | ApiErrorResponse>
       const ds = await getDataSource();
       const userId = numericQueryParam(req.query.userId)!;
       const listId = numericQueryParam(req.query.listId)!;
-      const response = await ds.query(`
+      await ds.query(`
           INSERT INTO users_tracked_lists_letterboxd_list ("usersId", "letterboxdListId")
           VALUES ($1, $2)
         `, 
         [userId, listId]
       );
 
-      console.log("FINISHED", JSON.stringify(response, null, 2));
       res.json({ success: true });
     }
   }

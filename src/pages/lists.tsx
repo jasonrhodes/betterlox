@@ -46,7 +46,7 @@ function PageContent({ user }: { user: UserResponse }) {
     },
     {
       label: 'Followed Lists',
-      content: <Alert severity="info">Coming Soon</Alert>
+      content: <ListsList scope="user-following" />
     },
     {
       label: 'Explore',

@@ -33,7 +33,9 @@ const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse
           movies: {
             movie: true
           },
-          trackers: true
+          owner: true,
+          trackers: true,
+          followers: true
         },
         where,
         take: limit,
@@ -58,6 +60,7 @@ const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse
     },
     post: async (req, res) => {
       const url = singleQueryParam(req.body.url);
+      const autofollower = numericQueryParam(req.body.autofollower);
       if (!url) {
         res.status(400).json({ success: false, code: 400, message: 'url is required and must be a valid Letterboxd list url' });
         return;
@@ -82,6 +85,13 @@ const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse
 
       if (!updated) {
         throw new Error('Could not upsert list into DB');
+      }
+
+      if (autofollower) {
+        const follower = await UsersRepo.findOneBy({ id: autofollower });
+        if (follower) {
+          updated.followers.push(follower);
+        }
       }
 
       const saved = await LetterboxdListsRepo.save(updated);

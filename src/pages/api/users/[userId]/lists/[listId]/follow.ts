@@ -10,22 +10,38 @@ const UserFollowListRoute = createApiRoute<ApiSuccessResponse | ApiErrorResponse
       const userId = numericQueryParam(req.query.userId)!;
       const listId = numericQueryParam(req.query.listId)!;
 
-      const response = await ds.query(`
-        INSERT INTO letterboxd_list_follow ("userId", "listId")
-        SELECT * FROM (
-          VALUES (${userId}, ${listId})
-        ) AS t (numeric, numeric)
-        WHERE NOT EXISTS (
-          SELECT id, "ownerId" FROM letterboxd_list ll
-          WHERE ll.id = ${listId}
-          AND "ownerId" = ${userId}
-        )`
+      await ds.query(`
+          INSERT INTO users_followed_lists_letterboxd_list ("usersId", "letterboxdListId")
+          VALUES ($1, $2)
+        `, 
+        [userId, listId]
       );
 
-      console.log("FINISHED", JSON.stringify(response, null, 2));
+      // await ds.query(`
+      //   INSERT INTO letterboxd_list_follow ("userId", "listId")
+      //   SELECT * FROM (
+      //     VALUES (${userId}, ${listId})
+      //   ) AS t (numeric, numeric)
+      //   WHERE NOT EXISTS (
+      //     SELECT id, "ownerId" FROM letterboxd_list ll
+      //     WHERE ll.id = ${listId}
+      //     AND "ownerId" = ${userId}
+      //   )`
+      // );
+
       res.json({ success: true });
     }
   }
 });
+
+// INSERT INTO letterboxd_list_follow ("userId", "listId")
+// SELECT * FROM (
+//   VALUES (${userId}, ${listId})
+// ) AS t (numeric, numeric)
+// WHERE NOT EXISTS (
+//   SELECT id, "ownerId" FROM letterboxd_list ll
+//   WHERE ll.id = ${listId}
+//   AND "ownerId" = ${userId}
+// )
 
 export default UserFollowListRoute;

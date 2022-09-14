@@ -9,7 +9,7 @@ const UserUntrackListRoute = createApiRoute<ApiSuccessResponse | ApiErrorRespons
       const ds = await getDataSource();
       const userId = numericQueryParam(req.query.userId)!;
       const listId = numericQueryParam(req.query.listId)!;
-      const response = await ds.query(`
+      await ds.query(`
           DELETE FROM users_tracked_lists_letterboxd_list
           WHERE "usersId" = $1
           AND "letterboxdListId" = $2
@@ -17,7 +17,6 @@ const UserUntrackListRoute = createApiRoute<ApiSuccessResponse | ApiErrorRespons
         [userId, listId]
       );
 
-      console.log("FINISHED", JSON.stringify(response, null, 2));
       res.json({ success: true });
     }
   }

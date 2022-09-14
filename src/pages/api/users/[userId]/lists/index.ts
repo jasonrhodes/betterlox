@@ -50,6 +50,7 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
           movies: {
             movie: true
           },
+          owner: true,
           trackers: true
         },
         where,

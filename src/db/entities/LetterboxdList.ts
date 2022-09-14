@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation, Unique } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation, Unique } from "typeorm";
 import { Movie } from "./Movie";
 import { User } from "./User";
 
@@ -43,37 +43,14 @@ export class LetterboxdList {
   @Column({ default: false })
   isRanked: boolean;
 
-  @OneToMany(() => LetterboxdListFollow, (follow) => follow.list, { cascade: true })
-  follows: Relation<LetterboxdListFollow>;
+  @ManyToMany(() => User, (user) => user.followedLists)
+  followers: Relation<User>[];
 
   @OneToMany(() => LetterboxdListMovieEntry, (entry) => entry.list, { eager: true, cascade: true })
   movies: Relation<LetterboxdListMovieEntry>[];
 
   @ManyToMany(() => User, (user) => user.trackedLists)
   trackers: Relation<User>[];
-}
-
-@Entity()
-export class LetterboxdListFollow {
-  @PrimaryColumn()
-  listId: number;
-
-  @PrimaryColumn()
-  userId: number;
-
-  @ManyToOne(() => LetterboxdList, (list) => list.follows)
-  @JoinColumn({
-    name: 'listId',
-    referencedColumnName: 'id'
-  })
-  list: Relation<LetterboxdList>;
-
-  @ManyToOne(() => User)
-  @JoinColumn({
-    name: 'userId',
-    referencedColumnName: 'id'
-  })
-  user: Relation<User>;
 }
 
 @Entity()
