@@ -53,7 +53,7 @@ export function MyLists() {
     return (
       <Box sx={{ maxWidth: 600 }}>
         <Typography variant="h6" component="h2">No Lists Synced</Typography>
-        <Typography sx={{ my: 2 }} variant="body1">To sync your lists from Letterboxd, visit <AppLink href="/account/sync">your sync page</AppLink>.</Typography>
+        <Typography sx={{ my: 2 }} variant="body1">To sync all of your lists from Letterboxd, visit <AppLink href="/account/sync">your sync page</AppLink>. Alternatively, you can visit the "Import List" tab on this page to add individual lists (your own or others).</Typography>
         <Alert severity="info"><AlertTitle>Coming Soon</AlertTitle>Add and follow other people&apos;s lists instead of or in addition to your own...</Alert>
       </Box>
     )
@@ -80,7 +80,7 @@ export function MyLists() {
       </Box>
       {filteredLists.map(list => (
         <Box key={list.id} sx={{ mb: 3 }}>
-          <Link color="secondary" underline="hover" href={`https://letterboxd.com${list.url}`} target="_blank" rel="noreferrer">
+          <Link color="secondary" underline="hover" href={list.url} target="_blank" rel="noreferrer">
             <Typography variant="h6" component="h2" sx={{ mb: 1 }}>{list.title}</Typography>
           </Link>
           {list.description ? <Typography component="p" variant="caption" sx={{ lineHeight: 1.4 }}>{list.description.substring(0, 250)}</Typography> : null}

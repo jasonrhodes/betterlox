@@ -207,7 +207,11 @@ export interface LetterboxdListsManagementGetResponse extends ApiSuccessResponse
   lists: LetterboxdList[];
 }
 
-export type LetterboxdListsManagementApiResponse = ApiResponse<LetterboxdListsManagementGetResponse>;
+interface LetterboxdListsManagementPostResponse extends ApiSuccessResponse {
+  list: Partial<LetterboxdList>;
+}
+
+export type LetterboxdListsManagementApiResponse = ApiResponse<LetterboxdListsManagementGetResponse | LetterboxdListsManagementPostResponse>;
 
 
 export interface LetterboxdListsForUserGetResponse extends ApiSuccessResponse {

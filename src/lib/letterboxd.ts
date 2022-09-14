@@ -38,8 +38,12 @@ async function tryLetterboxd(
     url = `https://letterboxd.com${url}`;
   }
 
+  if (url.split('/')[2] !== "letterboxd.com") {
+    throw new Error(`Invalid URL passed to tryLetterboxd ${url}`);
+  }
+
   if (tries >= MAX_TRIES) {
-    throw new Error(`Exceeded max tries while attempting to reach ${url}`);
+    throw new Error(`Exceeded max tries (${MAX_TRIES}) while attempting to reach ${url}`);
   }
 
   try {
@@ -180,9 +184,8 @@ export async function scrapeMoviesByPage({
   page = 1,
   maxMoviesForPage
 }: ScrapeMoviesByPageOptions): Promise<{ movies: Partial<ScrapedMovie>[] }> {
-  const { data } = await tryLetterboxd(
-    `${baseUrl}/page/${page}`
-  );
+  const pageUrl = `${baseUrl}page/${page}`;
+  const { data } = await tryLetterboxd(pageUrl);
   const $ = cheerio.load(data); 
   const elements = $('.col-main > ul.poster-list > li');
 
@@ -193,7 +196,7 @@ export async function scrapeMoviesByPage({
   const elementsToProcess = typeof maxMoviesForPage === "number" && elements.length > maxMoviesForPage
     ? elements.slice(0, maxMoviesForPage)
     : elements;
-
+  
   const movies = await Promise.all(elementsToProcess.map(async (i, item) => {
     const m: Partial<ScrapedMovie> = {};
 
@@ -242,8 +245,9 @@ export async function scrapeMovieByUrl(url: string): Promise<ScrapedMovie> {
   const $$ = cheerio.load(data);
   const { tmdbId } = $$("body").data();
   const _id = Number(tmdbId);
-  const id = isNaN(_id) ? _id : undefined;
+  const id = isNaN(_id) ? undefined : _id;
   const name = $$("h1.headline-1").text();
+
   return {
     id,
     name,
@@ -415,7 +419,7 @@ export async function scrapeListByUrl(url: string): Promise<ScrapedList> {
   const luDate = $lastUpdated.attr("datetime");
 
   const $listIntroSection = body.find(".list-title-intro");
-  const title = $listIntroSection.find("h1");
+  const title = $listIntroSection.find("h1").text().trim();
   const description = $listIntroSection.find(".body-text");
   const rankedItems = body.find(".poster-list.film-list .poster-container.numbered-list-item");
   const isRanked = rankedItems.length > 0;
@@ -425,7 +429,10 @@ export async function scrapeListByUrl(url: string): Promise<ScrapedList> {
   let movieIds: number[] = [];
   try {
     const films = await scrapeMoviesOverPages({ baseUrl: url });
-    movieIds = films.map(f => f.id).filter(isNumber);    
+    movieIds = films.map(f => f.id).filter(isNumber);  
+    if (movieIds.length < films.length) {
+      console.log(`Warning: Dropped ${films.length - movieIds.length} movie IDs for not having a numeric ID, which may indicate a bug`);
+    }  
   } catch (error) {
     console.log("error while scrapeMoviesOverPages", getErrorAsString(error));
     throw error;
@@ -434,7 +441,7 @@ export async function scrapeListByUrl(url: string): Promise<ScrapedList> {
   const details: Partial<LetterboxdList> = {
     publishDate,
     lastUpdated,
-    title: title.text().trim(),
+    title,
     description: description.text().trim(),
     letterboxdUsername: owner,
     url: url,

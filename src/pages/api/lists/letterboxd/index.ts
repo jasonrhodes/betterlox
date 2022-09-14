@@ -1,17 +1,21 @@
 import { LetterboxdListsManagementApiResponse } from "../../../../common/types/api";
 import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getUserRepository } from "../../../../db/repositories";
 import { scrapeListByUrl } from "../../../../lib/letterboxd";
-import { singleQueryParam } from "../../../../lib/queryParams";
+import { numericQueryParam, singleQueryParam } from "../../../../lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
 
 const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse>({
   handlers: {
     get: async (req, res) => {
+      const limit = numericQueryParam(req.query.perPage, 50);
+      const offset = numericQueryParam(req.query.page, 1) - 1;
       const ListsRepo = await getLetterboxdListsRepository();
       const lists = await ListsRepo.find({
         order: {
           lastSynced: 'DESC'
-        }
+        },
+        take: limit,
+        skip: offset
       });
       res.json({ success: true, lists });
     },
@@ -54,7 +58,7 @@ const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse
       });
       await MovieEntriesRepo.delete({ listId: saved.id });
       await MovieEntriesRepo.upsert(movieEntries, ['movieId', 'listId']);
-      res.json({ success: true });
+      res.json({ success: true, list: details });
     }
   }
 });

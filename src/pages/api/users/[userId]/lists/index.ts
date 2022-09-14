@@ -52,7 +52,6 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
 
       if (sortBy === 'filmCount') {
         lists.sort((a, b) => {
-          console.log(a.title, a.movies.length, b.title, b.movies.length);
           const compare = a.movies.length > b.movies.length;
           if (sortDir === "ASC") {
             return compare ? 1 : -1;

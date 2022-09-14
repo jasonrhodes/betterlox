@@ -3,6 +3,7 @@ import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { LetterboxdListsForUserApiResponse } from "../common/types/api";
 import { UserResponse } from "../common/types/db";
+import { AddList } from "../components/lists/AddList";
 import { MyLists } from "../components/lists/MyLists";
 import { MyTrackedLists } from "../components/lists/TrackedLists";
 import { UserPageTemplate } from "../components/PageTemplate";
@@ -50,6 +51,10 @@ function PageContent({ user }: { user: UserResponse }) {
     {
       label: 'Explore',
       content: <Alert severity="info">Coming Soon</Alert>
+    },
+    {
+      label: 'Import List',
+      content: <AddList user={user} />
     }
   ];
 
