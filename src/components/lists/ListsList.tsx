@@ -53,11 +53,7 @@ export function ListsList({ scope }: { scope: ListScope }) {
     updateQuickSearchValue(escapeRegExp(event.target.value));
   }, []);
 
-  if (isLoading) {
-    return <LinearProgress />;
-  }
-
-  if (quickSearchValue === '' && lists.length === 0) {
+  if (!isLoading && quickSearchValue === '' && lists.length === 0) {
     return (
       <Box sx={{ maxWidth: 600 }}>
         <Typography variant="h6" component="h2">No Lists Synced</Typography>
@@ -86,7 +82,7 @@ export function ListsList({ scope }: { scope: ListScope }) {
           filmCount: 'Film Count'
         }} />
       </Box>
-      {lists.map(list => (
+      {isLoading ? <LinearProgress /> : lists.map(list => (
         <Box key={list.id} sx={{ mb: 3 }}>
           <Link color="secondary" underline="hover" href={list.url} target="_blank" rel="noreferrer">
             <Typography variant="h6" component="h2" sx={{ mb: 1 }}>{list.title}</Typography>
