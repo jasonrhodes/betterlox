@@ -2,7 +2,7 @@ import { CalendarMonth, Theaters } from "@mui/icons-material";
 import { Alert, AlertTitle, Box, FormControlLabel, LinearProgress, Link, Switch, TextField, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { LetterboxdListsForUserApiResponse } from "../../common/types/api";
-import { UserPublicSafe } from "../../common/types/db";
+import { UserPublicSafe, UserResponse } from "../../common/types/db";
 import { escapeRegExp } from "../../lib/escapeRegex";
 import { LetterboxdList, LetterboxdListMovieEntry, Movie } from "../../db/entities";
 import { callApi } from "../../hooks/useApi";
@@ -12,10 +12,22 @@ import { TMDBImage } from "../images";
 import { AppLink } from "../AppLink";
 
 type ListSortBy = 'publishDate' | 'lastUpdated' | 'title' | 'filmCount';
+type ListScope = 'user-owned' | 'user-followed' | 'all';
 
-export function MyLists() {
+function getApiForScope(scope: ListScope, user: UserResponse | UserPublicSafe) {
+  switch (scope) {
+    case 'user-owned':
+      return `/api/users/${user.id}/lists`;
+    case 'user-followed':
+      return `/api/users/${user.id}/lists/following`;
+    case 'all':
+    default:
+      return `/api/lists/letterboxd`;
+  }
+}
+
+export function ListsList({ scope }: { scope: ListScope }) {
   const [lists, setLists] = useState<LetterboxdList[]>([]);
-  const [filteredLists, setFilteredLists] = useState<LetterboxdList[]>(lists);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [quickSearchValue, updateQuickSearchValue] = useState<string>('');
   const sorting = useSorting<ListSortBy>('lastUpdated', 'DESC');
@@ -27,19 +39,15 @@ export function MyLists() {
         return;
       }
       setIsLoading(true);
-      const response = await callApi<LetterboxdListsForUserApiResponse>(`/api/users/${user.id}/lists?sortBy=${sorting.sortBy}&sortDir=${sorting.sortDir}`);
+      const baseUrl = getApiForScope(scope, user);
+      const response = await callApi<LetterboxdListsForUserApiResponse>(`${baseUrl}?sortBy=${sorting.sortBy}&sortDir=${sorting.sortDir}&q=${encodeURIComponent(quickSearchValue)}`);
       if (response.data?.success && 'lists' in response.data) {
         setLists(response.data.lists);
       }
       setIsLoading(false);
     }
     retrieve();
-  }, [user, sorting.sortDir, sorting.sortBy]);
-
-  useEffect(() => {
-    const filtered = lists.filter((list) => (new RegExp(quickSearchValue)).test(list.title));
-    setFilteredLists(filtered);
-  }, [lists, quickSearchValue]);
+  }, [user, sorting.sortDir, sorting.sortBy, scope, quickSearchValue]);
 
   const handleQuickSearchChange = useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateQuickSearchValue(escapeRegExp(event.target.value));
@@ -49,11 +57,11 @@ export function MyLists() {
     return <LinearProgress />;
   }
 
-  if (filteredLists.length === 0) {
+  if (quickSearchValue === '' && lists.length === 0) {
     return (
       <Box sx={{ maxWidth: 600 }}>
         <Typography variant="h6" component="h2">No Lists Synced</Typography>
-        <Typography sx={{ my: 2 }} variant="body1">To sync all of your lists from Letterboxd, visit <AppLink href="/account/sync">your sync page</AppLink>. Alternatively, you can visit the "Import List" tab on this page to add individual lists (your own or others).</Typography>
+        <Typography sx={{ my: 2 }} variant="body1">To sync all of your lists from Letterboxd, visit <AppLink href="/account/sync">your sync page</AppLink>. Alternatively, you can visit the &ldquo;Import List&rdquo; tab on this page to add individual lists (your own or others).</Typography>
         <Alert severity="info"><AlertTitle>Coming Soon</AlertTitle>Add and follow other people&apos;s lists instead of or in addition to your own...</Alert>
       </Box>
     )
@@ -78,12 +86,11 @@ export function MyLists() {
           filmCount: 'Film Count'
         }} />
       </Box>
-      {filteredLists.map(list => (
+      {lists.map(list => (
         <Box key={list.id} sx={{ mb: 3 }}>
           <Link color="secondary" underline="hover" href={list.url} target="_blank" rel="noreferrer">
             <Typography variant="h6" component="h2" sx={{ mb: 1 }}>{list.title}</Typography>
           </Link>
-          {list.description ? <Typography component="p" variant="caption" sx={{ lineHeight: 1.4 }}>{list.description.substring(0, 250)}</Typography> : null}
           <ListMeta list={list} user={user} sortBy={sorting.sortBy} />
           <ListMoviePosterPreview n={10} movieEntries={list.movies} />
         </Box>
@@ -119,7 +126,7 @@ function ListMoviePosterPreview({ movieEntries, n }: ListMoviePosterPreviewOptio
 }
 
 function ListMeta({ list, user, sortBy }: { list: LetterboxdList; user?: UserPublicSafe; sortBy: ListSortBy }) {
-  const [isTracked, setIsTracked] = useState<boolean>(Boolean(list.trackers.find(u => u.id === user?.id)));
+  const [isTracked, setIsTracked] = useState<boolean>(Boolean(list.trackers?.find(u => u.id === user?.id)));
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const updated = list.lastUpdated || list.publishDate;
 

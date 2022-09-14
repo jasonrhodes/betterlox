@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { LetterboxdListsForUserApiResponse } from "../common/types/api";
 import { UserResponse } from "../common/types/db";
 import { AddList } from "../components/lists/AddList";
-import { MyLists } from "../components/lists/MyLists";
+import { ListsList } from "../components/lists/ListsList";
 import { MyTrackedLists } from "../components/lists/TrackedLists";
 import { UserPageTemplate } from "../components/PageTemplate";
 import { TabNavPage } from "../components/TabNavPage";
@@ -42,7 +42,7 @@ function PageContent({ user }: { user: UserResponse }) {
   const tabs = [
     {
       label: 'My Lists',
-      content: <MyLists />
+      content: <ListsList scope="user-owned" />
     },
     {
       label: 'Followed Lists',
@@ -50,7 +50,7 @@ function PageContent({ user }: { user: UserResponse }) {
     },
     {
       label: 'Explore',
-      content: <Alert severity="info">Coming Soon</Alert>
+      content: <ListsList scope="all" />
     },
     {
       label: 'Import List',

@@ -1,4 +1,6 @@
+import { FindOptionsWhere, ILike } from "typeorm";
 import { LetterboxdListsManagementApiResponse } from "../../../../common/types/api";
+import { LetterboxdList } from "../../../../db/entities";
 import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getUserRepository } from "../../../../db/repositories";
 import { scrapeListByUrl } from "../../../../lib/letterboxd";
 import { numericQueryParam, singleQueryParam } from "../../../../lib/queryParams";
@@ -7,16 +9,51 @@ import { createApiRoute } from "../../../../lib/routes";
 const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse>({
   handlers: {
     get: async (req, res) => {
-      const limit = numericQueryParam(req.query.perPage, 50);
+      const limit = numericQueryParam(req.query.perPage, 100);
       const offset = numericQueryParam(req.query.page, 1) - 1;
+      const sortBy = singleQueryParam(req.query.sortBy) || 'publishDate';
+      const sortDir = singleQueryParam(req.query.sortOrder) || 'DESC';
+      const q = singleQueryParam(req.query.q);
       const ListsRepo = await getLetterboxdListsRepository();
-      const lists = await ListsRepo.find({
+
+      const orderBy = sortBy === 'filmCount' ? {} : {
         order: {
-          lastSynced: 'DESC'
+          [sortBy]: sortDir
+        }
+      };
+
+      const where: FindOptionsWhere<LetterboxdList> = {};
+
+      if (q) {
+        where.title = ILike(`%${q}%`);
+      }
+
+      const lists = await ListsRepo.find({
+        relations: {
+          movies: {
+            movie: true
+          },
+          trackers: true
         },
+        where,
         take: limit,
-        skip: offset
+        skip: offset,
+        ...orderBy
       });
+
+      if (sortBy === 'filmCount') {
+        lists.sort((a, b) => {
+          const compare = a.movies.length > b.movies.length;
+          if (sortDir === "ASC") {
+            return compare ? 1 : -1;
+          }
+          if (sortDir === "DESC") {
+            return compare ? -1 : 1;
+          }
+          return 0;
+        });
+      }
+
       res.json({ success: true, lists });
     },
     post: async (req, res) => {

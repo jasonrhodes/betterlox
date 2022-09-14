@@ -1,9 +1,8 @@
-import { In } from "typeorm";
+import { FindOptionsWhere, ILike, In } from "typeorm";
 import { LetterboxdListsForUserApiResponse } from "../../../../../common/types/api";
 import { SyncStatus, SyncTrigger, SyncType } from "../../../../../common/types/db";
-import { LetterboxdListMovieEntry } from "../../../../../db/entities";
+import { LetterboxdList, LetterboxdListMovieEntry } from "../../../../../db/entities";
 import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getMoviesRepository, getSyncRepository, getUserRepository, getUserSettingsRepository } from "../../../../../db/repositories";
-import { handleGenericError } from "../../../../../lib/apiErrorHandler";
 import { getErrorAsString } from "../../../../../lib/getErrorAsString";
 import { scrapeListsForUser } from "../../../../../lib/letterboxd";
 import { numericQueryParam, singleQueryParam } from "../../../../../lib/queryParams";
@@ -15,6 +14,7 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
       const userId = numericQueryParam(req.query.userId)!
       const sortBy = singleQueryParam(req.query.sortBy) || 'publishDate';
       const sortDir = singleQueryParam(req.query.sortOrder) || 'DESC';
+      const q = singleQueryParam(req.query.q);
       const LetterboxdListsRepo = await getLetterboxdListsRepository();
 
       // console.log('GET users/:id/lists - sort by', sortBy);
@@ -35,6 +35,16 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
         }
       };
 
+      const where: FindOptionsWhere<LetterboxdList> = {
+        owner: {
+          id: userId
+        }
+      };
+
+      if (q) {
+        where.title = ILike(`%${q}%`);
+      }
+
       const lists = await LetterboxdListsRepo.find({
         relations: {
           movies: {
@@ -42,11 +52,7 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
           },
           trackers: true
         },
-        where: {
-          owner: {
-            id: userId
-          }
-        },
+        where,
         ...orderBy
       });
 
