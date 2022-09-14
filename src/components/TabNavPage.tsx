@@ -1,4 +1,4 @@
-import { SxProps, Box, Tabs, Tab } from "@mui/material";
+import { SxProps, Box, Tabs, Tab, Button } from "@mui/material";
 import { useCallback, useState } from "react";
 import { a11yTabProps, TabPanel } from "./TabPanel";
 
@@ -23,19 +23,13 @@ const tabPanelSx: SxProps = {
   flexGrow: 1
 };
 
-interface MobileContentProps {
-  value: number;
-  setValue: (v: number) => void;
-  sx: SxProps;
+interface TabNavPageOptions {
+  tabs: Tab[];
 }
 
 export function TabNavPage({
-  tabs,
-  MobileContent
-}: {
-  tabs: Tab[];
-  MobileContent?: (props: MobileContentProps) => JSX.Element;
-}) {
+  tabs
+}: TabNavPageOptions) {
   const [value, setValue] = useState<number>(0);
 
   const handleChange = useCallback((event: React.SyntheticEvent, newValue: number) => {
@@ -75,15 +69,33 @@ export function TabNavPage({
         ))}
       </Tabs>
       <Box sx={{ flex: 1 }}>
-        {MobileContent ? <Box sx={{ display: { xs: 'flex', md: 'none' }, flexShrink: 0 }}>
-          <MobileContent value={value} setValue={setValue} sx={{ display: { xs: 'block', md: 'none' }}} />
-        </Box> : null}
+        <MobileTabSwitcher tabs={tabs} value={value} setValue={setValue}  />
         {tabs.map((tab, i) => (
           <TabPanel key={tab.label} sx={tabPanelSx} value={value} index={i}>
             {tab.content}
           </TabPanel>
         ))}
       </Box>
+    </Box>
+  )
+}
+
+interface MobileTabSwitcherOptions { 
+  value: number; 
+  setValue: (value: number) => void; 
+  tabs: Tab[];
+}
+
+export function MobileTabSwitcher({ value, setValue, tabs }: MobileTabSwitcherOptions) {
+  return (
+    <Box sx={{ display: { xs: 'flex', md: 'none' }, flexShrink: 0 }}>
+      <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+        {tabs.map(({ label }, i) => (
+          <li key={label} style={{ marginBottom: '5px' }}>
+            <Button variant={value === i ? "outlined" : "text"} onClick={() => setValue(i)}>{label}</Button>
+          </li>
+        ))}
+      </ul>
     </Box>
   )
 }

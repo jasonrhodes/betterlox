@@ -12,13 +12,13 @@ import { TMDBImage } from "../images";
 import { AppLink } from "../AppLink";
 
 type ListSortBy = 'publishDate' | 'lastUpdated' | 'title' | 'filmCount';
-type ListScope = 'user-owned' | 'user-followed' | 'all';
+type ListScope = 'user-owned' | 'user-following' | 'all';
 
 function getApiForScope(scope: ListScope, user: UserResponse | UserPublicSafe) {
   switch (scope) {
     case 'user-owned':
       return `/api/users/${user.id}/lists`;
-    case 'user-followed':
+    case 'user-following':
       return `/api/users/${user.id}/lists/following`;
     case 'all':
     default:

@@ -4,7 +4,6 @@ import { UserPageTemplate } from '../../components/PageTemplate';
 import { StatMode } from '../../common/types/api';
 import { StatModeToggle } from '../../components/stats/StatModeToggle';
 import { StatsTab } from '../../components/stats/StatsTab';
-import { MobileSwitcher } from '../../components/stats/MobileSwitcher';
 import { TabNavPage } from '../../components/TabNavPage';
 
 const StatsPage: NextPage = () => {
@@ -39,7 +38,6 @@ const StatsPage: NextPage = () => {
               content: <StatsTab type="editors" mode={mode} />
             }
           ]}
-          MobileContent={MobileSwitcher}
         />
       )}
     </UserPageTemplate>
