@@ -10,7 +10,9 @@ const FollowedListsForUserRoute = createApiRoute<LetterboxdListsForUserApiRespon
     get: async (req, res) => {
       const userId = numericQueryParam(req.query.userId)!
       const sortBy = singleQueryParam(req.query.sortBy) || 'publishDate';
-      const sortDir = singleQueryParam(req.query.sortOrder) || 'DESC';
+      const sortDir = singleQueryParam(req.query.sortDir) || 'DESC';
+      const limit = numericQueryParam(req.query.perPage, 10);
+      const offset = (numericQueryParam(req.query.page, 1) - 1) * limit;
       const q = singleQueryParam(req.query.q);
       const LetterboxdListsRepo = await getLetterboxdListsRepository();
 
@@ -23,6 +25,8 @@ const FollowedListsForUserRoute = createApiRoute<LetterboxdListsForUserApiRespon
       if (q) {
         where.title = ILike(`%${q}%`);
       }
+
+      const totalCount = await LetterboxdListsRepo.countBy(where);
       
       const lists = await LetterboxdListsRepo.find({
         relations: {
@@ -34,25 +38,14 @@ const FollowedListsForUserRoute = createApiRoute<LetterboxdListsForUserApiRespon
           followers: true
         },
         where,
+        take: limit,
+        skip: offset,
         order: {
           [sortBy]: sortDir
         }
       });
-
-      if (sortBy === 'filmCount') {
-        lists.sort((a, b) => {
-          const compare = a.movies.length > b.movies.length;
-          if (sortDir === "ASC") {
-            return compare ? 1 : -1;
-          }
-          if (sortDir === "DESC") {
-            return compare ? -1 : 1;
-          }
-          return 0;
-        });
-      }
       
-      res.json({ success: true, lists });
+      res.json({ success: true, lists, totalCount });
     }
   }
 });

@@ -13,7 +13,9 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
     get: async (req, res) => {
       const userId = numericQueryParam(req.query.userId)!
       const sortBy = singleQueryParam(req.query.sortBy) || 'publishDate';
-      const sortDir = singleQueryParam(req.query.sortOrder) || 'DESC';
+      const sortDir = singleQueryParam(req.query.sortDir) || 'DESC';
+      const limit = numericQueryParam(req.query.perPage, 10);
+      const offset = (numericQueryParam(req.query.page, 1) - 1) * limit;
       const q = singleQueryParam(req.query.q);
       const LetterboxdListsRepo = await getLetterboxdListsRepository();
 
@@ -31,7 +33,7 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
 
       const orderBy = sortBy === 'filmCount' ? {} : {
         order: {
-          [sortBy]: sortDir
+          [sortBy]: sortDir.toLowerCase()
         }
       };
 
@@ -45,6 +47,8 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
         where.title = ILike(`%${q}%`);
       }
 
+      const totalCount = await LetterboxdListsRepo.countBy(where);
+
       const lists = await LetterboxdListsRepo.find({
         relations: {
           movies: {
@@ -54,25 +58,14 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
           trackers: true
         },
         where,
+        take: limit,
+        skip: offset,
         ...orderBy
       });
 
-      if (sortBy === 'filmCount') {
-        lists.sort((a, b) => {
-          const compare = a.movies.length > b.movies.length;
-          if (sortDir === "ASC") {
-            return compare ? 1 : -1;
-          }
-          if (sortDir === "DESC") {
-            return compare ? -1 : 1;
-          }
-          return 0;
-        });
-      }
-
       // console.log('GET users/:id/lists - after sort, first list', lists[0].title);
 
-      res.json({ success: true, lists });
+      res.json({ success: true, lists, totalCount });
     },
     post: async (req, res) => {
       // retrieve user's lists from Letterboxd

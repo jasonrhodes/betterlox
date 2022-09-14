@@ -9,10 +9,10 @@ import { createApiRoute } from "../../../../lib/routes";
 const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse>({
   handlers: {
     get: async (req, res) => {
-      const limit = numericQueryParam(req.query.perPage, 100);
-      const offset = numericQueryParam(req.query.page, 1) - 1;
+      const limit = numericQueryParam(req.query.perPage, 10);
+      const offset = (numericQueryParam(req.query.page, 1) - 1) * limit;
       const sortBy = singleQueryParam(req.query.sortBy) || 'publishDate';
-      const sortDir = singleQueryParam(req.query.sortOrder) || 'DESC';
+      const sortDir = singleQueryParam(req.query.sortDir) || 'DESC';
       const q = singleQueryParam(req.query.q);
       const ListsRepo = await getLetterboxdListsRepository();
 
@@ -27,6 +27,8 @@ const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse
       if (q) {
         where.title = ILike(`%${q}%`);
       }
+
+      const totalCount = await ListsRepo.countBy(where);
 
       const lists = await ListsRepo.find({
         relations: {
@@ -43,20 +45,7 @@ const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse
         ...orderBy
       });
 
-      if (sortBy === 'filmCount') {
-        lists.sort((a, b) => {
-          const compare = a.movies.length > b.movies.length;
-          if (sortDir === "ASC") {
-            return compare ? 1 : -1;
-          }
-          if (sortDir === "DESC") {
-            return compare ? -1 : 1;
-          }
-          return 0;
-        });
-      }
-
-      res.json({ success: true, lists });
+      res.json({ success: true, lists, totalCount });
     },
     post: async (req, res) => {
       const url = singleQueryParam(req.body.url);

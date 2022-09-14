@@ -1,5 +1,5 @@
-import { CalendarMonth, PersonPin, Theaters } from "@mui/icons-material";
-import { Alert, AlertTitle, Box, FormControlLabel, LinearProgress, Link, Switch, TextField, Typography } from "@mui/material";
+import { CalendarMonth, Close, PersonPin, Theaters } from "@mui/icons-material";
+import { Alert, AlertTitle, Box, Button, FormControlLabel, InputAdornment, LinearProgress, Link, Pagination, Switch, TextField, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { LetterboxdListsForUserApiResponse } from "../../common/types/api";
 import { UserPublicSafe, UserResponse } from "../../common/types/db";
@@ -11,7 +11,7 @@ import { SortControls, useSorting } from "../../hooks/useSorting";
 import { TMDBImage } from "../images";
 import { AppLink } from "../AppLink";
 
-type ListSortBy = 'publishDate' | 'lastUpdated' | 'title' | 'filmCount';
+type ListSortBy = 'publishDate' | 'lastUpdated' | 'title';
 type ListScope = 'user-owned' | 'user-following' | 'all';
 
 function getApiForScope(scope: ListScope, user: UserResponse | UserPublicSafe) {
@@ -30,6 +30,9 @@ export function ListsList({ scope }: { scope: ListScope }) {
   const [lists, setLists] = useState<LetterboxdList[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [quickSearchValue, updateQuickSearchValue] = useState<string>('');
+  const [perPage] = useState<number>(20);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const sorting = useSorting<ListSortBy>('lastUpdated', 'DESC');
   const { user } = useCurrentUser();
 
@@ -40,14 +43,17 @@ export function ListsList({ scope }: { scope: ListScope }) {
       }
       setIsLoading(true);
       const baseUrl = getApiForScope(scope, user);
-      const response = await callApi<LetterboxdListsForUserApiResponse>(`${baseUrl}?sortBy=${sorting.sortBy}&sortDir=${sorting.sortDir}&q=${encodeURIComponent(quickSearchValue)}`);
+      const response = await callApi<LetterboxdListsForUserApiResponse>(`${baseUrl}?sortBy=${sorting.sortBy}&sortDir=${sorting.sortDir}&q=${encodeURIComponent(quickSearchValue)}&perPage=${perPage}&page=${page}`);
       if (response.data?.success && 'lists' in response.data) {
         setLists(response.data.lists);
+      }
+      if (response.data?.success && 'totalCount' in response.data) {
+        setTotalPages(Math.ceil(response.data.totalCount / perPage));
       }
       setIsLoading(false);
     }
     retrieve();
-  }, [user, sorting.sortDir, sorting.sortBy, scope, quickSearchValue]);
+  }, [user, sorting.sortDir, sorting.sortBy, scope, quickSearchValue, perPage, page]);
 
   const handleQuickSearchChange = useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateQuickSearchValue(escapeRegExp(event.target.value));
@@ -74,12 +80,14 @@ export function ListsList({ scope }: { scope: ListScope }) {
           sx={{
             mr: 1
           }}
+          InputProps={{
+            endAdornment: <InputAdornment position="end"><Close sx={{ cursor: 'pointer' }} onClick={() => updateQuickSearchValue('')} /></InputAdornment>
+          }}
         />
         <SortControls<ListSortBy> {...sorting} sortByOptions={{
           lastUpdated: 'Last Updated',
           publishDate: 'Publish Date',
-          title: 'List Title',
-          filmCount: 'Film Count'
+          title: 'List Title'
         }} />
       </Box>
       {isLoading ? <LinearProgress /> : lists.map(list => (
@@ -91,6 +99,13 @@ export function ListsList({ scope }: { scope: ListScope }) {
           <ListMoviePosterPreview n={10} movieEntries={list.movies} />
         </Box>
       ))}
+      {(!isLoading && totalPages > 1) ? <Box sx={{ my: 2 }}>
+        <Pagination
+          page={page}
+          onChange={(e, value) => setPage(value)}
+          count={totalPages}
+        />
+      </Box> : null}
     </Box>
   );
 }

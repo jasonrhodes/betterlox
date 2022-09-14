@@ -204,6 +204,7 @@ interface MoviesApiFindResponse extends ApiSuccessResponse {
 export type MoviesApiResponse = MoviesApiFindResponse | ApiSuccessResponse | ApiErrorResponse;
 
 export interface LetterboxdListsManagementGetResponse extends ApiSuccessResponse {
+  totalCount: number;
   lists: LetterboxdList[];
 }
 
@@ -215,6 +216,7 @@ export type LetterboxdListsManagementApiResponse = ApiResponse<LetterboxdListsMa
 
 
 export interface LetterboxdListsForUserGetResponse extends ApiSuccessResponse {
+  totalCount: number;
   lists: LetterboxdList[];
 }
 
