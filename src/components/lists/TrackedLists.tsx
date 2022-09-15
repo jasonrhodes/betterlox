@@ -5,7 +5,8 @@ import { UserPublicSafe } from "../../common/types/db";
 import { LetterboxdList } from "../../db/entities";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";
-
+import { AppLink } from "../AppLink";
+import { ListProgressCircularChart } from "./ListProgressCircularChart";
 
 export function MyTrackedLists() {
   const [lists, setLists] = useState<LetterboxdList[]>([]);
@@ -63,30 +64,11 @@ function ListStatsCard({ list, user }: { list: LetterboxdList; user: UserPublicS
   }, [list, user]);
 
   const pct = stats ? Math.round((stats.watched / stats.movies) * 100) : 0;
+  const listPath = list.url.replace('https://letterboxd.com', '') + '?view=only-unwatched';
 
   return (
-    <Box sx={{ mb: 2, mr: 2, position: "relative", width: 200, height: 200 }}>
-      <CircularProgress
-        size={200}
-        thickness={1}
-        variant="determinate"
-        value={100}
-        sx={{ color: "rgba(0,0,0,0.3)", position: "absolute", top: 0, left: 0 }}
-      />
-      <CircularProgress
-        size={200}
-        thickness={1} 
-        color={pct === 100 ? "success" : "secondary"}
-        value={pct} 
-        variant={isLoading || !stats ? "indeterminate" : "determinate"}
-        sx={{ position: "absolute", top: 0, left: 0 }}
-      />
-      <Box sx={{ height: 150, width: 150, position: "absolute", top: 20, left: 25, display: "flex" , alignItems: 'center', alignContent: 'center', flexWrap: 'wrap' }}>
-        <Typography sx={{ fontSize: '36px', textAlign: 'center', width: '100%' }}>{pct}<Typography component="span" sx={{ fontSize: '24px', position: 'relative', top: '-4px', left: '2px' }}>%</Typography></Typography>
-        <Typography component="div" sx={{ fontSize: '12px', textAlign: 'center', width: '100%' }}>
-          {list.title}
-        </Typography>
-      </Box>
-    </Box>
+    <AppLink color="#ffffff" href={listPath}>
+      <ListProgressCircularChart isLoading={isLoading || !stats} pct={pct} title={list.title} />
+    </AppLink>
   );
 }

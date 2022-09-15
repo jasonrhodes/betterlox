@@ -44,6 +44,7 @@ const UserFollowListRoute = createApiRoute<UserListStatsApiResponse>({
       const stats = {
         movies: movieIds.length,
         watched: entries.length,
+        watchedIds: entries.map(e => e.movieId),
         entries
       };
 

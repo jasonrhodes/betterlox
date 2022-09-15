@@ -13,8 +13,8 @@ export class FilmEntry {
   @Column({ nullable: true, type: "float" })
   stars?: number;
 
-  @Column({ nullable: true })
-  dateRated?: Date;
+  // @Column({ nullable: true })
+  // dateRated?: Date;
 
   @Column({ nullable: true })
   date?: Date;

@@ -13,7 +13,7 @@ function convertResultsToEntries(results: EntryQueryResult[]): EntryApiResponse[
     unsyncable: result.entry_unsyncable,
     userId: result.entry_userId,
     stars: result.entry_stars,
-    dateRated: result.entry_dateRated,
+    date: result.entry_date,
     movie: convertResultToEntryMovie(result)
   }));
 }

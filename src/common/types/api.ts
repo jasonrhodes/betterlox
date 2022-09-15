@@ -137,6 +137,17 @@ export interface TmdbCollectionByIdResponse extends ApiSuccessResponse {
   collection: TmdbEnhancedCollection 
 }
 
+export interface TmdbMovieByIdGetResponse extends ApiSuccessResponse {
+  movie: {
+    id: number;
+    title?: string;
+    posterPath?: string;
+    releaseDate?: string;
+  }
+}
+
+export type TmdbMovieByIdApiResponse = ApiResponse<TmdbMovieByIdGetResponse>;
+
 export interface PersonStats extends Person {
   averageRating: number;
   countRated: number;
@@ -162,6 +173,7 @@ export interface EntryQueryResult {
   entry_unsyncable: false;
   entry_userId: number;
   entry_stars?: number;
+  entry_date?: Date;
   entry_dateRated?: Date;
   movie_id: number;
   movie_backdropPath: string;
@@ -244,6 +256,7 @@ export type ApiResponse<T extends ApiSuccessResponse = ApiSuccessResponse> = T |
 export interface ListUserStats {
   watched: number;
   entries: FilmEntry[];
+  watchedIds: number[];
   movies: number;
 }
 export interface UserListStatsGetResponse extends ApiSuccessResponse {
@@ -261,3 +274,9 @@ export interface UserListsGetResponse extends ApiSuccessResponse {
 }
 
 export type UserListsApiResponse = ApiResponse<UserListsGetResponse | UserListsPostResponse>;
+
+interface LetterboxdListBySlugGetResponse extends ApiSuccessResponse {
+  list: LetterboxdList;
+}
+
+export type LetterboxdListBySlugApiResponse = ApiResponse<LetterboxdListBySlugGetResponse>;

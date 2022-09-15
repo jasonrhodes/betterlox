@@ -42,7 +42,7 @@ function EntryCard({ entry }: { entry: EntryApiResponse }) {
             <Typography variant="caption" sx={{ my: 0.5 }}>Unrated</Typography>
           }
         </Box> 
-        {entry.dateRated ? <Box><Typography variant="caption">{(new Date(entry.dateRated)).toLocaleDateString()}</Typography></Box> : null}
+        {entry.date ? <Box><Typography variant="caption">{(new Date(entry.date)).toLocaleDateString()}</Typography></Box> : null}
         <Box sx={{ display: "flex", py: 1 }}>
           <Box sx={{ marginRight: 1 }}>
             <LetterboxdLink slug={slug} />

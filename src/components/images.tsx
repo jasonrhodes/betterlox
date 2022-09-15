@@ -13,7 +13,7 @@ export interface TMDBImageProps extends Omit<ImageProps, 'src'> {
   size?: ImageSize;
   shape?: ImageShape;
   type?: ImageType;
-  tmdbPath: string;
+  tmdbPath?: string;
   sx?: SxProps;
   imageStyles?: React.CSSProperties;
   urlOverride?: string;

@@ -157,6 +157,9 @@ interface SyncAllEntriesOptions {
 export async function syncAllEntriesForUser({ userId, username, order = "ASC" }: SyncAllEntriesOptions) {
   let syncedWatches: FilmEntry[] = [];
   let syncedRatings: FilmEntry[] = [];
+
+  // TODO REMOVE
+  console.log(`Preparing to sync ALL letterboxd entries for this user ${username}`);
   
   const UsersRepo = await getUserRepository();
 
@@ -175,8 +178,12 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
   const lastWatchesPage = await findLastWatchesPage(username);
 
   try {
-    // if (order === "DESC") {
+    if (order === "DESC") {
       for (let page = lastWatchesPage; page > 0; page--) {
+        
+        // TODO REMOVE 
+        console.log(`syncing watches DESC for page ${page}`);
+
         const syncedForPage = await syncWatchesForPage({
           userId,
           username,
@@ -184,22 +191,26 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
         });
         syncedWatches = syncedWatches.concat(syncedForPage);
       }
-    // } else if (order === "ASC") {
-    //   for (let page = 0; page <= lastWatchesPage; page++) {
-    //     const syncedForPage = await syncWatchesForPage({
-    //       userId,
-    //       username,
-    //       page
-    //     });
-    //     // if (syncedForPage.length === 0) {
-    //     //   // when moving through the pages forward, as soon
-    //     //   // as we encounter a page with no ratings, we can
-    //     //   // assume we don't need to continue through pages
-    //     //   break;
-    //     // }
-    //     syncedWatches = syncedWatches.concat(syncedForPage);
-    //   }
-    // }
+    } else if (order === "ASC") {
+      for (let page = 0; page <= lastWatchesPage; page++) {
+
+        // TODO REMOVE
+        console.log(`syncing watches ASC for page ${page}`);
+
+        const syncedForPage = await syncWatchesForPage({
+          userId,
+          username,
+          page
+        });
+        // if (syncedForPage.length === 0) {
+        //   // when moving through the pages forward, as soon
+        //   // as we encounter a page with no ratings, we can
+        //   // assume we don't need to continue through pages
+        //   break;
+        // }
+        syncedWatches = syncedWatches.concat(syncedForPage);
+      }
+    }
   } catch (error) {
     let message = "Unknown error occurred";
     if (error instanceof Error) {
@@ -214,8 +225,12 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
   const lastRatingsPage = await findLastRatingsPage(username);
 
   try {
-    // if (order === "DESC") {
+    if (order === "DESC") {
       for (let page = lastRatingsPage; page > 0; page--) {
+
+        // TODO REMOVE
+        console.log(`Syncing ratings DESC for page ${page}`);
+
         const syncedForPage = await syncRatingsForPage({
           userId,
           username,
@@ -223,22 +238,26 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
         });
         syncedRatings = syncedRatings.concat(syncedForPage);
       }
-    // } else if (order === "ASC") {
-    //   for (let page = 0; page <= lastRatingsPage; page++) {
-    //     const syncedForPage = await syncRatingsForPage({
-    //       userId,
-    //       username,
-    //       page
-    //     });
-    //     if (syncedForPage.length === 0) {
-    //       // when moving through the pages forward, as soon
-    //       // as we encounter a page with no ratings, we can
-    //       // assume we don't need to continue through pages
-    //       break;
-    //     }
-    //     syncedRatings = syncedRatings.concat(syncedForPage);
-    //   }
-    // }
+    } else if (order === "ASC") {
+      for (let page = 0; page <= lastRatingsPage; page++) {
+
+        // TODO REMOVE
+        console.log(`Syncing ratings ASC for page ${page}`);
+
+        const syncedForPage = await syncRatingsForPage({
+          userId,
+          username,
+          page
+        });
+        if (syncedForPage.length === 0) {
+          // when moving through the pages forward, as soon
+          // as we encounter a page with no ratings, we can
+          // assume we don't need to continue through pages
+          break;
+        }
+        syncedRatings = syncedRatings.concat(syncedForPage);
+      }
+    }
   } catch (error) {
     let message = "Unknown error occurred";
     if (error instanceof Error) {

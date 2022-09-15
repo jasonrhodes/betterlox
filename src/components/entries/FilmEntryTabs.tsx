@@ -18,20 +18,8 @@ interface FilmEntryTabsOptions {
 }
 
 function removeInvalidEntries(entries: EntryApiResponse[], hideUnrated?: boolean) {
-  // switch (sortBy) {
-  //   case 'dateRated':
-  //     entries = entries.filter((e) => Boolean(e.dateRated));
-  //     break;
-  //   case 'stars':
-  //     entries = entries.filter((e) => Boolean(e.stars));
-  //     break;
-  //   case 'movie.title':
-  //     entries = entries.filter((e) => Boolean(e.movie?.title));
-  //     break;
-  // }
-
   if (hideUnrated) {
-    entries = entries.filter((e) => Boolean(e.dateRated) && typeof e.stars !== undefined);
+    entries = entries.filter((e) => Boolean(e.date) && typeof e.stars !== undefined);
   }
 
   entries = entries.filter((e) => Boolean(e.movie));
@@ -45,16 +33,12 @@ export function FilmEntryTabs({
 }: FilmEntryTabsOptions) {
   const [value, setValue] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  // const [activeFilterCount, setActiveFilterCount] = useState<number>(0);
   const [totalSeen, setTotalSeen] = useState<number>(0);
   const [quickTitleSearch, updateQuickTitleSearch] = useState<string>('');
   const [show, setShow] = useState<"all" | number>(100);
-  // const [sortBy, setSortBy] = useState<SortBy>("dateRated");
-  // const [sortDir, setSortDir] = useState<SortDir>("DESC");
-  // const [hideUnrated, setHideUnrated] = useState<boolean>(false);
   const [processedEntries, updateProcessedEntries] = useState<EntryApiResponse[]>([]);
   const [blindspots, setBlindspots] = useState<PartialMovie[]>([]);
-  const sorting = useSorting<FilmEntrySortBy>("dateRated");
+  const sorting = useSorting<FilmEntrySortBy>("date");
   const { sortBy, sortDir } = sorting;
   const { user } = useCurrentUser();
 
@@ -83,7 +67,7 @@ export function FilmEntryTabs({
       setBlindspots(blindspots);
     }
     retrieve();
-  })
+  }, [processedEntries, filters, user])
 
   const handleQuickTitleSearchChange = useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateQuickTitleSearch(escapeRegExp(event.target.value));

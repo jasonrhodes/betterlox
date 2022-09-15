@@ -23,6 +23,7 @@ const UserSyncRoute = createApiRoute<UserEntriesSyncApiResponse | ApiErrorRespon
       const { syncsInProgress, sync } = await SyncsRepo.queueSync({ trigger: SyncTrigger.USER, username: user?.username });
 
       if (syncsInProgress.length) {
+        console.log('Oopsies daisies you can no do 2 syncy syncs hey!');
         SyncsRepo.skipSync(sync);
         return res.status(200).json({
           success: false,

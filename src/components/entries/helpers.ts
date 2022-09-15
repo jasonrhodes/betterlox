@@ -1,7 +1,7 @@
 import { EntryApiResponse } from "../../common/types/api";
 import { getErrorAsString } from "../../lib/getErrorAsString";
 
-export type FilmEntrySortBy = 'dateRated' | 'stars' | 'movie.title';
+export type FilmEntrySortBy = 'date' | 'stars' | 'movie.title';
 export type SortDir = 'ASC' | 'DESC';
 
 export function applyTitleFilter(filterString: string, entries?: EntryApiResponse[]) {
@@ -27,20 +27,20 @@ export function applySort(sortBy: FilmEntrySortBy, sortDir: SortDir, entries: En
   rated.sort((a, b) => {
     try {
       switch (sortBy) {
-        case 'dateRated':  
-          if (!a.dateRated && !b.dateRated) {
+        case 'date':  
+          if (!a.date && !b.date) {
             return 0;
           }
-          if (!a.dateRated) {
+          if (!a.date) {
             return 1;
           }
-          if (!b.dateRated) {
+          if (!b.date) {
             return -1;
           }
           if (sortDir === 'ASC') {
-            return a.dateRated < b.dateRated ? -1 : 1;
+            return a.date < b.date ? -1 : 1;
           } else {
-            return a.dateRated > b.dateRated ? -1 : 1;
+            return a.date > b.date ? -1 : 1;
           }
         case 'stars':
           if (sortDir === 'ASC') {
