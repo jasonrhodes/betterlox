@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { DEFAULT_USER_SETTINGS } from "../../common/constants";
 import { AllStatsType, StatMode, PersonStats, UserStatsResponse, PeopleStatsType } from "../../common/types/api";
 import { Collection } from "../../db/entities";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
@@ -29,7 +30,7 @@ export function StatsTab({ type, mode }: StatsTabOptions) {
       // Hard-code allGenres to true, not implementing "ANY" for genres at this time
       globalFilters.allGenres = true;
       const filtersQueryString = convertFiltersToQueryString(globalFilters);
-      const { statsMinWatched, statsMinCastOrder } = user.settings;
+      const { statsMinWatched, statsMinCastOrder } = user.settings || DEFAULT_USER_SETTINGS;
       const { data } = await callApi<UserStatsResponse>(`/api/users/${user.id}/stats?type=${type}&mode=${mode}&minCastOrder=${statsMinCastOrder}&minWatched=${statsMinWatched}&${filtersQueryString}`);
       setResults(data.stats);
       setIsLoading(false);
