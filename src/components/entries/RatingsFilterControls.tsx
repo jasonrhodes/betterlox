@@ -52,7 +52,7 @@ export function RatingsFilterControls() {
           filterKey="collections"
           AutocompleteSx={{ width: 300 }}
           isOptionEqualToValue={(option, value) => value && option.id === value.id}
-          getOptionLabel={(option) => option.name}
+          getOptionLabel={(option) => option.name.replace(/ Collection$/, '')}
           getId={(options) => options.id}
         />
       </Grid>

@@ -67,7 +67,12 @@ export function Blindspots({ blindspots, isLoading }: { blindspots: PartialMovie
   }
 
   if (blindspots.length === 0) {
-    return <Typography>No blindspots for these filters.</Typography>;
+    return (
+      <>
+        <Typography variant="h6">Nice work! 🎉 🎉 🎉</Typography>
+        <Typography>Looks like you've seen everything for these filters.</Typography>
+      </>
+    );
   }
 
   return (

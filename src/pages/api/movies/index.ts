@@ -13,6 +13,7 @@ const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
       const genres = stringListQueryParam(req.query.genres);
       const excludedGenres = stringListQueryParam(req.query.excludedGenres);
       const dateRange = convertYearsToRange(singleQueryParam(req.query.releaseDateRange));
+      const collections = numberListQueryParam(req.query.collections);
       const userId = numericQueryParam(req.query.blindspotsForUser);
       const limit = numericQueryParam(req.query.limit);
 
@@ -34,6 +35,11 @@ const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
 
         if (excludedGenres.length > 0) {
           query = query.andWhere(`NOT(movie.genres && '{${excludedGenres.join(',')}}')`);
+        }
+
+        if (collections.length > 0) {
+          query = query.leftJoin('movie.collections', 'collection')
+            .andWhere(`collection.id IN(${collections.join(',')})`);
         }
 
         if (dateRange.length === 2) {
