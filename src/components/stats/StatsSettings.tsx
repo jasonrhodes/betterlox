@@ -26,7 +26,7 @@ export function StatsSettings({
           color="secondary"
           variant="outlined"
           sx={{ ml: 1 }} 
-          label={`Min Watched: ${user.settings.statsMinWatched}`} 
+          label={`Min Watched: ${user.settings?.statsMinWatched || 'Unset'}`} 
           onClick={() => setIsOpen(true)} 
         /> : null}
         {showMinCastOrder ? <Chip 
@@ -34,7 +34,7 @@ export function StatsSettings({
           color="secondary"
           variant="outlined"
           sx={{ ml: 1 }} 
-          label={`Lowest Cast Order: ${user.settings.statsMinCastOrder}`} 
+          label={`Lowest Cast Order: ${user.settings?.statsMinCastOrder || 'Unset'}`} 
           onClick={() => setIsOpen(true)} 
         /> : null}
         <Settings color="secondary" fontSize="medium" sx={{ ml: 1 }} />

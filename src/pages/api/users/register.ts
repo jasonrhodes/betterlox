@@ -1,6 +1,8 @@
 import { NextApiHandler } from "next";
 import { TypeORMError } from "typeorm";
+import { DEFAULT_USER_SETTINGS } from "../../../common/constants";
 import { UserPublic } from "../../../common/types/db";
+import { User } from "../../../db/entities";
 import { getUserRepository } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
 import { singleQueryParam } from "../../../lib/queryParams";
@@ -19,7 +21,7 @@ interface RegisterApiResponseFailure {
 type RegisterApiResponse = RegisterApiResponseSuccess | RegisterApiResponseFailure;
 
 const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
-  const userOptions: Record<string, string | boolean | undefined> = {};
+  const userOptions: Partial<User> = {};
   userOptions.email = (singleQueryParam(req.body.email) || '').toLowerCase(); // lowercase ALL emails
   userOptions.password = singleQueryParam(req.body.password);
   userOptions.avatarUrl = singleQueryParam(req.body.avatarUrl);
@@ -28,9 +30,10 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
   userOptions.letterboxdAccountLevel = singleQueryParam(req.body.letterboxdAccountLevel) || 'basic';
   userOptions.rememberMe = Boolean(singleQueryParam(req.body.rememberMe));
 
-  const missingRequiredKeys = [];
+  const requiredKeys: Array<keyof User> = ['email', 'password', 'avatarUrl', 'username', 'name', 'letterboxdAccountLevel'];
+  const missingRequiredKeys: Array<keyof User> = [];
 
-  for (let key of ['email', 'password', 'avatarUrl', 'username', 'name', 'letterboxdAccountLevel']) {
+  for (let key of requiredKeys) {
     if (!userOptions[key]) {
       missingRequiredKeys.push(key);
     }
@@ -40,7 +43,6 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     res.status(400).json({ success: false, errorMessage: `Missing required properties ${missingRequiredKeys.join(', ')}`});
     return;
   }
-
   const UserRepository = await getUserRepository();
   
   // TODO: validate lb account level? use enum column type in entity ...
@@ -48,6 +50,10 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
   try {
     const user = UserRepository.create(userOptions);
     const saved = await UserRepository.save(user);
+
+    user.settings = { ...DEFAULT_USER_SETTINGS, userId: saved.id };
+    await UserRepository.save(user);
+    
     res.json({ success: true, created: user });
 
     // after responding to the request, kick off a ratings sync for this user

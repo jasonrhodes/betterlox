@@ -8,6 +8,12 @@ import { callApi } from './useApi';
 import { UpdateUserSettingsResponse, UserApiResponse } from '../common/types/api';
 import { getErrorAsString } from '../lib/getErrorAsString';
 import { isAdmin } from '../lib/isAdmin';
+import { DEFAULT_USER_SETTINGS } from '../common/constants';
+
+const DEFAULT_SETTINGS = {
+  statsMinWatched: 2,
+  statsMinCastOrder: 15
+};
 
 interface LoginOptions {
   email: string;
@@ -49,7 +55,11 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     }
     const response = await callApi<UserApiResponse>(`/api/users/${id}`);
     if (response.data.success && response.data.user) {
-      setUser(response.data.user);
+      const { user } = response.data;
+      if (!user.settings) {
+        user.settings = { ...DEFAULT_USER_SETTINGS, userId: user.id };
+      }
+      setUser(user);
     }
   }
   
@@ -60,7 +70,11 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
     async function validateToken(token: string) {
       const { data } = await api.checkRememberMeToken(token);
       if (data.success) {
-        const publicUser: UserPublic = { ...data.user, isAdmin: isAdmin(data.user) }
+        const publicUser: UserPublic = {
+          settings: { ...DEFAULT_USER_SETTINGS, userId: data.user.id },
+          ...data.user,
+          isAdmin: isAdmin(data.user)
+        };
         await setUser(publicUser);
       } else {
         removeCookie('rememberMe');
@@ -76,7 +90,11 @@ const UserContextProvider: React.FC<{}> = ({ children }) => {
 
   async function login({ email, password, rememberMe }: LoginOptions) {
     const response = await api.login({ email, password, rememberMe });
-    const publicUser = { ...response.data.user, isAdmin: isAdmin(response.data.user) }
+    const publicUser = {
+      settings: { ...DEFAULT_USER_SETTINGS, userId: response.data.user.id },
+      ...response.data.user, 
+      isAdmin: isAdmin(response.data.user)
+    }
     setUser(publicUser);
     if (response.data.user.rememberMeToken) {
       try {

@@ -78,3 +78,8 @@ export const GENRE_ID_MAP: Record<string, number> = {
 	["Music"]: 10402,
 	["TV Movie"]: 10770
 }
+
+export const DEFAULT_USER_SETTINGS = {
+  statsMinWatched: 2,
+  statsMinCastOrder: 15
+};
