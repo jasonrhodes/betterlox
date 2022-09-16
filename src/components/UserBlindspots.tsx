@@ -70,7 +70,7 @@ export function Blindspots({ blindspots, isLoading }: { blindspots: PartialMovie
     return (
       <>
         <Typography variant="h6">Nice work! 🎉 🎉 🎉</Typography>
-        <Typography>Looks like you've seen everything for these filters.</Typography>
+        <Typography>Looks like you&apos;ve seen everything for these filters.</Typography>
       </>
     );
   }
