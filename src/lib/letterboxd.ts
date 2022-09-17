@@ -184,7 +184,8 @@ export async function scrapeMoviesByPage({
   page = 1,
   maxMoviesForPage
 }: ScrapeMoviesByPageOptions): Promise<{ movies: Partial<ScrapedMovie>[] }> {
-  const pageUrl = `${baseUrl}page/${page}`;
+  const pageUrl = `${baseUrl}/page/${page}`;
+  console.log(`Syncing: ${pageUrl}`);
   const { data } = await tryLetterboxd(pageUrl);
   const $ = cheerio.load(data); 
   const elements = $('.col-main > ul.poster-list > li');
