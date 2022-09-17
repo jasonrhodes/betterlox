@@ -24,15 +24,18 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
 
       if (syncsInProgress.length > 0 && !force) {
         // sync already pending or in progress
+        console.log('Skipping admin sync, there is already a sync in progress');
         await SyncRepo.skipSync(sync);
         return res.status(200).json({ success: false, type: 'none', synced: [], message: 'Sync already pending or in progress' });
       } else {
+        console.log('Beginning admin sync');
         await SyncRepo.startSync(sync);
       }
 
       try {
         // Pull x years, y movies per year from letterboxd
         if (!forceType || forceType === "popular_movies_per_year") {
+          console.log('Evaluating the popular movies per year sync...');
           const n = await syncPopularMoviesPerYear(sync, { 
             yearBatchSize: 20,
             moviesPerYear: 100
@@ -48,6 +51,7 @@ const SyncRatingsRoute = createApiRoute<SyncResponse>({
 
         // Pull y movies per genre from letterboxd
         if (!forceType || forceType === "popular_movies_per_genre") {
+          console.log('Evaluating the popular movies per genre sync...');
           const n = await syncPopularMoviesPerGenre(sync, {
             force,
             moviesPerGenre: 100

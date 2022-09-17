@@ -10,6 +10,7 @@ import { BetterloxApiError } from "../BetterloxApiError";
 import { ScrapedMovie, scrapeMoviesByPage, scrapeMoviesOverPages } from "../letterboxd";
 import { MoreThan } from "typeorm";
 import { GENRES } from "../../common/constants";
+import axios from "axios";
 
 export interface SyncAllMoviesByDateRangeOptions {
   startYear: number;
@@ -59,7 +60,7 @@ export async function syncPopularMoviesPerYear(sync: Sync, {
     type: SyncType.POPULAR_MOVIES_YEAR
   });
 
-  // console.log(JSON.stringify(completedDuringPastInterval, null, 2));
+  console.log('movies per year status:', JSON.stringify(completedDuringPastInterval, null, 2));
 
   if (completedDuringPastInterval.length > 0) {
     return 0;
@@ -76,7 +77,7 @@ export async function syncPopularMoviesPerYear(sync: Sync, {
     take: 1
   });
 
-  // console.log(JSON.stringify(lastPopularYearSync, null, 2));
+  console.log(JSON.stringify(lastPopularYearSync, null, 2));
 
   const currentYear = now.getUTCFullYear();
   let startYear = 1900;
@@ -122,6 +123,13 @@ export async function syncPopularMoviesByDateRange({
       const nextBatch = await scrapeMoviesOverPages({ baseUrl, maxMovies: moviesPerYear, processPage: processPopularPage });
       results = results.concat(nextBatch);
     } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const { status, statusText } = error.response || {};
+        
+        if (error.response?.status === 404) {
+          continue;
+        }
+      }
       if (error instanceof BetterloxApiError) {
         throw error;
       }
@@ -177,6 +185,9 @@ export async function syncPopularMoviesPerGenre(sync: Sync, {
       const nextBatch = await scrapeMoviesOverPages({ baseUrl, maxMovies: moviesPerGenre, processPage: processPopularPage });
       results = results.concat(nextBatch);
     } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.log('Axios error with genres', 'url:', error.request?.url, 'error message:', error.message, 'status text:', error.response?.statusText, 'status:', error.response?.status);
+      }
       if (error instanceof BetterloxApiError) {
         throw error;
       }
