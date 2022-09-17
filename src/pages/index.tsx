@@ -4,6 +4,8 @@ import { PageTemplate } from '../components/PageTemplate';
 import { useRouter } from 'next/router';
 import { Box, Button, Grid, Link, Typography } from '@mui/material';
 import Image from 'next/image';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const HomePage: NextPage = () => {
   const router = useRouter();
@@ -89,12 +91,6 @@ const HomePage: NextPage = () => {
   );
 }
 
-// filters-for-ratings
-// blindspots
-// stats-1
-// stats-2
-// lists
-
 interface IntroCardOptions {
   alignImage: 'left' | 'right';
   image: {
@@ -107,6 +103,13 @@ interface IntroCardOptions {
 }
 
 function IntroCard({ alignImage, image, text, subtext }: IntroCardOptions) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  if (isMobile) {
+    alignImage = "left";
+  }
+
   const imageSection = (
     <Grid item xs={12} md={7}>
       <Box sx={{ ['& > span']: { 
@@ -128,7 +131,7 @@ function IntroCard({ alignImage, image, text, subtext }: IntroCardOptions) {
   );
 
   return (
-    <Grid container spacing={8} sx={{ mb: 15, display: "flex", alignItems: "center" }}>
+    <Grid container spacing={8} sx={{ mb: isMobile ? 20 : 15, display: "flex", alignItems: "center" }}>
       {alignImage === "left" ? imageSection : textSection}
       {alignImage === "left" ? textSection : imageSection}
     </Grid>
