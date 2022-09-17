@@ -75,9 +75,9 @@ const HomePage: NextPage = () => {
         <IntroCard
           alignImage="left"
           image={{
-            src: '/img/stats-2.png',
-            width: 2524,
-            height: 1662
+            src: '/img/lists.png',
+            width: 2490,
+            height: 1674
           }}
           text={<>...and of course, more ways to track your progress on lists, lists, and MORE LISTS!</>}
         />
