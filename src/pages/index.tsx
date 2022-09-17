@@ -128,7 +128,7 @@ function IntroCard({ alignImage, image, text, subtext }: IntroCardOptions) {
   );
 
   return (
-    <Grid container spacing={4} sx={{ mb: 15, display: "flex", alignItems: "center" }}>
+    <Grid container spacing={8} sx={{ mb: 15, display: "flex", alignItems: "center" }}>
       {alignImage === "left" ? imageSection : textSection}
       {alignImage === "left" ? textSection : imageSection}
     </Grid>
