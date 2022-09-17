@@ -30,7 +30,7 @@ function PageContent({ userId }: { userId: number }) {
 
   return (
     <>
-      <Box sx={{ position: "absolute", top: 15, right: 15 }}>
+      <Box sx={{ position: "absolute", top: 20, right: 20 }}>
         <MobileRatingsFilterControls
           appliedFilters={globalFilters}
           applyFilters={setGlobalFilters} 

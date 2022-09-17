@@ -20,6 +20,7 @@ export interface PublicPageTemplateProps {
   maxWidth?: false | Breakpoint;
   children: React.ReactNode;
   titleLineRightContent?: JSX.Element;
+  loggedIn?: boolean;
 }
 export interface UserPageTemplateProps extends PublicPageTemplateProps {
   children: ChildrenFunction;
@@ -79,12 +80,19 @@ export const UserPageTemplate: React.FC<UserPageTemplateProps> = ({ children: Ch
   );
 }
 
-export function PageTemplate({ title, headTitle = title, maxWidth = 'lg', backLink, children, titleLineRightContent }: PublicPageTemplateProps) {
+export function PageTemplate({
+  title, 
+  headTitle = title, 
+  maxWidth = 'lg', 
+  backLink, 
+  children, 
+  titleLineRightContent, 
+  loggedIn 
+}: PublicPageTemplateProps) {
   return (
     <>
       <Head>
         <title>{headTitle}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <MainNav />
       <Container maxWidth={maxWidth}>

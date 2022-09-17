@@ -119,8 +119,8 @@ const LoggedOutMenu: React.FC = () => {
   )
 }
 
-const Logo: React.FC = () => (
-  <Box sx={{ display: 'flex', justifyContent: 'center', cursor: 'pointer' }}>
+function FishLogo() {
+  return (
     <Box sx={{ padding: '5px 15px 5px 0' }}>
       <Image
         alt="BETTERLOX"
@@ -129,6 +129,11 @@ const Logo: React.FC = () => (
         width={47}
       />
     </Box>
+  )
+}
+
+function LogoText() {
+  return (
     <Typography sx={{
       fontFamily: 'Rubik',
       fontWeight: 700,
@@ -137,7 +142,16 @@ const Logo: React.FC = () => (
       paddingRight: '15px',
       color: 'primary.main',
       cursor: 'pointer'
-    }}>Betterlox</Typography>
+    }}>
+      Betterlox
+    </Typography>
+  )
+}
+
+const Logo: React.FC = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', cursor: 'pointer' }}>
+    <FishLogo />
+    <LogoText />
   </Box>
 );
 
@@ -150,8 +164,8 @@ function MobileMenu({ loggedIn, user }: { loggedIn: boolean, user?: UserPublic }
     setAnchorElNav(null);
   }, [setAnchorElNav]);
   return (
-    <Grid container spacing={0} sx={{ display: { xs: 'inherit', md: 'none', paddingTop: '5px' }}}>
-      <Grid width={48} item>
+    <Box sx={{ display: { xs: 'block', md: 'none' }, position: 'relative', textAlign: 'center', width: '100%', paddingTop: '5px' }}>
+      <Box sx={{ position: 'absolute', left: 10, top: 10 }}>
         <IconButton
           size="large"
           aria-label="account of current user"
@@ -195,16 +209,15 @@ function MobileMenu({ loggedIn, user }: { loggedIn: boolean, user?: UserPublic }
             <AccountMenuItem key={item.label} item={item} />
           ))}
         </Menu>
-      </Grid>
-      <Grid item flexGrow={1} sx={{ display: { paddingTop: '7px' }}}>
+      </Box>
+      <Box sx={{ display: 'block', width: '100%', textAlign: 'center' }}>
         <Link href="/" passHref>
-          <Box>
-            <Logo />
+          <Box sx={{ display: 'block', width: '100%', pt: 1 }}>
+            <LogoText />
           </Box>
         </Link>
-      </Grid>
-      <Grid item width={48}></Grid>
-    </Grid>
+      </Box>
+    </Box>
   )
 }
 
@@ -233,39 +246,43 @@ function AdminMenuItems({ user }: { user?: UserPublic }) {
 
 export function MainNav() {
   const router = useRouter();
+  const context = useCurrentUser();
+
   return (
-    <UserContextConsumer>
-      {context => (
-        <AppBar position="static" elevation={0} style={{ backgroundColor: 'transparent' }}>
-          <Container maxWidth="lg">
-            <Toolbar disableGutters>
+    <AppBar position="static" elevation={0} style={{ backgroundColor: 'transparent' }}>
+      <Container maxWidth="lg">
+        <Box sx={{ display: "block" }}>
+          <MobileMenu loggedIn={Boolean(context.user)} user={context.user} />
+          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+            <Box sx={{ display: "flex" }}>
               <Link href="/" passHref>
-                <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2, pt: '2px' }}>
+                <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2, pt: 2 }}>
                   <Logo />
                 </Box>
               </Link>
-              <MobileMenu loggedIn={Boolean(context?.user)} user={context.user} />
-              <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                {pages.map((page) => (
-                  <Link key={page.label} href={page.route} passHref>
-                    <Button
-                      variant={router.pathname.startsWith(page.route) ? "outlined" : "text"}
-                      color="secondary"
-                      sx={{ my: 2, mx: 0.6, display: 'block', textAlign: 'center' }}
-                    >
-                      {page.label}
-                    </Button>
-                  </Link>
-                ))}
-                <AdminMenuItems user={context.user} />
+              <Box>
+                {Boolean(context.user) ? <Box sx={{ flexGrow: 1, pt: '4px', display: { xs: 'none', md: 'flex' } }}>
+                  {pages.map((page) => (
+                    <Link key={page.label} href={page.route} passHref>
+                      <Button
+                        variant={router.pathname.startsWith(page.route) ? "outlined" : "text"}
+                        color="secondary"
+                        sx={{ my: 2, mx: 0.6, display: 'block', textAlign: 'center' }}
+                      >
+                        {page.label}
+                      </Button>
+                    </Link>
+                  ))}
+                  <AdminMenuItems user={context.user} />
+                </Box> : null}
               </Box>
-              <Box sx={{ display: { xs: 'none', md: 'flex' }}}>
-                {context?.user ? <UserMenu user={context.user} /> : <LoggedOutMenu />}
-              </Box>
-            </Toolbar>
-          </Container>
-        </AppBar>
-      )}
-    </UserContextConsumer>
+            </Box>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, flexGrow: 0, alignItems: 'center' }}>
+              {context.user ? <UserMenu user={context.user} /> : <LoggedOutMenu />}
+            </Box>
+          </Box>
+        </Box>
+      </Container>
+    </AppBar>
   )
 }
