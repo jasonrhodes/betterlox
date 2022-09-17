@@ -20,7 +20,7 @@ const HomePage: NextPage = () => {
             height: 1636
           }}
           text={<>First of all, Letterboxd is an <em>incredible</em> site. We love it with all our hearts.</>}
-          subtext={<>If you don't have a Letterboxd account, <Link href="https://letterboxd.com/?register=true" target="_blank" rel="noreferrer">go get one right now</Link>!</>}
+          subtext={<>If you don&apos;t have a Letterboxd account, <Link href="https://letterboxd.com/?register=true" target="_blank" rel="noreferrer">go get one right now</Link>!</>}
         />
         <IntroCard
           alignImage="right"
@@ -83,7 +83,7 @@ const HomePage: NextPage = () => {
         />
 
         <Button sx={{ py: 8, mb: 5, fontSize: 36 }} size="large" color="primary" variant="contained" onClick={() => router.push("/register")}>Sign up now!</Button>
-        <Typography component="p" sx={{ mb: 30 }}>Want to support Betterlox? <Link href="https://letterboxd.com/pro/" target="_blank" rel="noreferrer">Sign up for Letterboxd Pro or Patron levels.</Link> There's no Betterlox without Letterboxd!</Typography>
+        <Typography component="p" sx={{ mb: 30 }}>Want to support Betterlox? <Link href="https://letterboxd.com/pro/" target="_blank" rel="noreferrer">Sign up for Letterboxd Pro or Patron levels.</Link> There&apos;s no Betterlox without Letterboxd!</Typography>
       </PageTemplate>
     </Box>
   );
