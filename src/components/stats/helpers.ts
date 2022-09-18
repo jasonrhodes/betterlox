@@ -2,7 +2,7 @@ import { AllStatsType, PersonStats, StatMode } from "../../common/types/api";
 import { Collection } from "../../db/entities";
 
 export function isPeople(list: PersonStats[] | Collection[], type: AllStatsType): list is PersonStats[] {
-  return ["actors", "directors", "cinematographers", "editors"].includes(type);
+  return ["actors", "directors", "writers", "cinematographers", "editors"].includes(type);
 }
 
 export function isCollections(list: PersonStats[] | Collection[], type: AllStatsType): list is Collection[] {

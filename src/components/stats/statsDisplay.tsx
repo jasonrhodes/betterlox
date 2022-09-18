@@ -32,7 +32,7 @@ export function CardsPersonStats({ people, setDetails, isLoading }: StatsDisplay
           }}
           onClick={() => setDetails(person)}
         >
-          <Badge color="secondary" badgeContent={i + 1} anchorOrigin={{
+          <Badge sx={{ ["& .MuiBadge-badge"]: { border: '1px solid rgba(255,255,255,0.3)', boxShadow: '0 2px 2px rgba(0,0,0,0.3)', textShadow: '1px 1px 0 rgba(255,255,255,0.6)' }}} color="secondary" badgeContent={i + 1} anchorOrigin={{
             vertical: 'top',
             horizontal: 'left',
           }}>

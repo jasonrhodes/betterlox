@@ -3,7 +3,9 @@ import { numberListQueryParam, numericQueryParam, singleQueryParam, stringListQu
 import { createApiRoute } from "../../../../../lib/routes";
 import { convertYearsToRange } from "../../../../../lib/convertYearsToRange";
 import { EntryMovie, EntryQueryResult, EntryApiResponse } from "../../../../../common/types/api";
-import { ObjectLiteral } from "typeorm";
+import { ObjectLiteral, QueryBuilder, SelectQueryBuilder } from "typeorm";
+import { FilmEntry } from "../../../../../db/entities";
+import { CREW_JOB_MAP } from "../../../../../common/constants";
 
 function convertResultsToEntries(results: EntryQueryResult[]): EntryApiResponse[] {
   return results.map(result => ({
@@ -36,6 +38,32 @@ function convertResultToEntryMovie(result: EntryQueryResult): EntryMovie {
   }
 }
 
+interface JoinCrewOptions {
+  query: SelectQueryBuilder<FilmEntry>;
+  jobs: string[];
+  joinName: string;
+}
+
+function joinCrew({ query, jobs, joinName }: JoinCrewOptions) {
+  return query.innerJoin(
+    (subquery) => (
+      subquery
+        .select('m.id', 'id')
+        .addSelect('ARRAY_AGG(jmc.personId)', 'ids')
+        .from('movies', 'm')
+        .innerJoin('join_movies_crew', 'jmc', 'jmc.movieId = m.id')
+        .where(`jmc.job IN('${jobs.join("','")}')`)
+        .groupBy('m.id')
+    ),
+    joinName, 
+    `${joinName}.id = entry.movieId`
+  );
+}
+
+function whereCrew(joinName: string, ids: number[]) {
+  return `${joinName}.ids @> ARRAY[${ids.join(',')}]`;
+}
+
 const UserEntriesRoute = createApiRoute({
   handlers: {
     get: async (req, res) => {
@@ -46,6 +74,9 @@ const UserEntriesRoute = createApiRoute({
       const userId = numericQueryParam(req.query.userId);
       const actors = numberListQueryParam(req.query.actors);
       const directors = numberListQueryParam(req.query.directors);
+      const writers = numberListQueryParam(req.query.writers);
+      const editors = numberListQueryParam(req.query.editors);
+      const cinematographers = numberListQueryParam(req.query.cinematographers);
 
       const FilmEntriesRepo = await getFilmEntriesRepository();
       let query = FilmEntriesRepo.createQueryBuilder('entry')
@@ -78,22 +109,51 @@ const UserEntriesRoute = createApiRoute({
       }
 
       if (directors.length > 0) {
-        query = query
-          .innerJoin(
-            (subquery) => (
-              subquery
-                .select('m.id', 'id')
-                .addSelect('ARRAY_AGG(jmc.personId)', 'ids')
-                .from('movies', 'm')
-                .innerJoin('join_movies_crew', 'jmc', 'jmc.movieId = m.id')
-                .where(`jmc.job = 'Director'`)
-                .groupBy('m.id')
-            ),
-            'movie_directors', 
-            'movie_directors.id = entry.movieId'
-          );
+        const joinName = 'movie_directors';
 
-        wheres.push([`movie_directors.ids @> ARRAY[${directors.join(',')}]`, {}]);
+        query = joinCrew({
+          query,
+          jobs: CREW_JOB_MAP.directors,
+          joinName
+        })
+
+        wheres.push([whereCrew(joinName, directors), {}]);
+      }
+
+      if (writers.length > 0) {
+        const joinName = 'movie_writers';
+
+        query = joinCrew({
+          query,
+          jobs: CREW_JOB_MAP.writers,
+          joinName
+        })
+
+        wheres.push([whereCrew(joinName, writers), {}]);
+      }
+
+      if (editors.length > 0) {
+        const joinName = 'movie_editors';
+
+        query = joinCrew({
+          query,
+          jobs: CREW_JOB_MAP.editors,
+          joinName
+        })
+
+        wheres.push([whereCrew(joinName, editors), {}]);
+      }
+
+      if (cinematographers.length > 0) {
+        const joinName = 'movie_cinematographers';
+
+        query = joinCrew({
+          query,
+          jobs: CREW_JOB_MAP.cinematographers,
+          joinName
+        })
+
+        wheres.push([whereCrew(joinName, cinematographers), {}]);
       }
 
       if (releaseDateRange.length === 2) {

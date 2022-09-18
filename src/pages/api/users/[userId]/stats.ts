@@ -37,6 +37,7 @@ const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
       switch (type) {
         case 'actors':
         case 'directors': 
+        case 'writers':
         case 'cinematographers': 
         case 'editors': {
           const PeopleRepo = await getPeopleRepository();

@@ -30,6 +30,10 @@ const StatsPage: NextPage = () => {
               content: <StatsTab type="directors" mode={mode} />
             },
             {
+              label: 'Writers',
+              content: <StatsTab type="writers" mode={mode} />
+            },
+            {
               label: 'Cinematographers',
               content: <StatsTab type="cinematographers" mode={mode} />
             },
