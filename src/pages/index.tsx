@@ -23,6 +23,7 @@ const HomePage: NextPage = () => {
           }}
           text={<>First of all, Letterboxd is an <em>incredible</em> site. We love it with all our hearts.</>}
           subtext={<>If you don&apos;t have a Letterboxd account, <Link href="https://letterboxd.com/?register=true" target="_blank" rel="noreferrer">go get one right now</Link>!</>}
+          alt="Screenshot of Letterboxd.com website"
         />
         <IntroCard
           alignImage="right"
@@ -32,6 +33,7 @@ const HomePage: NextPage = () => {
             height: 1840
           }}
           text={<>Second, we wanted to build a few new features for ourselves and our friends ... </>}
+          alt="Image of a code editor"
         />
 
         <IntroCard
@@ -42,6 +44,7 @@ const HomePage: NextPage = () => {
             height: 1530
           }}
           text={<>...like advanced filters for your watches and ratings...</>}
+          alt="Betterlox UI, showing filtering a user's entries"
         />
 
         <IntroCard
@@ -52,6 +55,7 @@ const HomePage: NextPage = () => {
             height: 1656
           }}
           text={<>...a quick way to see all your blindspots for a set of filters...</>}
+          alt="Betterlox UI, showing blindspots i.e. the movies that match a set of filters that a user hasn't seen"
         />
 
         <IntroCard
@@ -62,6 +66,7 @@ const HomePage: NextPage = () => {
             height: 1598
           }}
           text={<>...exciting new ways to explore your favorite or most watched actors...</>}
+          alt="Betterlox UI, stats pages showing your favorite actors"
         />
 
         <IntroCard
@@ -72,6 +77,7 @@ const HomePage: NextPage = () => {
             height: 1662
           }}
           text={<>...or your favorite directors, cinematographers, and more...</>}
+          alt="Betterlox UI, stats pages for your favorite directors"
         />
 
         <IntroCard
@@ -82,6 +88,7 @@ const HomePage: NextPage = () => {
             height: 1674
           }}
           text={<>...and of course, more ways to track your progress on lists, lists, and MORE LISTS!</>}
+          alt="Betterlox UI, list charts showing progress per list"
         />
 
         <Button sx={{ py: 8, mb: 5, fontSize: 36 }} size="large" color="primary" variant="contained" onClick={() => router.push("/register")}>Sign up now!</Button>
@@ -100,9 +107,10 @@ interface IntroCardOptions {
   }
   text: JSX.Element;
   subtext?: JSX.Element;
+  alt: string;
 }
 
-function IntroCard({ alignImage, image, text, subtext }: IntroCardOptions) {
+function IntroCard({ alignImage, image, text, subtext, alt }: IntroCardOptions) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -116,7 +124,7 @@ function IntroCard({ alignImage, image, text, subtext }: IntroCardOptions) {
         border: '1px solid rgba(255,255,255,0.1) !important', 
         boxShadow: '0 3px 3px rgba(0,0,0,0.2) !important' 
       }}}>
-        <Image {...image} layout="responsive" />
+        <Image {...image} layout="responsive" alt={alt} />
       </Box>
     </Grid>
   );

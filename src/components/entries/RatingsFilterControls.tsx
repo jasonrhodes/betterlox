@@ -47,6 +47,16 @@ export function RatingsFilterControls() {
         />
       </Grid>
       <Grid item xs={12}>
+        <RatingsFilterFieldLookup<Person>
+          searchType="people"
+          filterKey="writers"
+          AutocompleteSx={{ width: 300 }}
+          isOptionEqualToValue={(option, value) => value && option.id === value.id}
+          getOptionLabel={(option) => option.name}
+          getId={(options) => options.id}
+        />
+      </Grid>
+      <Grid item xs={12}>
         <RatingsFilterFieldLookup<Collection>
           searchType="collections"
           filterKey="collections"

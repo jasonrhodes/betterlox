@@ -8,6 +8,7 @@ import { TabNavPage } from '../../components/TabNavPage';
 
 const StatsPage: NextPage = () => {
   const [mode, setMode] = useState<StatMode>('favorite');
+  const [value, setValue] = useState<number>(0);
 
   function toggleStatMode() {
     setMode(mode === 'favorite' ? 'most' : 'favorite');
@@ -20,6 +21,8 @@ const StatsPage: NextPage = () => {
     >
       {() => (
         <TabNavPage
+          value={value}
+          setValue={setValue}
           tabs={[
             {
               label: 'Actors',

@@ -77,7 +77,8 @@ export function ListsList({ scope }: { scope: ListScope }) {
           value={quickSearchValue} 
           onChange={handleQuickSearchChange} 
           sx={{
-            mr: 1
+            mr: 1,
+            mb: 2
           }}
           InputProps={{
             endAdornment: <InputAdornment position="end"><Close sx={{ cursor: 'pointer' }} onClick={() => updateQuickSearchValue('')} /></InputAdornment>

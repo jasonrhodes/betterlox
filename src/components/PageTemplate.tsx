@@ -106,7 +106,7 @@ export function PageTemplate({
         >
           <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
             {backLink && backLink.url ? <BackLink {...backLink} /> : null}
-            <Box sx={{ flexShrink: { xs: 0, md: 1 }}}>
+            <Box sx={{ flexShrink: 1 }}>
               <Typography component='h1' variant='h1' gutterBottom={true}>{title}</Typography>
             </Box>
             {titleLineRightContent ? <RightContent content={titleLineRightContent} /> : null}

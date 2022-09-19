@@ -204,11 +204,11 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
       query = query.innerJoin('join_movies_cast', 'cr', 'cr."personId" = p.id')
         .andWhere('cr IS NOT NULL')
         .andWhere('cr."castOrder" <= 10');
-    } else {
-      const job = role.slice(0, -1);
+    } else if (role === "directors" || role === "writers") {
+      const jobs = CREW_JOB_MAP[role];
       query = query.innerJoin('join_movies_crew', 'cr', 'cr."personId" = p.id')
         .andWhere('cr IS NOT NULL')
-        .andWhere(`cr.job ILIKE '${job}'`);
+        .andWhere(`cr.job IN ('${jobs.join("','")}')`);
     }
 
     if (namePattern) {

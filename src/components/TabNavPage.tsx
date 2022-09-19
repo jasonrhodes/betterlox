@@ -1,5 +1,10 @@
-import { SxProps, Box, Tabs, Tab, Button } from "@mui/material";
+import { ExpandMore } from "@mui/icons-material";
+import { SxProps, Box, Tabs, Tab, Button, Accordion, AccordionDetails, AccordionSummary, Typography, Stack } from "@mui/material";
 import { useCallback, useState } from "react";
+import { ExcludedGenreFilterControl } from "./filterControls/ExcludedGenreFilterControl";
+import { OnlyWomenFilterControl, OnlyNonBinaryFilterControl } from "./filterControls/genderFilterControls";
+import { GenreFilterControl } from "./filterControls/GenreFilterControl";
+import { ReleaseDateRangeFilterControl } from "./filterControls/ReleaseDateRangeFilterControl";
 import { a11yTabProps, TabPanel } from "./TabPanel";
 
 export interface Tab {
@@ -25,16 +30,20 @@ const tabPanelSx: SxProps = {
 
 interface TabNavPageOptions {
   tabs: Tab[];
+  value?: number;
+  setValue?: (v: number) => void;
 }
 
 export function TabNavPage({
-  tabs
+  tabs,
+  value,
+  setValue
 }: TabNavPageOptions) {
-  const [value, setValue] = useState<number>(0);
+  const [internalValue, setInternalValue] = useState<number>(0);
 
   const handleChange = useCallback((event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  }, []);
+    setValue ? setValue(newValue) : setInternalValue;
+  }, [setValue, setInternalValue]);
   
   return (
     <Box
@@ -49,7 +58,7 @@ export function TabNavPage({
       <Tabs
         orientation="vertical"
         variant="standard"
-        value={value}
+        value={setValue ? value : internalValue}
         onChange={handleChange}
         aria-label="Vertical tabs example"
         sx={{ 
@@ -69,9 +78,9 @@ export function TabNavPage({
         ))}
       </Tabs>
       <Box sx={{ flex: 1 }}>
-        <MobileTabSwitcher tabs={tabs} value={value} setValue={setValue}  />
+        <MobileTabSwitcher tabs={tabs} value={typeof value === "number" ? value : internalValue} setValue={setValue ? setValue : setInternalValue}  />
         {tabs.map((tab, i) => (
-          <TabPanel key={tab.label} sx={tabPanelSx} value={value} index={i}>
+          <TabPanel key={tab.label} sx={tabPanelSx} value={typeof value === "number" ? value : internalValue} index={i}>
             {tab.content}
           </TabPanel>
         ))}
@@ -87,15 +96,40 @@ interface MobileTabSwitcherOptions {
 }
 
 export function MobileTabSwitcher({ value, setValue, tabs }: MobileTabSwitcherOptions) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  function handleTabClick(i: number) {
+    setIsOpen(false);
+    setValue(i);
+  }
+
   return (
-    <Box sx={{ display: { xs: 'flex', md: 'none' }, flexShrink: 0 }}>
-      <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-        {tabs.map(({ label }, i) => (
-          <li key={label} style={{ marginBottom: '5px' }}>
-            <Button variant={value === i ? "outlined" : "text"} onClick={() => setValue(i)}>{label}</Button>
-          </li>
-        ))}
-      </ul>
+    <Box sx={{ display: { xs: 'flex', md: 'none' }, flexShrink: 0, mb: 5 }}>
+      <Accordion 
+        expanded={isOpen} 
+        onChange={() => setIsOpen(!isOpen)} 
+        square={true} 
+        color="primary" 
+        variant="elevation" 
+        elevation={1}
+        sx={{ mb: 1, width: '100%' }}
+        disableGutters
+      >
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Box display="flex">
+            <Box sx={{ mr: 1 }}><Typography component="span">Viewing: </Typography><Typography component="span" color="primary"><b>{tabs[value].label}</b></Typography></Box>
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Stack spacing={1}>
+          {tabs.map(({ label }, i) => value !== i ? (
+            <Box key={label}>
+              <Button variant="text" onClick={() => handleTabClick(i)}>{label}</Button>
+            </Box>
+          ) : null)}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
     </Box>
   )
 }

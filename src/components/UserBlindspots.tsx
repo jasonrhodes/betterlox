@@ -1,17 +1,13 @@
-import { Box, FormControl, InputLabel, LinearProgress, MenuItem, Select, Typography } from '@mui/material';
-import React, { useCallback, useEffect, useState } from 'react';
-import { EntryApiResponse, GlobalFilters, MoviesApiResponse, TmdbCollectionByIdResponse, TmdbPersonByIdResponse } from '../common/types/api';
+import { Box, LinearProgress, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { EntryApiResponse, GlobalFilters, MoviesApiResponse, TmdbPersonByIdResponse } from '../common/types/api';
 import { Movie, UserSettings } from '../db/entities';
 import { callApi } from '../hooks/useApi';
-import { useGlobalFilters } from '../hooks/GlobalFiltersContext';
-import { useCurrentUser } from '../hooks/UserContext';
 import { UserPublic } from '../common/types/db';
 import { convertYearsToRange } from '../lib/convertYearsToRange';
-import { TmdbCollection } from '../lib/tmdb';
 import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
 import { MoviesTable } from './MoviesTable';
 import { PartialMovie } from '../common/types/base';
-import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { SortControls, useSorting } from '../hooks/useSorting';
 
 interface GetBlindspotsForUserOptions {

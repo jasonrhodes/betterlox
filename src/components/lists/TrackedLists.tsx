@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Grid, LinearProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, Grid, LinearProgress, SxProps, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
 import { LetterboxdListsForUserApiResponse, ListUserStats, UserListStatsApiResponse } from "../../common/types/api";
 import { UserPublicSafe } from "../../common/types/db";
@@ -12,6 +12,10 @@ export function MyTrackedLists() {
   const [lists, setLists] = useState<LetterboxdList[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useCurrentUser();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const gridXSpacing = isMobile ? 'space-evenly' : 'flex-start';
 
   useEffect(() => {
     async function retrieve() {
@@ -36,18 +40,22 @@ export function MyTrackedLists() {
     return <LinearProgress />;
   }
 
+  const extraStyles: SxProps = isMobile ? {} : {
+    mb: 2, mr: 1
+  };
+
   return (
-    <Grid container spacing={3}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: gridXSpacing }}>
       {lists.map(list => (
-        <Grid key={list.id} item>
-          <ListStatsCard list={list} user={user} />
-        </Grid>
+        <Box key={list.id} sx={{ mb: 1, ...extraStyles }}>
+          <ListStatsCard isMobile={isMobile} list={list} user={user} />
+        </Box>
       ))}
-    </Grid>
+    </Box>
   );
 }
 
-function ListStatsCard({ list, user }: { list: LetterboxdList; user: UserPublicSafe; }) {
+function ListStatsCard({ list, user, isMobile }: { list: LetterboxdList; user: UserPublicSafe; isMobile?: boolean; }) {
   const [stats, setStats] = useState<ListUserStats | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -64,11 +72,11 @@ function ListStatsCard({ list, user }: { list: LetterboxdList; user: UserPublicS
   }, [list, user]);
 
   const pct = stats ? Math.round((stats.watched / stats.movies) * 100) : 0;
-  const listPath = list.url.replace('https://letterboxd.com', '') + '?view=only-unwatched';
+  const listPath = list.url.replace('https://letterboxd.com', '');
 
   return (
-    <AppLink color="#ffffff" href={listPath}>
-      <ListProgressCircularChart isLoading={isLoading || !stats} pct={pct} title={list.title} />
+    <AppLink underline="none" color="#ffffff" href={listPath}>
+      <ListProgressCircularChart isLoading={isLoading || !stats} pct={pct} title={list.title} isMobile={isMobile} />
     </AppLink>
   );
 }

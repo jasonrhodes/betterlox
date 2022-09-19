@@ -12,12 +12,14 @@ export function CurrentFilters() {
   const { globalFilters, setGlobalFilters } = useGlobalFilters();
   const searchedActors = useGetPeople(globalFilters.actors);
   const searchedDirectors = useGetPeople(globalFilters.directors);
+  const searchedWriters = useGetPeople(globalFilters.writers);
   const searchedCollections = useGetCollections(globalFilters.collections);
-  
+
   const {
     actors = [],
     collections = [],
-    directors = []
+    directors = [],
+    writers = []
   } = globalFilters;
 
   return (
@@ -50,6 +52,13 @@ export function CurrentFilters() {
         icon={<FilterAlt />} 
         label={'Director: ' + person.name} 
         onDelete={() => setGlobalFilters({ ...globalFilters, directors: directors.filter(a => a !== person.id) })} 
+        sx={ChipSx}
+      />)}
+      {searchedWriters.map(person => <Chip
+        key={person.name} 
+        icon={<FilterAlt />} 
+        label={'Writer: ' + person.name} 
+        onDelete={() => setGlobalFilters({ ...globalFilters, writers: writers.filter(a => a !== person.id) })} 
         sx={ChipSx}
       />)}
       {searchedCollections.map(collection => <Chip 
