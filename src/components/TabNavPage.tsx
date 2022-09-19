@@ -30,8 +30,8 @@ const tabPanelSx: SxProps = {
 
 interface TabNavPageOptions {
   tabs: Tab[];
-  value?: number;
-  setValue?: (v: number) => void;
+  value: number;
+  setValue: (v: number) => void;
 }
 
 export function TabNavPage({
@@ -39,11 +39,11 @@ export function TabNavPage({
   value,
   setValue
 }: TabNavPageOptions) {
-  const [internalValue, setInternalValue] = useState<number>(0);
 
   const handleChange = useCallback((event: React.SyntheticEvent, newValue: number) => {
-    setValue ? setValue(newValue) : setInternalValue;
-  }, [setValue, setInternalValue]);
+    setValue(newValue);
+  }, [setValue]);
+
   
   return (
     <Box
@@ -58,14 +58,14 @@ export function TabNavPage({
       <Tabs
         orientation="vertical"
         variant="standard"
-        value={setValue ? value : internalValue}
+        value={value}
         onChange={handleChange}
         aria-label="Vertical tabs example"
         sx={{ 
           borderRight: 1, 
           borderColor: 'divider', 
           alignItems: "flex-start",
-          flexShrink: 0,
+          flexShrink: 0, 
           paddingLeft: 0,
           display: {
             xs: 'none',
@@ -78,9 +78,9 @@ export function TabNavPage({
         ))}
       </Tabs>
       <Box sx={{ flex: 1 }}>
-        <MobileTabSwitcher tabs={tabs} value={typeof value === "number" ? value : internalValue} setValue={setValue ? setValue : setInternalValue}  />
+        <MobileTabSwitcher tabs={tabs} value={value} setValue={setValue}  />
         {tabs.map((tab, i) => (
-          <TabPanel key={tab.label} sx={tabPanelSx} value={typeof value === "number" ? value : internalValue} index={i}>
+          <TabPanel key={tab.label} sx={tabPanelSx} value={value} index={i}>
             {tab.content}
           </TabPanel>
         ))}

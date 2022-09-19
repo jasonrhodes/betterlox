@@ -219,8 +219,6 @@ function PageContent({ list, userStats, isLoading }: { list: LetterboxdList; use
   );
 }
 
-
-
 interface ListMovieCardOptions {
   movie: Movie | null;
   order?: number;

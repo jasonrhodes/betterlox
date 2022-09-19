@@ -23,6 +23,7 @@ const ListsPage: NextPage = () => {
 function PageContent({ user }: { user: UserResponse }) {
   const [tracked, setTracked] = useState<LetterboxdList[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [value, setValue] = useState<number>(0);
 
   useEffect(() => {
     async function retrieve() {
@@ -72,6 +73,8 @@ function PageContent({ user }: { user: UserResponse }) {
   return (
     <TabNavPage
       tabs={tabs}
+      value={value}
+      setValue={setValue}
     />
   );
 }
