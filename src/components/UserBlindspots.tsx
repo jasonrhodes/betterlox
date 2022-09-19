@@ -41,18 +41,24 @@ export function Blindspots({ blindspots, isLoading }: { blindspots: PartialMovie
     async function retrieve() {
       setIsSorting(true);
 
-      const sorted = blindspots.sort((a, b) => {
+      const sorted = [...blindspots].sort((a, b) => {
         const aVal = a[sortBy];
         const bVal = b[sortBy];
         if (typeof aVal === 'undefined' || typeof bVal === "undefined") {
           return 0;
         }
-        const val = (aVal > bVal) ? -1 : 1;
+
+        let val = 0;
+        if (typeof aVal === "string" && typeof bVal === "string") {
+          val = aVal.localeCompare(bVal);
+        }
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          val = (aVal > bVal) ? -1 : 1;
+        }
         const finalVal = (sortDir === 'ASC') ? (val * -1) : val;
-        // console.log(aVal, bVal, sortDir, val, finalVal);
         return finalVal;
       });
-      setSorted(blindspots);
+      setSorted(sorted);
       setIsSorting(false);
     }
     retrieve();
