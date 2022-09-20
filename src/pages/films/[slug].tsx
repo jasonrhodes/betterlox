@@ -49,7 +49,7 @@ function CastGrid({ cast }: { cast: CastRole[]; }) {
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
       {cast.slice(0, 10).map((role) => (
-        <Box sx={{ px: 2, py: 2 }}>
+        <Box key={role.creditId} sx={{ px: 2, py: 2 }}>
           <TmdbAvatar sx={{ height: { xs: 100, md: 130 }, width: { xs: 100, md: 130 }, mb: 1 }} tmdbPath={role.actor.profilePath} />
           <Typography sx={{ fontSize: { xs: '12px', sm: '14px', md: 'inherit' }}}>{role.actor.name}</Typography>
           <Typography variant="subtitle2">{role.character}</Typography>
@@ -63,7 +63,7 @@ function CrewGrid({ crew }: { crew: CrewRole[]; }) {
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
       {crew.slice(0, 10).map((role) => (
-        <Box sx={{ px: 2, py: 2 }}>
+        <Box key={role.creditId} sx={{ px: 2, py: 2 }}>
           <TmdbAvatar sx={{ height: { xs: 100, md: 130 }, width: { xs: 100, md: 130 }, mb: 1 }} tmdbPath={role.person.profilePath} />
           <Typography sx={{ fontSize: { xs: '12px', sm: '14px', md: 'inherit' }}}>{role.person.name}</Typography>
           <Typography variant="subtitle2">{role.job}</Typography>
