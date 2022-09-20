@@ -7,6 +7,7 @@ import { Box, Typography } from '@mui/material';
 import { useCurrentUser } from '../hooks/UserContext';
 import { ImdbLink, LetterboxdLink } from './externalServiceLinks';
 import { EntryApiResponse } from '../common/types/api';
+import { AppLink } from './AppLink';
 
 interface EntriesTableProps {
   entries: EntryApiResponse[] | undefined;
@@ -28,31 +29,26 @@ function EntryCard({ entry }: { entry: EntryApiResponse }) {
     /> :
     <Image {...sharedProps} src="/img/no-poster.png" alt="" />;
   
-  const slug = entry.movie?.letterboxdSlug;
+  const loxPath = (entry.movie?.letterboxdSlug || '').replace(/^\/film/, '/films/');
+  const action = typeof entry.stars === "number" ? 'Rated' : 'Watched';
   return (
-    <Box className="entryCard" sx={{ display: "flex", paddingBottom: "15px" }}>
-      <Box width="80px" sx={{ flexShrink: 0, paddingRight: "15px" }}>
-        {poster}
-      </Box>
-      <Box>
-        <Typography><b>{entry.movie?.title || entry.name}</b> ({entry.movie?.releaseDate.substring(0, 4)})</Typography>
+    <AppLink href={loxPath} underline="none" color="#ffffff">
+      <Box className="entryCard" sx={{ display: "flex", padding: "10px", mb: 1, cursor: 'pointer', ['&:hover']: { backgroundColor: 'rgba(0,0,0,0.2)' }}}>
+        <Box width="80px" sx={{ flexShrink: 0, paddingRight: "15px" }}>
+          {poster}
+        </Box>
         <Box>
-          {entry.stars ? 
-            <Box sx={{ marginBottom: "-7px" }}><StarRating color="primary" score={entry.stars} /></Box> : 
-            <Typography variant="caption" sx={{ my: 0.5 }}>Unrated</Typography>
-          }
-        </Box> 
-        {entry.date ? <Box><Typography variant="caption">{(new Date(entry.date)).toLocaleDateString()}</Typography></Box> : null}
-        <Box sx={{ display: "flex", py: 1 }}>
-          <Box sx={{ marginRight: 1 }}>
-            <LetterboxdLink slug={slug} />
-          </Box>
-          <Box sx={{ marginRight: 1 }}>
-            <ImdbLink id={entry.movie?.imdbId} />
-          </Box>
+          <Typography><b>{entry.movie?.title || entry.name}</b> ({entry.movie?.releaseDate.substring(0, 4)})</Typography>
+          <Box>
+            {entry.stars ? 
+              <Box sx={{ marginBottom: "-7px" }}><StarRating color="primary" score={entry.stars} /></Box> : 
+              <Typography variant="caption" sx={{ my: 0.5 }}>Unrated</Typography>
+            }
+          </Box> 
+          {entry.date ? <Box><Typography sx={{ opacity: 0.6 }} variant="caption">{`${action} on ${(new Date(entry.date)).toLocaleDateString()}`}</Typography></Box> : null}
         </Box>
       </Box>
-    </Box>
+    </AppLink>
   );
 }
 

@@ -1,10 +1,11 @@
 import { CalendarMonth, PersonPin, Theaters } from "@mui/icons-material";
-import { Box, FormControlLabel, Link, Switch, Typography } from "@mui/material";
+import { Box, FormControlLabel, Link, Switch, Typography, Icon } from "@mui/material";
 import { useCallback, useState } from "react";
 import { ListSortBy } from "../../common/types/base";
 import { UserPublicSafe } from "../../common/types/db";
 import { LetterboxdList } from "../../db/entities";
 import { callApi } from "../../hooks/useApi";
+import { Meta } from "../Meta";
 
 export interface ListMetaOptions {
   list: LetterboxdList; 
@@ -58,13 +59,4 @@ export function ListMeta({ list, user, showPublishDate = true, showUpdatedDate =
       {!owned ? <FormControlLabel sx={{ px: 1 }} control={<Switch disabled={isLoading} size="small" color="secondary" checked={isFollowing} onChange={handleFollowChange} />} label={<Typography variant="caption">Follow List</Typography>} /> : null}
     </Box>
   )
-}
-
-function Meta({ label, icon }: { label: string | JSX.Element; icon?: JSX.Element }) {
-  return (
-    <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-      {icon ? <Box sx={{ mr: 1 }}>{icon}</Box> : null}
-      {label}
-    </Typography>
-  );
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, SxProps } from "@mui/material";
+import { Avatar, AvatarProps, Box, SxProps } from "@mui/material";
 import useImageConfigs from "../hooks/useImageConfigs";
 import Image, { ImageProps } from "next/image";
 
@@ -29,6 +29,14 @@ export function useTmdbImageBaseUrl({ size = "medium", type = "profile" }: { siz
     throw new Error("No secure_base_url provided from TMDB oh noes " + config.errorStatus + '\n' + Object.keys(config).join(', '));
   }
   return `${config.secure_base_url}/${sizes[index]}`;
+}
+
+export function PosterImage({ path, width = 400, sx = {} }: { path?: string; width?: number; sx?: SxProps }) {
+  return <TMDBImage tmdbPath={path} width={width} height={width * 1.5} sx={sx} />
+}
+
+export function BackdropImage({ path, width = 1200, sx = {} }: { path?: string; width?: number; sx?: SxProps; }) {
+  return <TMDBImage tmdbPath={path} width={width} height={width / 1.77} sx={sx} />
 }
 
 
@@ -67,5 +75,17 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
         }}
       />
     </Box>
+  );
+}
+
+interface TmdbAvatarOptions extends AvatarProps {
+  tmdbPath: string;
+}
+
+export function TmdbAvatar({ tmdbPath, ...rest }: TmdbAvatarOptions) {
+  const baseUrl = useTmdbImageBaseUrl({ type: 'profile', size: 'largest' });
+
+  return (
+    <Avatar src={`${baseUrl}/${tmdbPath}`} {...rest} />
   );
 }

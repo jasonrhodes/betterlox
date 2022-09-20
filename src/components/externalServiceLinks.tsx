@@ -73,7 +73,7 @@ export function ImdbLink({
     return (
       <Tooltip title="Movie data unavailable" arrow>
         <Box>
-          <Image height={size} width={size} style={{ opacity: 0.4 }} src="/img/imdb-icon.png" alt="Letterboxd.com logo" />
+          <Image height={size} width={size} style={{ opacity: 0.4 }} src="/img/imdb-icon.png" alt="IMDb.com logo" />
         </Box>
       </Tooltip>
     )

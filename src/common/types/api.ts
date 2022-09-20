@@ -280,3 +280,9 @@ interface LetterboxdListBySlugGetResponse extends ApiSuccessResponse {
 }
 
 export type LetterboxdListBySlugApiResponse = ApiResponse<LetterboxdListBySlugGetResponse>;
+
+export interface MovieGetResponse extends ApiSuccessResponse {
+  movie: Movie;
+};
+
+export type MovieApiResponse = ApiResponse<MovieGetResponse>;

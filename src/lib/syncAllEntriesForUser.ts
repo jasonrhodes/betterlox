@@ -157,9 +157,6 @@ interface SyncAllEntriesOptions {
 export async function syncAllEntriesForUser({ userId, username, order = "ASC" }: SyncAllEntriesOptions) {
   let syncedWatches: FilmEntry[] = [];
   let syncedRatings: FilmEntry[] = [];
-
-  // TODO REMOVE
-  console.log(`Preparing to sync ALL letterboxd entries for this user ${username}`);
   
   const UsersRepo = await getUserRepository();
 

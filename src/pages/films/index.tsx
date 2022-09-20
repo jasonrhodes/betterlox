@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { Box, Grid } from '@mui/material';
-import { callApi } from '../hooks/useApi';
-import { UserPageTemplate } from '../components/PageTemplate';
+import { callApi } from '../../hooks/useApi';
+import { UserPageTemplate } from '../../components/PageTemplate';
 import { useRouter } from 'next/router';
-import { RatingsFilterControls } from '../components/entries/RatingsFilterControls';
-import { MobileRatingsFilterControls } from '../components/entries/MobileRatingsFilterControls';
-import { FilmEntryTabs } from '../components/entries/FilmEntryTabs';
-import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
-import { useGlobalFilters } from '../hooks/GlobalFiltersContext';
-import { EntriesApiResponse, EntryApiResponse } from '../common/types/api';
+import { RatingsFilterControls } from '../../components/entries/RatingsFilterControls';
+import { MobileRatingsFilterControls } from '../../components/entries/MobileRatingsFilterControls';
+import { FilmEntryTabs } from '../../components/entries/FilmEntryTabs';
+import { convertFiltersToQueryString } from '../../lib/convertFiltersToQueryString';
+import { useGlobalFilters } from '../../hooks/GlobalFiltersContext';
+import { EntriesApiResponse, EntryApiResponse } from '../../common/types/api';
 
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedEntries, updateUnprocessedEntries] = useState<EntryApiResponse[]>([]);

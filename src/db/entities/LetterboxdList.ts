@@ -46,7 +46,7 @@ export class LetterboxdList {
   @ManyToMany(() => User, (user) => user.followedLists)
   followers: Relation<User>[];
 
-  @OneToMany(() => LetterboxdListMovieEntry, (entry) => entry.list, { eager: true, cascade: true })
+  @OneToMany(() => LetterboxdListMovieEntry, (entry) => entry.list, { cascade: true })
   movies: Relation<LetterboxdListMovieEntry>[];
 
   @ManyToMany(() => User, (user) => user.trackedLists)

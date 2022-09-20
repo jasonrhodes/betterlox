@@ -16,7 +16,7 @@ import { CrewRole } from "./CrewRole";
 import { Genre } from "./Genre";
 import { ProductionCompany } from "./ProductionCompany";
 import { FilmEntry } from "./FilmEntry";
-import { LetterboxdList } from "./LetterboxdList";
+import { LetterboxdList, LetterboxdListMovieEntry } from "./LetterboxdList";
 
 @Entity('movies')
 export class Movie extends BaseEntity {
@@ -114,6 +114,6 @@ export class Movie extends BaseEntity {
   @OneToMany(() => FilmEntry, (entry) => entry.movie)
   entries: Relation<FilmEntry[]>;
 
-  @ManyToMany(() => LetterboxdList, (list) => list.movies)
-  lists?: Relation<LetterboxdList>[];
+  @OneToMany(() => LetterboxdListMovieEntry, (entry) => entry.movie)
+  lists?: Relation<LetterboxdListMovieEntry>[];
 }

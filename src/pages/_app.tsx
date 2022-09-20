@@ -37,6 +37,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="apple-touch-icon" sizes="144x144" href="/img/logo/apple-touch-icon-144x144.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/img/logo/apple-touch-icon-152x152.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/img/logo/apple-touch-icon-180x180.png" />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://app.betterlox.com" />
+        <meta property="og:title" content="Betterlox" />
+        <meta property="og:description" content="Super-charge your Letterboxd.com experience with the power of freshly-brined salmon" />
+        <meta property="og:image" content="https://app.betterlox.com/img/BetterloxOpenGraphImage.png" />
+      
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
