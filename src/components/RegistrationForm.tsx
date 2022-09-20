@@ -66,6 +66,9 @@ export const RegistrationForm = () => {
       } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 409) {
           setFieldError("email", "Email already exists, log in instead?");
+        } else if (error instanceof AxiosError) {
+          setPageError(`We're having problems with registration right now. Sorry! [${error.response?.status}] ${error.message}`);
+          console.log('REGISTRATION ERROR', error.message, error.response?.status);
         } else {
           setPageError("We're having problems with registration right now, please try again later.");
         }
