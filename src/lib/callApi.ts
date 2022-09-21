@@ -30,7 +30,6 @@ interface ApiCheckIfExistsResponse {
 export interface ApiRegisterOptions {
   email: string;
   password: string;
-  avatarUrl: string;
   username: string;
   name: string;
   letterboxdAccountLevel: LetterboxdAccountLevel;

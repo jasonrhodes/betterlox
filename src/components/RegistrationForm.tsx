@@ -56,7 +56,6 @@ export const RegistrationForm = () => {
         await api.register({
           email: values.email,
           password: values.password,
-          avatarUrl: details.avatarUrl,
           username: values.username,
           name: details.name,
           letterboxdAccountLevel: details.isPatron ? 'patron' : details.isPro ? 'pro' : 'basic'

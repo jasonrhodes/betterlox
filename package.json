@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "debug": "NODE_OPTIONS='--inspect' next dev",
     "next": "next",
     "build": "next build",
     "start": "next start -p $PORT",
@@ -36,6 +37,7 @@
     "lodash.merge": "^4.6.2",
     "moviedb-promise": "^3.1.13",
     "next": "^12.3.0",
+    "node-fetch": "^3.2.10",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",

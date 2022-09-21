@@ -5,6 +5,7 @@ import { UserPublic } from "../../../common/types/db";
 import { User } from "../../../db/entities";
 import { getUserRepository } from "../../../db/repositories/UserRepo";
 import { handleGenericError } from "../../../lib/apiErrorHandler";
+import { getUserDetails } from "../../../lib/letterboxd";
 import { singleQueryParam } from "../../../lib/queryParams";
 import { syncAllEntriesForUser } from "../../../lib/syncAllEntriesForUser";
 
@@ -24,13 +25,12 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
   const userOptions: Partial<User> = {};
   userOptions.email = (singleQueryParam(req.body.email) || '').toLowerCase(); // lowercase ALL emails
   userOptions.password = singleQueryParam(req.body.password);
-  userOptions.avatarUrl = singleQueryParam(req.body.avatarUrl);
   userOptions.username = singleQueryParam(req.body.username);
   userOptions.name = singleQueryParam(req.body.name);
   userOptions.letterboxdAccountLevel = singleQueryParam(req.body.letterboxdAccountLevel) || 'basic';
-  userOptions.rememberMe = Boolean(singleQueryParam(req.body.rememberMe));
+  userOptions.rememberMe = true; // Boolean(singleQueryParam(req.body.rememberMe));
 
-  const requiredKeys: Array<keyof User> = ['email', 'password', 'avatarUrl', 'username', 'name', 'letterboxdAccountLevel'];
+  const requiredKeys: Array<keyof User> = ['email', 'password', 'username', 'name', 'letterboxdAccountLevel'];
   const missingRequiredKeys: Array<keyof User> = [];
 
   console.log(`Registering user ${userOptions.username}`);
@@ -44,6 +44,12 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
   if (missingRequiredKeys.length > 0) {
     res.status(400).json({ success: false, errorMessage: `Missing required properties ${missingRequiredKeys.join(', ')}`});
     return;
+  }
+
+  const details = await getUserDetails(userOptions.username!);
+  if (details.found) {
+    userOptions.avatarUrl = details.avatarUrl;
+    console.log('yay, url found', details.avatarUrl);
   }
 
   console.log('Registration required keys are all present');
