@@ -9,6 +9,7 @@ import { FormatListNumbered, Tv } from '@mui/icons-material';
 import { UserPublic } from '../../common/types/db';
 import axios from 'axios';
 import { response } from 'express';
+import { AppLink } from '../../components/AppLink';
 
 type SyncingState = 'none' | 'syncing' | 'success' | 'failed';
 
@@ -164,9 +165,9 @@ function SyncListData({
           <Typography variant="h5">List Data</Typography>
         </Box>
       </Box>
-      <Typography sx={{ mb: 1 }} variant="body1" component="div">Manually sync your list data to retrieve your latest <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/lists`}>lists</Link> from Letterboxd.</Typography>
+      <Typography sx={{ mb: 1 }} variant="body1" component="div">You can sync your lists (or any lists from Letterboxd) at <AppLink href="/lists">/lists -&gt; Import List</AppLink>.</Typography>
 
-      <Box sx={{ py: 3 }}>
+      {/* <Box sx={{ py: 3 }}>
         <Button 
           disabled={syncState === "syncing"} 
           onClick={() => handleSyncClick(user.id)} 
@@ -175,7 +176,7 @@ function SyncListData({
         >
           Sync My List Data
         </Button>
-      </Box>
+      </Box> */}
     </Paper>
   );
 }
