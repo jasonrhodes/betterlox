@@ -199,6 +199,7 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
           username,
           page
         });
+
         if (syncedForPage.length === 0) {
           // when moving through the pages forward, as soon
           // as we encounter a page with no ratings, we can
@@ -226,7 +227,7 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
       for (let page = lastRatingsPage; page > 0; page--) {
 
         // TODO REMOVE
-        console.log(`Syncing ratings DESC for page ${page}`);
+        console.log(`Syncing ${username} ratings DESC for page ${page}`);
 
         const syncedForPage = await syncRatingsForPage({
           userId,
@@ -239,7 +240,7 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
       for (let page = 0; page <= lastRatingsPage; page++) {
 
         // TODO REMOVE
-        console.log(`Syncing ratings ASC for page ${page}`);
+        console.log(`Syncing ${username} ratings ASC for page ${page}`);
 
         const syncedForPage = await syncRatingsForPage({
           userId,

@@ -33,6 +33,8 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
   const requiredKeys: Array<keyof User> = ['email', 'password', 'avatarUrl', 'username', 'name', 'letterboxdAccountLevel'];
   const missingRequiredKeys: Array<keyof User> = [];
 
+  console.log(`Registering user ${userOptions.username}`);
+
   for (let key of requiredKeys) {
     if (!userOptions[key]) {
       missingRequiredKeys.push(key);
@@ -43,7 +45,12 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     res.status(400).json({ success: false, errorMessage: `Missing required properties ${missingRequiredKeys.join(', ')}`});
     return;
   }
+
+  console.log('Registration required keys are all present');
+
   const UserRepository = await getUserRepository();
+
+  console.log('Registration user repository loaded');
   
   // TODO: validate lb account level? use enum column type in entity ...
 
@@ -51,10 +58,16 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     const user = UserRepository.create(userOptions);
     const saved = await UserRepository.save(user);
 
+    console.log('Registration - User saved', user.username);
+
     user.settings = { ...DEFAULT_USER_SETTINGS, userId: saved.id };
     await UserRepository.save(user);
+
+    console.log('Registration - User settings saved', user.username);
     
     res.json({ success: true, created: user });
+
+    console.log(`Registration for ${userOptions.username} completed successfully, sync will begin now`);
 
     // after responding to the request, kick off a ratings sync for this user
     syncAllEntriesForUser({ userId: user.id, username: user.username, order: "DESC" });
