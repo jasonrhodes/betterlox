@@ -68,82 +68,87 @@ const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({
       res.json({ success: true, lists, totalCount });
     },
     post: async (req, res) => {
-      // retrieve user's lists from Letterboxd
-      const userId = numericQueryParam(req.query.userId)!
-      const UsersRepo = await getUserRepository();
-      const user = await UsersRepo.findOneBy({ id: userId });
+      // Deactivating this endpoint because the sync overload is massive, and users can sync one list at a time
+      // on the /lists page which should prevent overload somewhat.
+      res.status(403).json({ success: false, code: 403, message: 'This endpoint is currently deactivated for all users' });
+      return;
 
-      if (!user) {
-        console.log("No user exists in user list request");
-        return res.status(401).json({ 
-          success: false, 
-          code: 401,
-          message: 'User does not exist or does not have access to perform this operation.' 
-        });
-      }
+      // // retrieve user's lists from Letterboxd
+      // const userId = numericQueryParam(req.query.userId)!
+      // const UsersRepo = await getUserRepository();
+      // const user = await UsersRepo.findOneBy({ id: userId });
 
-      const SyncsRepo = await getSyncRepository();
-      const { syncsInProgress, sync } = await SyncsRepo.queueSync({ trigger: SyncTrigger.USER, username: user.username });
+      // if (!user) {
+      //   console.log("No user exists in user list request");
+      //   return res.status(401).json({ 
+      //     success: false, 
+      //     code: 401,
+      //     message: 'User does not exist or does not have access to perform this operation.' 
+      //   });
+      // }
 
-      if (syncsInProgress.length) {
-        SyncsRepo.skipSync(sync);
-        return res.status(429).json({
-          success: false,
-          code: 429,
-          message: "Sync already in progress for this user"
-        });
-      }
+      // const SyncsRepo = await getSyncRepository();
+      // const { syncsInProgress, sync } = await SyncsRepo.queueSync({ trigger: SyncTrigger.USER, username: user.username });
 
-      sync.type = SyncType.USER_LISTS;
-      SyncsRepo.startSync(sync);
+      // if (syncsInProgress.length) {
+      //   SyncsRepo.skipSync(sync);
+      //   return res.status(429).json({
+      //     success: false,
+      //     code: 429,
+      //     message: "Sync already in progress for this user"
+      //   });
+      // }
 
-      res.status(200).json({
-        success: true
-      });
+      // sync.type = SyncType.USER_LISTS;
+      // SyncsRepo.startSync(sync);
 
-      try {
-        const LetterboxdListsRepo = await getLetterboxdListsRepository();
-        const MovieEntriesRepo = await getLetterboxdListMovieEntriesRepository();
+      // res.status(200).json({
+      //   success: true
+      // });
+
+      // try {
+      //   const LetterboxdListsRepo = await getLetterboxdListsRepository();
+      //   const MovieEntriesRepo = await getLetterboxdListMovieEntriesRepository();
         
-        const numListsSynced = await scrapeListsForUser({
-          username: user.username,
-          processList: async ({ details, movieIds }) => {
-            details.lastSynced = new Date();
-            details.owner = user;
+      //   const numListsSynced = await scrapeListsForUser({
+      //     username: user.username,
+      //     processList: async ({ details, movieIds }) => {
+      //       details.lastSynced = new Date();
+      //       details.owner = user;
     
-            const found = await LetterboxdListsRepo.findOneBy({ url: details.url });
-            const updated = found 
-              ? await LetterboxdListsRepo.preload({ ...details, id: found.id }) 
-              : LetterboxdListsRepo.create(details);
+      //       const found = await LetterboxdListsRepo.findOneBy({ url: details.url });
+      //       const updated = found 
+      //         ? await LetterboxdListsRepo.preload({ ...details, id: found.id }) 
+      //         : LetterboxdListsRepo.create(details);
 
-            if (!updated) {
-              throw new Error('Could not upsert list into DB');
-            }
+      //       if (!updated) {
+      //         throw new Error('Could not upsert list into DB');
+      //       }
 
-            const saved = await LetterboxdListsRepo.save(updated);
+      //       const saved = await LetterboxdListsRepo.save(updated);
 
-            const movieEntries = movieIds.map((id, i) => {
-              return {
-                movieId: id,
-                listId: saved.id,
-                order: i
-              }
-            });
-            await MovieEntriesRepo.delete({ listId: saved.id });
-            const result = await MovieEntriesRepo.upsert(movieEntries, ['movieId', 'listId']);
-          }
-        });
+      //       const movieEntries = movieIds.map((id, i) => {
+      //         return {
+      //           movieId: id,
+      //           listId: saved.id,
+      //           order: i
+      //         }
+      //       });
+      //       await MovieEntriesRepo.delete({ listId: saved.id });
+      //       const result = await MovieEntriesRepo.upsert(movieEntries, ['movieId', 'listId']);
+      //     }
+      //   });
 
-        SyncsRepo.endSync(sync, { status: SyncStatus.COMPLETE, numSynced: numListsSynced });
-      } catch (error: unknown) {
-        SyncsRepo.endSync(sync, { 
-          status: SyncStatus.FAILED,
-          numSynced: 0,
-          errorMessage: getErrorAsString(error) 
-        });
-        const message = getErrorAsString(error);
-        console.log('ERROR CAUGHT AFTER RESPONSE', message);
-      }
+      //   SyncsRepo.endSync(sync, { status: SyncStatus.COMPLETE, numSynced: numListsSynced });
+      // } catch (error: unknown) {
+      //   SyncsRepo.endSync(sync, { 
+      //     status: SyncStatus.FAILED,
+      //     numSynced: 0,
+      //     errorMessage: getErrorAsString(error) 
+      //   });
+      //   const message = getErrorAsString(error);
+      //   console.log('ERROR CAUGHT AFTER RESPONSE', message);
+      // }
     }
   }
 });

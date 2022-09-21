@@ -179,7 +179,7 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
       for (let page = lastWatchesPage; page > 0; page--) {
         
         // TODO REMOVE 
-        console.log(`syncing watches DESC for page ${page}`);
+        console.log(`syncing ${username} watches DESC for page ${page}`);
 
         const syncedForPage = await syncWatchesForPage({
           userId,
@@ -192,19 +192,19 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
       for (let page = 0; page <= lastWatchesPage; page++) {
 
         // TODO REMOVE
-        console.log(`syncing watches ASC for page ${page}`);
+        console.log(`syncing ${username} watches ASC for page ${page}`);
 
         const syncedForPage = await syncWatchesForPage({
           userId,
           username,
           page
         });
-        // if (syncedForPage.length === 0) {
-        //   // when moving through the pages forward, as soon
-        //   // as we encounter a page with no ratings, we can
-        //   // assume we don't need to continue through pages
-        //   break;
-        // }
+        if (syncedForPage.length === 0) {
+          // when moving through the pages forward, as soon
+          // as we encounter a page with no ratings, we can
+          // assume we don't need to continue through pages
+          break;
+        }
         syncedWatches = syncedWatches.concat(syncedForPage);
       }
     }

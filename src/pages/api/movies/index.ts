@@ -5,6 +5,13 @@ import { convertYearsToRange } from "../../../lib/convertYearsToRange";
 import { numberListQueryParam, numericQueryParam, singleQueryParam, stringListQueryParam } from "../../../lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";
 
+
+const SORT_BY_MAP = {
+  popularity: 'movie.popularity',
+  dateRated: 'date',
+  title: 'movie.title'
+};
+
 const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
   handlers: {
     get: async (req, res) => {
@@ -16,8 +23,11 @@ const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
       const collections = numberListQueryParam(req.query.collections);
       const userId = numericQueryParam(req.query.blindspotsForUser);
       const limit = numericQueryParam(req.query.limit);
+      const sortBy = (singleQueryParam(req.query.sortBy) || 'popularity') as 'popularity' | 'dateRated' | 'title';
+      const sortDir = (singleQueryParam(req.query.sortDir) || 'DESC') as 'ASC' | 'DESC';
+      const mappedSortBy = SORT_BY_MAP[sortBy];
 
-      // TODO: Accept collections? Other filters?
+
       let query = MoviesRepo.createQueryBuilder('movie');
 
       if (ids.length > 0) {
@@ -42,7 +52,7 @@ const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
             .andWhere(`collection.id IN(${collections.join(',')})`);
         }
 
-        if (dateRange.length === 2) {
+        if (dateRange.length === 2 && typeof dateRange[0] === "string" && typeof dateRange[1] === "string") {
           query = query.andWhere('movie.releaseDate BETWEEN :start AND :end', {
             start: dateRange[0],
             end: dateRange[1]
@@ -50,9 +60,7 @@ const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
         }
       }
 
-      query = query.orderBy('movie.popularity', 'DESC')
-        .addOrderBy('movie.releaseDate', 'DESC')
-        .limit(limit);
+      query = query.orderBy(mappedSortBy, sortDir).limit(limit);
 
       const results = await query.getMany();
       res.json({ success: true, movies: results });
