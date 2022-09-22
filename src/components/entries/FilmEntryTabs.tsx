@@ -38,6 +38,7 @@ export function FilmEntryTabs({
   const [show, setShow] = useState<"all" | number>(100);
   const [processedEntries, updateProcessedEntries] = useState<EntryApiResponse[]>([]);
   const [blindspots, setBlindspots] = useState<BlindspotMovie[]>([]);
+  const [blindspotsLoading, setBlindspotsLoading] = useState<boolean>(false);
   const sorting = useSorting<FilmEntrySortBy>("date");
   const blindspotSorting = useSorting<BlindspotsSortBy>("loxScore", "DESC");
   const { sortBy, sortDir } = sorting;
@@ -60,6 +61,7 @@ export function FilmEntryTabs({
 
   useEffect(() => {
     async function retrieve() {
+      setBlindspotsLoading(true);
       const blindspots = await getBlindspotsForFilters({
         entries: processedEntries, 
         filters, 
@@ -67,6 +69,7 @@ export function FilmEntryTabs({
         sorting: blindspotSorting
       });
       setBlindspots(blindspots);
+      setBlindspotsLoading(false);
     }
     retrieve();
   }, [processedEntries, filters, user, blindspotSorting.sortBy, blindspotSorting.sortDir])
@@ -113,7 +116,7 @@ export function FilmEntryTabs({
         <EntriesTable entries={processedEntries} isLoading={isReloading || isProcessing} />
       </TabPanel>
       <TabPanel value={value} index={1} sx={{ paddingLeft: 0 }}>
-        <Blindspots blindspots={blindspots} sorting={blindspotSorting} />
+        <Blindspots blindspots={blindspots} sorting={blindspotSorting} isLoading={blindspotsLoading} />
       </TabPanel>
     </Box>
   );

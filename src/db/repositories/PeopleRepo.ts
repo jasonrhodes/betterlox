@@ -220,7 +220,7 @@ export const getPeopleRepository = async () => (await getDataSource()).getReposi
     }
 
     query = query.innerJoin('film_entries', 'e', 'e."movieId" = cr."movieId"')
-      .addSelect('((COUNT(e."movieId") / 10) + p.popularity) as pop_score')
+      .addSelect('COUNT(e."movieId") as pop_score')
       .groupBy('p.id')
       .orderBy('pop_score', 'DESC');
     
