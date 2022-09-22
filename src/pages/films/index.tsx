@@ -10,6 +10,7 @@ import { FilmEntryTabs } from '../../components/entries/FilmEntryTabs';
 import { convertFiltersToQueryString } from '../../lib/convertFiltersToQueryString';
 import { useGlobalFilters } from '../../hooks/GlobalFiltersContext';
 import { EntriesApiResponse, EntryApiResponse } from '../../common/types/api';
+import { BlindspotsInfo } from '../../components/BlindspotsInfo';
 
 function PageContent({ userId }: { userId: number }) {
   const [unprocessedEntries, updateUnprocessedEntries] = useState<EntryApiResponse[]>([]);
@@ -59,7 +60,7 @@ function PageContent({ userId }: { userId: number }) {
 const EntriesPage: NextPage = () => {
   const router = useRouter();
   return (
-    <UserPageTemplate title="My Films">
+    <UserPageTemplate title="My Films" titleLineRightContent={<BlindspotsInfo />}>
       {(userContext) => {
         if (!userContext.user) {
           router.replace('/login');

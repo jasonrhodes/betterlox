@@ -7,12 +7,12 @@ import { createApiRoute } from "../../../lib/routes";
 
 
 const SORT_BY_MAP = {
-  popularity: 'movie.popularity',
+  popularity: 'score.averageRating',
   dateRated: 'date',
   title: 'movie.title'
 };
 
-const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
+const MoviesApiRoute = createApiRoute<any>({
   handlers: {
     get: async (req, res) => {
       const MoviesRepo = await getMoviesRepository();
@@ -26,7 +26,6 @@ const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
       const sortBy = (singleQueryParam(req.query.sortBy) || 'popularity') as 'popularity' | 'dateRated' | 'title';
       const sortDir = (singleQueryParam(req.query.sortDir) || 'DESC') as 'ASC' | 'DESC';
       const mappedSortBy = SORT_BY_MAP[sortBy];
-
 
       let query = MoviesRepo.createQueryBuilder('movie');
 
@@ -60,9 +59,36 @@ const MoviesApiRoute = createApiRoute<MoviesApiResponse>({
         }
       }
 
+      const subquery = MoviesRepo.createQueryBuilder('movie')
+        .leftJoin('movie.entries', 'entry')
+        .select('movie.id')
+        .addSelect('AVG(entry.stars)', 'averageRating')
+        .groupBy('movie.id');
+
+      query = query.leftJoin(() => `(${subquery.getQuery()})`, 'score', 'movie.id = score.id')
+        .addSelect('score.averageRating');
+
       query = query.orderBy(mappedSortBy, sortDir).limit(limit);
 
-      const results = await query.getMany();
+      let results = await query.getRawMany();
+
+      // let averages: any[] = [];
+      // if (sortBy === 'popularity') {
+      //   const rQuery = MoviesRepo.createQueryBuilder('movie')
+      //     .leftJoin('movie.entries', 'entry')
+      //     .select('movie.id')
+      //     .addSelect('AVG(entry.stars)', 'averageRating')
+      //     .where(`movie.id IN(${results.map(m => m.id).join(',')})`)
+      //     .groupBy('movie.id')
+      //     .having('COUNT(entry."userId") > 1');
+        
+      //   averages = await rQuery.getRawMany();
+      //   results = results.map((m) => {
+      //     const avg = averages.find(a => a.id === m.id);
+      //     m.loxAverageRating = avg.averageRating || 0;
+      //     return m;
+      //   })
+      // }
       res.json({ success: true, movies: results });
     }
   }

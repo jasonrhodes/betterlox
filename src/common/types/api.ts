@@ -286,3 +286,17 @@ export interface MovieGetResponse extends ApiSuccessResponse {
 };
 
 export type MovieApiResponse = ApiResponse<MovieGetResponse>;
+
+export type BlindspotMovie = Pick<Movie, 'id' | 'title' | 'posterPath' | 'runtime' | 'releaseDate' | 'popularity' | 'status' | 'imdbId' | 'letterboxdSlug' | 'genres'> 
+  & { averageRating: number; countRatings: number; loxScore: number; reason?: string; };
+export interface UserBlindspotExtras {
+  collections?: Collection[];
+}
+export interface UserBlindspotsGetResponse extends ApiSuccessResponse {
+  blindspots: BlindspotMovie[];
+  extras?: UserBlindspotExtras;
+  unknownIds?: number[];
+}
+export type UserBlindspotsApiResponse = ApiResponse<UserBlindspotsGetResponse>;
+
+export type BlindspotsSortBy = 'loxScore' | 'loxMostRated' | 'loxHighestRated' | 'releaseDate' | 'title';

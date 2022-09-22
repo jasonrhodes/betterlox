@@ -1,6 +1,6 @@
 import { Box, LinearProgress, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { EntryApiResponse, GlobalFilters, MoviesApiResponse, TmdbPersonByIdResponse } from '../common/types/api';
+import { BlindspotMovie, BlindspotsSortBy, EntryApiResponse, GlobalFilters, MoviesApiResponse, TmdbPersonByIdResponse, UserBlindspotsApiResponse } from '../common/types/api';
 import { Movie, UserSettings } from '../db/entities';
 import { callApi } from '../hooks/useApi';
 import { UserPublic } from '../common/types/db';
@@ -8,63 +8,23 @@ import { convertYearsToRange } from '../lib/convertYearsToRange';
 import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
 import { MoviesTable } from './MoviesTable';
 import { PartialMovie } from '../common/types/base';
-import { SortControls, useSorting } from '../hooks/useSorting';
+import { SortControls, SortManagement, useSorting } from '../hooks/useSorting';
 
 interface GetBlindspotsForUserOptions {
   entries: EntryApiResponse[];
   filters: GlobalFilters;
   user?: UserPublic;
+  sorting: SortManagement<BlindspotsSortBy>;
 }
 
-interface MissingMovieExtras {
-  reason: string;
-  castOrder?: number;
-  voteCount?: number;
-  collectionIds: number[];
+interface BlindspotsOptions {
+  blindspots: BlindspotMovie[]; 
+  isLoading?: boolean;
+  sorting: SortManagement<BlindspotsSortBy>;
 }
 
-export type MissingMovie = Pick<Movie, 'id' | 'title' | 'imdbId' | 'posterPath' | 'popularity' | 'releaseDate' | 'genres'> & MissingMovieExtras;
-
-type BlindspotsSortBy = 'popularity' | 'releaseDate' | 'title';
-
-
-export function Blindspots({ blindspots, isLoading }: { blindspots: PartialMovie[]; isLoading?: boolean }) {
-  const [sorted, setSorted] = useState<PartialMovie[]>([]);
-  const [isSorting, setIsSorting] = useState<boolean>(false);
-  // const [sortBy, setSortBy] = useState<SortBy>('popularity');
-  // const [sortDir, setSortDir] = useState<SortDir>('DESC')
-
-  const sorting = useSorting<BlindspotsSortBy>('popularity', 'DESC');
-  const { sortBy, sortDir } = sorting;
-
-  useEffect(() => {
-    async function retrieve() {
-      setIsSorting(true);
-
-      const sorted = [...blindspots].sort((a, b) => {
-        const aVal = a[sortBy];
-        const bVal = b[sortBy];
-        if (typeof aVal === 'undefined' || typeof bVal === "undefined") {
-          return 0;
-        }
-
-        let val = 0;
-        if (typeof aVal === "string" && typeof bVal === "string") {
-          val = aVal.localeCompare(bVal);
-        }
-        if (typeof aVal === "number" && typeof bVal === "number") {
-          val = (aVal > bVal) ? -1 : 1;
-        }
-        const finalVal = (sortDir === 'ASC') ? (val * -1) : val;
-        return finalVal;
-      });
-      setSorted(sorted);
-      setIsSorting(false);
-    }
-    retrieve();
-  }, [blindspots, sortBy, sortDir]);
-
-  if (isLoading || isSorting) {
+export function Blindspots({ blindspots, isLoading, sorting }: BlindspotsOptions) {
+  if (isLoading) {
     return <LinearProgress />;
   }
 
@@ -81,80 +41,36 @@ export function Blindspots({ blindspots, isLoading }: { blindspots: PartialMovie
     <Box>
       <Box sx={{ mb: 2 }}>
         <SortControls<BlindspotsSortBy> {...sorting} sortByOptions={{
-          popularity: 'Popularity',
+          loxScore: 'Lox Popularity',
+          loxMostRated: 'Lox Most Watched',
+          loxHighestRated: 'Lox Highest Rated',
           releaseDate: 'Release Date',
           title: 'Movie Title'
         }} />
       </Box>
-      <MoviesTable movies={sorted} isLoading={false} />
+      <MoviesTable movies={blindspots} isLoading={false} />
     </Box>
   )
 }
 
-interface HasId {
-  id: unknown;
-};
-
-interface HasNumericId {
-  id: number;
-};
-
-function hasId(x: unknown): x is HasId {
-  return Boolean(x)
-    && typeof x === "object"
-    && x !== null
-    && ("id" in x);
+interface FindPeopleBlindspotsOptions { 
+  currentEntryIds: number[];
+  filters: GlobalFilters;
+  settings?: UserSettings | null;
 }
 
-function hasNumericId(x: unknown): x is HasNumericId {
-  return hasId(x) && typeof x.id === "number";
-}
-
-function getCollectionsFromTmdb(c: unknown) {
-  if (hasNumericId(c)) {
-    return [c.id];
-  } else {
-    return [];
-  }
-}
-
-function findMissing(seen: number[], potentials: MissingMovie[]): MissingMovie[];
-function findMissing(seen: number[], potentails: Movie[]): Movie[];
-function findMissing(seen: number[], potentials:(MissingMovie | Movie)[]) {
-  const missing = potentials.filter((movie) => {
-    if (seen.includes(movie.id)) {
-      return false;
-    }
-
-    const d = new Date(movie.releaseDate);
-    const now = new Date();
-    if (d.toString() !== "Invalid Date" && d.getTime() > now.getTime()) {
-      return false;
-    }
-
-    // Remove undervoted/under popular movies ...
-    const underVoted = ('voteCount' in movie && typeof movie.voteCount === "number") && movie.voteCount < 25;
-    const unpopular = (typeof movie.popularity === "number") && movie.popularity < 5;
-
-    if (underVoted && unpopular) {
-      return false;
-    }
-
-    return true;
-  });
-
-  missing.sort((a, b) => a.popularity > b.popularity ? -1 : 1);
-  return missing;
-}
-
-async function findPeoplePotentials(currentEntries: number[], filters: GlobalFilters, settings?: UserSettings | null) {
-  const allPeopleSets: MissingMovie[][] = [];
+async function findPeopleBlindspots({
+  currentEntryIds,
+  filters,
+  settings
+}: FindPeopleBlindspotsOptions) {
+  const allPeopleSets: BlindspotMovie[][] = [];
 
   if (filters.actors?.length) {
     const actors = (await Promise.all(filters.actors.map((actorId) => callApi<TmdbPersonByIdResponse>(`/api/tmdb/people/${actorId}`)))).map(response => response.data?.person);
 
     actors.forEach((actor) => {
-      const actorMovies: MissingMovie[] = [];
+      const actorMovies: BlindspotMovie[] = [];
       actor.movie_credits.cast?.forEach((credit) => {
         if (
           credit.id && 
@@ -162,20 +78,25 @@ async function findPeoplePotentials(currentEntries: number[], filters: GlobalFil
           typeof credit.popularity === "number" &&
           typeof credit.order === "number" &&
           credit.order <= (settings?.statsMinCastOrder || 10000) && 
-          !currentEntries.includes(credit.id)
+          !currentEntryIds.includes(credit.id)
         ) {
           actorMovies.push({
             id: credit.id,
             reason: `${actor.name} plays ${credit.character || '(unknown)'}`,
             title: credit.title,
             genres: (credit.genres || []).map(g => g.name || 'unknown'),
-            collectionIds: getCollectionsFromTmdb(credit.belongs_to_collection),
+            // collectionIds: getCollectionsFromTmdb(credit.belongs_to_collection),
             imdbId: credit.imdb_id || '',
             posterPath: credit.poster_path || '',
             popularity: credit.popularity,
             releaseDate: credit.release_date || '',
-            castOrder: credit.order,
-            voteCount: credit.vote_count
+            runtime: credit.runtime || 0,
+            status: credit.status || '',
+            averageRating: 0,
+            countRatings: 0,
+            loxScore: 0
+            // castOrder: credit.order,
+            // voteCount: credit.vote_count
           });
         }
       });
@@ -187,26 +108,31 @@ async function findPeoplePotentials(currentEntries: number[], filters: GlobalFil
   if (filters.directors?.length) {
     const directors = (await Promise.all(filters.directors.map((personId) => callApi<TmdbPersonByIdResponse>(`/api/tmdb/people/${personId}`)))).map(response => response.data?.person);
     directors.forEach((person) => {
-      const directorMovies: MissingMovie[] = [];
+      const directorMovies: BlindspotMovie[] = [];
       person.movie_credits.crew?.forEach((role) => {
         if (
           role.id && 
           role.title && 
           role.job === "Director" && 
           typeof role.popularity === "number" && 
-          !currentEntries.includes(role.id)
+          !currentEntryIds.includes(role.id)
         ) {
           directorMovies.push({
             id: role.id,
             reason: `Directed by ${person.name}`,
             title: role.title,
             genres: (role.genres || []).map(g => g.name || 'unknown'),
-            collectionIds: [],
+            // collectionIds: [],
             imdbId: role.imdb_id || '',
             posterPath: role.poster_path || '',
             popularity: role.popularity,
             releaseDate: role.release_date || '',
-            voteCount: role.vote_count
+            runtime: role.runtime || 0,
+            status: role.status || '',
+            averageRating: 0,
+            countRatings: 0,
+            loxScore: 0
+            // voteCount: role.vote_count
           });
         }
       });
@@ -214,7 +140,9 @@ async function findPeoplePotentials(currentEntries: number[], filters: GlobalFil
     });
   }
 
-  const overlapping = allPeopleSets.reduce<MissingMovie[]>((prev, current) => {
+  // TODO: Add editors, writers, etc?
+
+  const overlapping = allPeopleSets.reduce<BlindspotMovie[]>((prev, current) => {
     if (prev.length === 0) {
       return current;
     }
@@ -223,25 +151,33 @@ async function findPeoplePotentials(currentEntries: number[], filters: GlobalFil
     return overlap;
   }, []);
 
-  return overlapping;
+  return await applyFiltersToPeopleBlindspots(overlapping, filters);
 }
 
-async function findNonPeoplePotentials(filters: GlobalFilters, userId?: number) {
+interface FindLoxBlindspotsOptions {
+  filters: GlobalFilters;
+  userId: number;
+  sorting: SortManagement<BlindspotsSortBy>;
+  ids?: number[];
+}
+
+async function findLoxBlindspots({ filters, userId, sorting, ids }: FindLoxBlindspotsOptions) {
   // call a local movies API and request top x movies for filters
   let qs = convertFiltersToQueryString(filters);
-  if (userId) {
-    qs += `&blindspotsForUser=${userId}`;
+  qs += `&limit=100&sortBy=${sorting.sortBy}&sortDir=${sorting.sortDir}`;
+  
+  if (ids) {
+    qs += `&movieIds=${ids.join(',')}`;
   }
-  qs += '&limit=100';
 
-  const { data } = await callApi<MoviesApiResponse>(`/api/movies?${qs}`);
-  if ('movies' in data) {
-    return data.movies;
+  const { data } = await callApi<UserBlindspotsApiResponse>(`/api/users/${userId}/blindspots?${qs}`);
+  if (data.success && 'blindspots' in data) {
+    return data;
   }
-  return [];
+  return { blindspots: [], extras: undefined, unknownIds: undefined };
 }
 
-function applyNonPeopleFiltersToPeople(movies: MissingMovie[], filters: GlobalFilters) {
+function applyFiltersToPeopleBlindspots(movies: BlindspotMovie[], filters: GlobalFilters) {
   const {
     genres = [],
     excludedGenres = []
@@ -280,18 +216,54 @@ function applyNonPeopleFiltersToPeople(movies: MissingMovie[], filters: GlobalFi
 export async function getBlindspotsForFilters({ 
   entries, 
   filters,
-  user
-}: GetBlindspotsForUserOptions): Promise<PartialMovie[]> {
+  user,
+  sorting
+}: GetBlindspotsForUserOptions): Promise<BlindspotMovie[]> {
+  if (!user) {
+    return [];
+  }
+
   const currentEntryIds = entries.map(r => r.movieId);
-  const peoplePotentials = await findPeoplePotentials(currentEntryIds, filters, user?.settings);
+  const peopleBlindspots = await findPeopleBlindspots({
+    currentEntryIds, 
+    filters, 
+    settings: user.settings
+  });
+  const peopleBlindspotIds = peopleBlindspots.map(b => b.id);
 
-  let blindspots: PartialMovie[] = [];
+  const { blindspots, extras, unknownIds } = await findLoxBlindspots({
+    filters,
+    userId: user.id,
+    sorting,
+    ids: peopleBlindspotIds
+  });
 
-  if (peoplePotentials.length > 0) {
-    const combinedPotentials = await applyNonPeopleFiltersToPeople(peoplePotentials, filters);
-    blindspots = findMissing(currentEntryIds, combinedPotentials);
-  } else {
-    blindspots = await findNonPeoplePotentials(filters, user?.id);
+  if (unknownIds && unknownIds.length > 0) {
+    let mergedBlindspots: BlindspotMovie[] = [];
+    const unknownBlindspots = peopleBlindspots.filter(b => unknownIds.includes(b.id));
+    if (sorting.sortBy.startsWith("lox")) {
+      unknownBlindspots.sort((a, b) => {
+        const val = a.popularity > b.popularity ? -1 : 1;
+        return sorting.sortDir === 'DESC' ? val : val * -1;
+      });
+      mergedBlindspots = blindspots.concat(unknownBlindspots);
+    } else {
+      mergedBlindspots = blindspots.concat(unknownBlindspots);
+      mergedBlindspots.sort((a, b) => {
+        let val = 0;
+        if (sorting.sortBy === "title") {
+          val = (a.title > b.title) ? -1 : 1;
+        }
+        if (sorting.sortBy === "releaseDate") {
+          const aTime = (new Date(a.releaseDate)).getTime();
+          const bTime = (new Date(b.releaseDate)).getTime();
+          val = (aTime > bTime) ? -1 : 1;
+        }
+        return sorting.sortDir === 'DESC' ? val : val * -1;
+      });
+    }
+
+    return mergedBlindspots;
   }
 
   return blindspots;

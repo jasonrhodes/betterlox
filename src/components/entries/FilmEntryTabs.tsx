@@ -1,6 +1,6 @@
 import { TextField, Box, Tabs, Tab, FormControl, Typography } from "@mui/material";
 import React, { useState, useEffect, useCallback } from "react";
-import { EntryApiResponse, GlobalFilters } from "../../common/types/api";
+import { BlindspotMovie, BlindspotsSortBy, EntryApiResponse, GlobalFilters } from "../../common/types/api";
 import { escapeRegExp } from "../../lib/escapeRegex";
 import { EntriesTable } from "../EntriesTable";
 import { TabPanel, a11yTabProps } from "../TabPanel";
@@ -37,8 +37,9 @@ export function FilmEntryTabs({
   const [quickTitleSearch, updateQuickTitleSearch] = useState<string>('');
   const [show, setShow] = useState<"all" | number>(100);
   const [processedEntries, updateProcessedEntries] = useState<EntryApiResponse[]>([]);
-  const [blindspots, setBlindspots] = useState<PartialMovie[]>([]);
+  const [blindspots, setBlindspots] = useState<BlindspotMovie[]>([]);
   const sorting = useSorting<FilmEntrySortBy>("date");
+  const blindspotSorting = useSorting<BlindspotsSortBy>("loxScore", "DESC");
   const { sortBy, sortDir } = sorting;
   const { user } = useCurrentUser();
 
@@ -62,12 +63,13 @@ export function FilmEntryTabs({
       const blindspots = await getBlindspotsForFilters({
         entries: processedEntries, 
         filters, 
-        user
+        user,
+        sorting: blindspotSorting
       });
       setBlindspots(blindspots);
     }
     retrieve();
-  }, [processedEntries, filters, user])
+  }, [processedEntries, filters, user, blindspotSorting.sortBy, blindspotSorting.sortDir])
 
   const handleQuickTitleSearchChange = useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateQuickTitleSearch(escapeRegExp(event.target.value));
@@ -81,19 +83,6 @@ export function FilmEntryTabs({
       setShow(Number(value));
     }
   }, []);
-
-  // const handleSortByChange = useCallback((event) => {
-  //   const { value } = event.target;
-  //   setSortBy(value);
-  // }, []);
-
-  // const handleSortDirClick = useCallback(() => {
-  //   setSortDir(sortDir === "ASC" ? "DESC" : "ASC");
-  // }, [sortDir]);
-
-  // const toggleHideUnrated = useCallback(() => {
-  //   setHideUnrated(!hideUnrated);
-  // }, [hideUnrated]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -124,7 +113,7 @@ export function FilmEntryTabs({
         <EntriesTable entries={processedEntries} isLoading={isReloading || isProcessing} />
       </TabPanel>
       <TabPanel value={value} index={1} sx={{ paddingLeft: 0 }}>
-        <Blindspots blindspots={blindspots} />
+        <Blindspots blindspots={blindspots} sorting={blindspotSorting} />
       </TabPanel>
     </Box>
   );
