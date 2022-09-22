@@ -189,14 +189,14 @@ function validateParameters({
   console.log('Validating parameters', JSON.stringify({ genres, excludedGenres, dateRange, collections }));
   const genreRegExp = new RegExp('^[a-zA-Z\-_\w]*$');
   const yearRegExp = new RegExp('^[1-3]{1}[0-9]{3}$');
-  const decadeRegExp = new RegExp('^Decade:[1-3]{1}[0-9]{3}s$');
+  const decadeRegExp = new RegExp('^Decade: ?[1-3]{1}[0-9]{3}s$');
 
   if (dateRange) {
     console.log('valid year', dateRange, `${dateRange.length} characters`, typeof dateRange, yearRegExp.test(dateRange));
     console.log('valid decade', dateRange, decadeRegExp.test(dateRange));
   }
 
-  if (genres.length > 0 && !genres.some(g => !genreRegExp.test(g))) {
+  if (genres.length > 0 && genres.some(g => !genreRegExp.test(g))) {
     throw new Error('Invalid value(s) for parameter "genres" provided');
   }
   if (excludedGenres.length > 0 && excludedGenres.some(g => !genreRegExp.test(g))) {
