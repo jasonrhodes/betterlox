@@ -1,5 +1,5 @@
 import { Apps, Close, FilterAlt, Phishing, Sort } from "@mui/icons-material";
-import { Box, Button, Drawer, IconButton, List, ListItem, ListItemAvatar, SxProps, Typography } from "@mui/material";
+import { Box, Button, Drawer, IconButton, Link, List, ListItem, ListItemAvatar, SxProps, Typography } from "@mui/material";
 import React, { useState } from "react";
 
 export function BlindspotsInfo() {
@@ -13,20 +13,20 @@ export function BlindspotsInfo() {
         onClose={() => setIsOpen(false)}
         PaperProps={{
           sx: {
-            backgroundColor: "#8A0500"
+            backgroundColor: "#710000"
           }
         }}
       >
         <Box sx={{ p: { xs: 4, sm: 6 }, pt: { xs: 6 }, position: 'relative', width: { xs: 300, sm: 550, md: 700 }}}>
           <IconButton onClick={() => setIsOpen(false)} sx={{ position: 'absolute', top: 10, right: 15 }}><Close /></IconButton>
           <Typography component="h3" sx={{ mb: 1, fontSize: { xs: '18px', sm: '32px' }}}>How blindspots work</Typography>
-          <Paragraph>Blindspots show you what you <em>haven&apos;t</em> seen yet, within a set of given filters. There are two main types of Lox Blindspots.</Paragraph>
+          <Paragraph>Blindspots show you what you <em>haven&apos;t</em> seen yet, within a set of given filters. There are two main types of blindspots.</Paragraph>
           
           <Subheading text='Lox Blindspots' icon={<Phishing />} />
-          <Paragraph>When your filters leave an enormous set of movies, the blindspots will show you what you haven&apos;t seen from all of the movies in the Lox database. This includes everything every Lox user has seen or rated, plus a selection of the 100 most popular films from every year since 1920 as well as each of the main Letterboxd genres.</Paragraph>
+          <Paragraph>When your filters include an enormous set of movies (decade, genre, etc.), we show you what you haven&apos;t seen <em>from all of the movies in the Lox database</em>. This includes everything every Lox user has seen or rated, plus a selection of the 100 most popular films from every year since 1920 as well as from each of the main Letterboxd genres.</Paragraph>
           
           <Subheading text="Filmography Blindspots" icon={<Apps />} />
-          <Paragraph>When you filter by actor, director, etc., the complete list of movies is much smaller, so the blindspot search will consider all of the movies that match those criteria (using TMDB).</Paragraph>
+          <Paragraph>When you filter by actor, director, etc., the complete list of movies is much smaller, so the blindspot search will consider all of the movies that match those criteria (using <Link href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">TMDB</Link>).</Paragraph>
           
           <Subheading text="Sorting" icon={<Sort />} />
           <Paragraph sx={{ mb: 2 }}>You can choose to sort your blindspots in many different ways. For the Lox-specific sort options, movies that are not in the Lox database will always appear at the end of those lists.</Paragraph>
