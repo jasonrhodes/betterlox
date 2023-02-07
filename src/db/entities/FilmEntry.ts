@@ -26,10 +26,10 @@ export class FilmEntry {
   letterboxdSlug: string;
 
   @Column({ default: false })
-  heart: boolean;
+  heart?: boolean;
 
   @Column({ nullable: true })
-  rewatch: boolean;
+  rewatch?: boolean;
 
   @Column({ default: false })
   unsyncable: boolean;

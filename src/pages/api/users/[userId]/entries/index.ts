@@ -16,6 +16,8 @@ function convertResultsToEntries(results: EntryQueryResult[]): EntryApiResponse[
     userId: result.entry_userId,
     stars: result.entry_stars,
     date: result.entry_date,
+    heart: result.entry_heart,
+    rewatch: result.entry_rewatch,
     movie: convertResultToEntryMovie(result)
   }));
 }

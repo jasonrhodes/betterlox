@@ -173,6 +173,8 @@ export interface EntryQueryResult {
   entry_unsyncable: false;
   entry_userId: number;
   entry_stars?: number;
+  entry_heart?: boolean;
+  entry_rewatch?: boolean;
   entry_date?: Date;
   entry_dateRated?: Date;
   movie_id: number;
