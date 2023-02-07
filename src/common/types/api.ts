@@ -95,7 +95,7 @@ export interface UnsyncedGetResponse {
 
 export interface UserEntriesSyncApiResponse extends ApiSuccessResponse {
   synced: {
-    ratings: FilmEntry[];
+    diaries: FilmEntry[];
     watches: FilmEntry[];
   };
   count: number;

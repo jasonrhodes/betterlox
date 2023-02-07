@@ -113,8 +113,8 @@ export async function getUserDetails(username: string): Promise<LetterboxdDetail
   };
 }
 
-export async function findLastRatingsPage(username: string) {
-  const { data } = await tryLetterboxd(`https://letterboxd.com/${username}/films/ratings/`);
+export async function findLastDiaryPage(username: string) {
+  const { data } = await tryLetterboxd(`https://letterboxd.com/${username}/films/diary/`);
   const $ = cheerio.load(data);
   const lastPageLink = $('.paginate-pages li.paginate-page:last-child');
   const lastPage = lastPageLink.text();
@@ -259,6 +259,7 @@ export async function scrapeMovieByUrl(url: string): Promise<ScrapedMovie> {
 interface ScrapeByPageOptions {
   username: string;
   page?: number;
+  direction?: 'up' | 'down';
 }
 
 export async function scrapeWatchesByPage({
@@ -303,22 +304,30 @@ export async function scrapeWatchesByPage({
   return { watches };
 }
 
-export async function scrapeRatingsByPage({
+export async function scrapeDiaryEntriesByPage({
   username,
-  page = 1
-}: ScrapeByPageOptions): Promise<{ ratings: Array<Partial<FilmEntry>> }> {
+  page = 1,
+  direction = 'down'
+}: ScrapeByPageOptions): Promise<{ diaryEntries: Array<Partial<FilmEntry>> }> {
+  // previously: `https://letterboxd.com/${username}/films/ratings/page/${page}`
   const { data } = await tryLetterboxd(
-    `https://letterboxd.com/${username}/films/ratings/page/${page}`
+    `https://letterboxd.com/${username}/films/diary/page/${page}`
   );
   const $ = cheerio.load(data);
-  const ratingElements = $('.poster-list li');
+  const diaryRows = $('#diary-table tr.diary-entry-row');
 
-  if (!ratingElements.length) {
-    return { ratings: [] };
+  if (!diaryRows.length) {
+    return { diaryEntries: [] };
   }
 
-  // process ratings
-  const ratings = await Promise.all(ratingElements.map(async (i, item) => {
+  const rows = diaryRows.get();
+
+  if (direction === 'up') {
+    rows.reverse();
+  }
+
+  // process diary entries
+  const diaryEntries = await Promise.all(rows.map(async (item, i) => {
     const r: Partial<FilmEntry> = {};
 
     const poster = $(item).find('.film-poster');
@@ -328,9 +337,9 @@ export async function scrapeRatingsByPage({
       r.letterboxdSlug = ratingData.filmSlug;
       const { data } = await tryLetterboxd(ratingData.filmSlug);
       const $$ = cheerio.load(data);
-      const { tmdbId } = $$("body").data();
+      const { tmdbId, tmdbType } = $$("body").data();
       const id = Number(tmdbId);
-      if (!isNaN(id)) {
+      if (!isNaN(id) && tmdbType === "movie") {
         r.movieId = id;
       }
     }
@@ -340,20 +349,36 @@ export async function scrapeRatingsByPage({
       r.name = name;
     }
 
-    const stars = $(item).find("span.rating")?.attr()?.class;
-    if (typeof stars === "string") {
-      r.stars = Number(stars.substring(13)) / 2;
+    const ratingClassString = $(item).find("td.td-rating span.rating")?.attr()?.class;
+    if (typeof ratingClassString === "string") {
+      const classes = ratingClassString.split(" ");
+      const ratedClass = classes.find((c) => c.startsWith("rated-"));
+
+      if (ratedClass) {
+        r.stars = Number(ratedClass.substring(6)) / 2;
+      }
     }
 
-    const rateDate = $(item).find("time")?.attr()?.datetime;
-    if (typeof rateDate === "string") {
-      r.date = new Date(rateDate);
+    const likeSpans = $(item).find(".diary-like span");
+    if (likeSpans && likeSpans.length === 3) {
+      r.heart = true;
+    }
+
+    const rewatch = $(item).find(".td-rewatch");
+    if (rewatch && typeof rewatch.hasClass === "function") {
+      r.rewatch = !rewatch.hasClass("icon-status-off");
+    }
+
+    const entryUrl = $(item).find(".diary-day > a")?.attr()?.href;
+    if (typeof entryUrl === "string") {
+      const date = entryUrl.split('/').slice(5, 8).join('/');
+      r.date = new Date(date);
     }
 
     return r;
-  }).get());
+  }));
 
-  return { ratings };
+  return { diaryEntries };
 }
 
 interface ScrapedList {

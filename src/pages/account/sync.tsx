@@ -57,7 +57,7 @@ function SyncWatchData({
       if (response.success && 'synced' in response.data) {
         const { synced } = response.data;
         setSyncState("success");
-        setSyncMessage(`Sync complete. ${synced.ratings.length} ratings and ${synced.watches.length} watches have been updated.`);
+        setSyncMessage(`Sync complete. ${synced.diaries.length} diary entries and ${synced.watches.length} watches have been updated.`);
       } else {
         setSyncState("failed");
         setSyncMessage("Sync request failed due to a system error. Please try again.")
@@ -79,7 +79,7 @@ function SyncWatchData({
           <Typography variant="h5">Watch Data</Typography>
         </Box>
       </Box>
-      <Typography sx={{ mb: 1 }} variant="body1" component="div">Manually sync your watch data to retrieve your latest <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/by/date`}>watches</Link> and <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/ratings`}>ratings</Link> from Letterboxd.</Typography>
+      <Typography sx={{ mb: 1 }} variant="body1" component="div">Manually sync your watch data to retrieve your latest <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/by/date`}>watches</Link> and <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/diary`}>diary entries</Link> from Letterboxd.</Typography>
 
       <Box sx={{ py: 3 }}>
         <Button 

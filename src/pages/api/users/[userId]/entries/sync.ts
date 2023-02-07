@@ -35,12 +35,13 @@ const UserSyncRoute = createApiRoute<UserEntriesSyncApiResponse | ApiErrorRespon
       try {
         sync.type = SyncType.USER_RATINGS;
         SyncsRepo.startSync(sync);
+
         const { synced } = await syncAllEntriesForUser({
           userId: numericUserId,
           username: user?.username,
           order: "ASC" 
         });
-        const numSynced = synced.watches.length + synced.ratings.length;
+        const numSynced = synced.watches.length + synced.diaries.length;
         SyncsRepo.endSync(sync, { status: SyncStatus.COMPLETE, numSynced });
         res.status(200).json({ success: true, synced, count: numSynced });
       } catch (error: unknown) {

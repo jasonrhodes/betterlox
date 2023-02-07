@@ -26,6 +26,12 @@ export class FilmEntry {
   letterboxdSlug: string;
 
   @Column({ default: false })
+  heart: boolean;
+
+  @Column({ nullable: true })
+  rewatch: boolean;
+
+  @Column({ default: false })
   unsyncable: boolean;
 
   @ManyToOne(() => Movie, {

@@ -1,9 +1,9 @@
 import { FilmEntry } from "../db/entities";
 import { getFilmEntriesRepository, getUserRepository } from "../db/repositories";
 import { 
-  findLastRatingsPage, 
+  findLastDiaryPage, 
   findLastWatchesPage,
-  scrapeRatingsByPage,
+  scrapeDiaryEntriesByPage,
   scrapeWatchesByPage
 } from "./letterboxd";
 
@@ -22,6 +22,7 @@ interface SyncPageOptions {
   userId: number;
   username: string;
   page: number;
+  direction?: 'down' | 'up';
 }
 
 async function syncWatchesForPage({ userId, username, page }: SyncPageOptions) {
@@ -79,18 +80,18 @@ async function syncWatchesForPage({ userId, username, page }: SyncPageOptions) {
   return syncedForPage;
 }
 
-async function syncRatingsForPage({ userId, username, page }: SyncPageOptions) {
+async function syncDiaryEntriesForPage({ userId, username, page, direction = 'down' }: SyncPageOptions) {
   const FilmEntriesRepo = await getFilmEntriesRepository();
-  const { ratings } = await scrapeRatingsByPage({ username, page });
-  if (ratings.length === 0) {
+  const { diaryEntries } = await scrapeDiaryEntriesByPage({ username, page, direction });
+  if (diaryEntries.length === 0) {
     return [];
   }
 
   const syncedForPage: FilmEntry[] = [];
 
-  for (let i = 0; i <= ratings.length; i++) {
-    const rating = ratings[i];
-    if (!rating) {
+  for (let i = 0; i <= diaryEntries.length; i++) {
+    const diaryEntry = diaryEntries[i];
+    if (!diaryEntry) {
       break;
     }
 
@@ -99,48 +100,69 @@ async function syncRatingsForPage({ userId, username, page }: SyncPageOptions) {
       name,
       stars,
       date,
+      heart,
+      rewatch,
       letterboxdSlug
-    } = rating;
+    } = diaryEntry;
 
     if (typeof movieId !== "number") {
       throw new Error('Invalid TMDB ID');
     }
 
-    if (typeof stars !== "number") {
-      throw new Error(`Invalid star rating ${stars}`);
+    if (typeof stars !== "number" && typeof stars !== "undefined") {
+      throw new Error(`Invalid star rating ${typeof stars} ${stars}`);
     }
 
-    if (!(date instanceof Date)) {
-      throw new Error(`Invalid date ${date}`);
+    if (!(date instanceof Date) && typeof date !== "undefined") {
+      throw new Error(`Invalid date ${typeof date} ${date}`);
     }
 
-    if (typeof name !== "string") {
+    if (typeof name !== "string" && typeof name !== "undefined") {
       throw new Error(`Invalid name ${name}`);
     }
 
     try {
-      const ratingInfo = {
+      const entryInfo = {
         movieId,
         userId,
         stars,
         date,
-        letterboxdSlug,
-        name
+        heart
       };
-      const foundRating = await FilmEntriesRepo.findOneBy(ratingInfo);
-      if (foundRating) {
-        // we have come across a rating that we already have in the db
-        // so we don't need to re-process this
+      const existingEntry = await FilmEntriesRepo.findOneBy(entryInfo);
+
+      if (existingEntry) {
+        // we have this entry in the database exactly the way we want it
         continue;
       }
-      const newRating = FilmEntriesRepo.create(ratingInfo);
 
-      const saved = await FilmEntriesRepo.save(newRating);
-      syncedForPage.push(saved);
+      const entryToSave = FilmEntriesRepo.create(entryInfo)
+
+      if (typeof name !== "undefined") {
+        entryToSave.name = name;
+      }
+      if (typeof date !== "undefined") {
+        entryToSave.date = date;
+      }
+      if (typeof stars !== "undefined") {
+        entryToSave.stars = stars;
+      }
+      if (typeof letterboxdSlug !== "undefined") {
+        entryToSave.letterboxdSlug = letterboxdSlug;
+      }
+      if (typeof heart !== "undefined") {
+        entryToSave.heart = heart;
+      }
+      if (typeof rewatch !== "undefined") {
+        entryToSave.rewatch = rewatch;
+      }
+
+      const upserted = await FilmEntriesRepo.upsert(entryToSave, { conflictPaths: ['movieId', 'userId'], skipUpdateIfNoValuesChanged: true });
+      syncedForPage.push(entryToSave);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const fullMessage = `Error while syncing ratings for Letterboxd user ${username} for user ID ${userId}: ${errorMessage}`;
-      console.log(fullMessage)
+      const fullMessage = `Error while syncing ratings for Letterboxd user ${username} (UID ${userId}): ${errorMessage}`;
+      console.log(fullMessage, { name, movieId });
       throw new SyncLetterboxdError(fullMessage);
     }
   }
@@ -156,7 +178,7 @@ interface SyncAllEntriesOptions {
 
 export async function syncAllEntriesForUser({ userId, username, order = "ASC" }: SyncAllEntriesOptions) {
   let syncedWatches: FilmEntry[] = [];
-  let syncedRatings: FilmEntry[] = [];
+  let syncedDiaryEntries: FilmEntry[] = [];
   
   const UsersRepo = await getUserRepository();
 
@@ -172,77 +194,78 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
     username = user.username;
   }
 
-  const lastWatchesPage = await findLastWatchesPage(username);
+  // const lastWatchesPage = await findLastWatchesPage(username);
 
-  try {
-    if (order === "DESC") {
-      for (let page = lastWatchesPage; page > 0; page--) {
+  // try {
+  //   if (order === "DESC") {
+  //     for (let page = lastWatchesPage; page > 0; page--) {
         
-        // TODO REMOVE 
-        console.log(`syncing ${username} watches DESC for page ${page}`);
+  //       // TODO REMOVE 
+  //       console.log(`Syncing ${username} watches DESC for page ${page}`);
 
-        const syncedForPage = await syncWatchesForPage({
-          userId,
-          username,
-          page
-        });
-        syncedWatches = syncedWatches.concat(syncedForPage);
-      }
-    } else if (order === "ASC") {
-      for (let page = 0; page <= lastWatchesPage; page++) {
+  //       const syncedForPage = await syncWatchesForPage({
+  //         userId,
+  //         username,
+  //         page
+  //       });
+  //       syncedWatches = syncedWatches.concat(syncedForPage);
+  //     }
+  //   } else if (order === "ASC") {
+  //     for (let page = 0; page <= lastWatchesPage; page++) {
 
-        // TODO REMOVE
-        console.log(`syncing ${username} watches ASC for page ${page}`);
+  //       // TODO REMOVE
+  //       console.log(`syncing ${username} watches ASC for page ${page}`);
 
-        const syncedForPage = await syncWatchesForPage({
-          userId,
-          username,
-          page
-        });
+  //       const syncedForPage = await syncWatchesForPage({
+  //         userId,
+  //         username,
+  //         page
+  //       });
 
-        if (syncedForPage.length === 0) {
-          // when moving through the pages forward, as soon
-          // as we encounter a page with no ratings, we can
-          // assume we don't need to continue through pages
-          break;
-        }
-        syncedWatches = syncedWatches.concat(syncedForPage);
-      }
-    }
-  } catch (error) {
-    let message = "Unknown error occurred";
-    if (error instanceof Error) {
-      message = error.message;
-    }
-    if (typeof error === "string") {
-      message = error;
-    }
-    throw new SyncLetterboxdError(message, { synced: syncedWatches, username });
-  }
+  //       if (syncedForPage.length === 0) {
+  //         // when moving through the pages forward, as soon
+  //         // as we encounter a page with no ratings, we can
+  //         // assume we don't need to continue through pages
+  //         break;
+  //       }
+  //       syncedWatches = syncedWatches.concat(syncedForPage);
+  //     }
+  //   }
+  // } catch (error) {
+  //   let message = "Unknown error occurred";
+  //   if (error instanceof Error) {
+  //     message = error.message;
+  //   }
+  //   if (typeof error === "string") {
+  //     message = error;
+  //   }
+  //   throw new SyncLetterboxdError(message, { synced: syncedWatches, username });
+  // }
 
-  const lastRatingsPage = await findLastRatingsPage(username);
+  const lastDiaryPage = await findLastDiaryPage(username);
 
   try {
     if (order === "DESC") {
-      for (let page = lastRatingsPage; page > 0; page--) {
+      for (let page = lastDiaryPage; page > 0; page--) {
 
         // TODO REMOVE
         console.log(`Syncing ${username} ratings DESC for page ${page}`);
 
-        const syncedForPage = await syncRatingsForPage({
+        const syncedForPage = await syncDiaryEntriesForPage({
           userId,
           username,
-          page
+          page,
+          direction: 'up'
         });
-        syncedRatings = syncedRatings.concat(syncedForPage);
+        syncedDiaryEntries = syncedDiaryEntries.concat(syncedForPage);
       }
     } else if (order === "ASC") {
-      for (let page = 0; page <= lastRatingsPage; page++) {
+      for (let page = 0; page <= lastDiaryPage; page++) {
 
         // TODO REMOVE
         console.log(`Syncing ${username} ratings ASC for page ${page}`);
 
-        const syncedForPage = await syncRatingsForPage({
+        const syncedForPage = await syncDiaryEntriesForPage({
           userId,
           username,
           page
@@ -253,7 +276,7 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
           // assume we don't need to continue through pages
           break;
         }
-        syncedRatings = syncedRatings.concat(syncedForPage);
+        syncedDiaryEntries = syncedDiaryEntries.concat(syncedForPage);
       }
     }
   } catch (error) {
@@ -264,17 +287,17 @@ export async function syncAllEntriesForUser({ userId, username, order = "ASC" }:
     if (typeof error === "string") {
       message = error;
     }
-    throw new SyncLetterboxdError(message, { synced: syncedRatings, username });
+    throw new SyncLetterboxdError(message, { synced: syncedDiaryEntries, username });
   }
 
   // set last synced date for this user
   await UsersRepo.setLastEntriesUpdated(userId);
 
   const synced: {
-    ratings: FilmEntry[];
+    diaries: FilmEntry[];
     watches: FilmEntry[];
   } = {
-    ratings: syncedRatings,
+    diaries: syncedDiaryEntries,
     watches: syncedWatches
   };
 
