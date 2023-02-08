@@ -40,6 +40,9 @@ export class User {
   @Column({ nullable: true })
   lastEntriesUpdate: Date;
 
+  @Column({ nullable: true })
+  lastLogin?: Date;
+
   @OneToOne(() => UserSettings, (settings) => settings.user, { eager: true, cascade: true })
   settings?: Relation<UserSettings>;
 

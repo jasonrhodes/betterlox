@@ -3,6 +3,7 @@ import { getDataSource } from "../orm";
 import { getRememberMeToken, hash } from "../../lib/hashPassword";
 import { LetterboxdAccountLevel } from "../../common/types/base";
 import { isAdmin } from "../../lib/isAdmin";
+import { UserPublic } from "../../common/types/db";
 
 export interface UserLetterboxdDetails {
   username: string;
@@ -100,14 +101,18 @@ export const getUserRepository = async () => (await getDataSource()).getReposito
     if (user === null) {
       return null;
     }
-    return removeCredentialsAndToken(user);
+    return this.convertUserToPublicSafe(user);
   },
 
   async getPublicSafeUsers({ limit, offset }: { limit?: number, offset?: number } = {}) {
     const users = await this.find({ take: limit, skip: offset });
-    return users.map((user) => ({ 
+    return users.map(this.convertUserToPublicSafe);
+  },
+
+  convertUserToPublicSafe(user: User): UserPublic {
+    return ({
       ...removeCredentialsAndToken(user),
       isAdmin: isAdmin(user)
-    }));
+    });
   }
-})
+});

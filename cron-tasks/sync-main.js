@@ -19,7 +19,7 @@ function ts() {
 
 async function main() {
   try {
-    const response = await instance.post(`/admin/sync?limit=${SYNC_LIMIT}`);
+    const response = await instance.post(`/remote/execute-sync?limit=${SYNC_LIMIT}`);
     if (!response || !response.data) {
       throw new Error("Error occurred: no response or response.data");
     }

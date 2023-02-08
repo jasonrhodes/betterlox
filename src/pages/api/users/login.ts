@@ -25,10 +25,18 @@ const LoginRoute: NextApiHandler<LoginApiResponse> = async (req, res) => {
 
   try {
     const { user } = await UserRepository.login(email, password, rememberMe);
+    const now = new Date();
+    await UserRepository.update({ id: user.id }, { lastLogin: now.toISOString() });
+
     res.json({ success: true, user });
 
-    // after responding to the request, kick off a ratings sync for this user
-    syncAllEntriesForUser({ userId: user.id, username: user.username, order: "ASC" });
+    try {
+      // after responding to the request, kick off a ratings sync for this user
+      syncAllEntriesForUser({ userId: user.id, username: user.username, order: "ASC" });
+    } catch (e) {
+      // ignore this error
+      console.log(`Error while trying to do post-login entries sync for user ${user.username}`)
+    }
   } catch (error: unknown) {
     if (error instanceof UserRepoError) {
       res.statusCode = 401;

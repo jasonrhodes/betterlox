@@ -28,6 +28,8 @@ const CheckTokenRoute = createApiRoute<CheckTokenApiResponse>({
 
       try {
         const { user } = await UserRepository.getUserByRememberMeToken(token);
+        const now = new Date();
+        await UserRepository.update({ id: user.id }, { lastLogin: now.toISOString() });
         res.json({ success: true, user });
       } catch (error: unknown) {
         if (error instanceof UserRepoError) {
