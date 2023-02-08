@@ -178,7 +178,7 @@ function FieldLookup<T>({
           <li {...props} key={id}>
             <Box sx={{ display: 'flex' }}>
               {profilePath.length ? <Box sx={{ marginRight: 2 }}>
-                <TMDBImage tmdbPath={profilePath} width={30} height={45} />
+                <TMDBImage tmdbPath={profilePath} width={30} height={45} alt={label} />
               </Box> : null}
               <Box>
                 <Typography>{label}</Typography>

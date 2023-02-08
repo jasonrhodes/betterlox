@@ -287,7 +287,7 @@ function ListMovieCard({
   const image = <TMDBImage sx={{ ["& > span"]: {
     border: "1px solid rgba(255,255,255,0.1) !important",
     borderRadius: "5px !important"
-  } }} tmdbPath={posterPath} width={posterWidth} height={posterHeight} />;
+  } }} alt={title + ' poster'} tmdbPath={posterPath} width={posterWidth} height={posterHeight} />;
 
   return (
     <Box sx={{ mr: 1, mb: list.isRanked ? 4 : 1, opacity: shouldFade ? 0.2 : 1}}>

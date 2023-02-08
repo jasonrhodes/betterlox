@@ -31,12 +31,12 @@ export function useTmdbImageBaseUrl({ size = "medium", type = "profile" }: { siz
   return `${config.secure_base_url}/${sizes[index]}`;
 }
 
-export function PosterImage({ path, width = 400, sx = {} }: { path?: string; width?: number; sx?: SxProps }) {
-  return <TMDBImage tmdbPath={path} width={width} height={width * 1.5} sx={sx} />
+export function PosterImage({ path, width = 400, sx = {}, alt }: { path?: string; width?: number; sx?: SxProps, alt: string; }) {
+  return <TMDBImage alt={alt} tmdbPath={path} width={width} height={width * 1.5} sx={sx} />
 }
 
-export function BackdropImage({ path, width = 1200, sx = {} }: { path?: string; width?: number; sx?: SxProps; }) {
-  return <TMDBImage tmdbPath={path} width={width} height={width / 1.77} sx={sx} />
+export function BackdropImage({ path, width = 1200, sx = {}, alt }: { path?: string; width?: number; sx?: SxProps; alt: string; }) {
+  return <TMDBImage alt={alt} tmdbPath={path} width={width} height={width / 1.77} sx={sx} />
 }
 
 
@@ -48,6 +48,7 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
   sx = {}, 
   imageStyles = {},
   urlOverride,
+  alt,
   ...rest
 }) => {
   const [src, setSrc] = useState<string | null>(null);
@@ -65,8 +66,8 @@ export const TMDBImage: React.FC<TMDBImageProps> = ({
   return (
     <Box sx={sx}>
       <Image
-        alt="" 
         {...rest} 
+        alt={alt}
         onError={() => setSrc("/img/no-poster.png")}
         src={src} 
         style={{ 

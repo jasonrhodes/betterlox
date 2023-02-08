@@ -100,8 +100,8 @@ function PageContent({ movie, isLoading, error }: { movie: Movie; isLoading: boo
       <Grid container spacing={4}>
         <Grid item xs={12} md={3}>
           <Box sx={{ mb: 1 }}>
-            <PosterImage sx={{ display: { xs: 'none', md: 'block' }}} path={movie.posterPath} width={500} />
-            <BackdropImage sx={{ display: { xs: 'block', md: 'none' }}} path={movie.backdropPath} width={900} />
+            <PosterImage alt={movie.title + ' poster'} sx={{ display: { xs: 'none', md: 'block' }}} path={movie.posterPath} width={500} />
+            <BackdropImage alt={movie.title + ' backdrop'} sx={{ display: { xs: 'block', md: 'none' }}} path={movie.backdropPath} width={900} />
           </Box>
           <MovieMeta movie={movie} />
         </Grid>

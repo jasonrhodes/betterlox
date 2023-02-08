@@ -36,9 +36,9 @@ function Table({ credits }: { credits: RatedTmdbCast[] }) {
           sortable: false,
           width: 40,
           align: "center",
-          renderCell: ({ value }) => {
+          renderCell: ({ value, row }) => {
             return value
-              ? <TMDBImage sx={{ height: '52px', width: 'auto' }} size="small" tmdbPath={value} />
+              ? <TMDBImage alt={row.name + ' poster'} sx={{ height: '52px', width: 'auto' }} size="small" tmdbPath={value} />
               : null;
           }
         },

@@ -72,7 +72,12 @@ export function FilmEntryTabs({
       setBlindspotsLoading(false);
     }
     retrieve();
-  }, [processedEntries, filters, user, blindspotSorting.sortBy, blindspotSorting.sortDir])
+  }, [
+    processedEntries, 
+    filters, 
+    user, 
+    blindspotSorting,
+  ]);
 
   const handleQuickTitleSearchChange = useCallback<React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>>((event) => {
     updateQuickTitleSearch(escapeRegExp(event.target.value));

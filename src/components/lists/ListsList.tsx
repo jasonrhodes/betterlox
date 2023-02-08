@@ -134,7 +134,7 @@ function ListMoviePosterPreview({ movieEntries, n }: ListMoviePosterPreviewOptio
     <Box sx={{ display: "flex", flexWrap: "wrap" }}>
       {posters.slice(0, n).map(posterPath => (
         <Box key={posterPath} sx={{ my: 1, marginRight: 1 }}>
-          <TMDBImage tmdbPath={posterPath} width={50} height={80} />
+          <TMDBImage alt="" tmdbPath={posterPath} width={50} height={80} />
         </Box>
       ))}
     </Box>

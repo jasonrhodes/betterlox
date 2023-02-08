@@ -26,6 +26,7 @@ function EntryCard({ entry }: { entry: EntryApiResponse }) {
     <TMDBImage
       {...sharedProps}
       tmdbPath={entry.movie.posterPath}
+      alt={entry.movie.title + ' Poster'}
     /> :
     <Image {...sharedProps} src="/img/no-poster.png" alt="" />;
   

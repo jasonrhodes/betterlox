@@ -14,7 +14,7 @@ interface MoviesTableProps {
 
 function MovieCard({ movie }: { movie: PartialMovie }) {
   console.log('movie card', movie.title, movie);
-  const sharedProps: Partial<ImageProps> = {
+  const sharedProps: Pick<ImageProps, "height" | "width" | "layout" | "alt"> = {
     height: 100,
     width: 66,
     layout: "responsive",
