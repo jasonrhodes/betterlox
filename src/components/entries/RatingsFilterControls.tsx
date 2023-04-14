@@ -70,5 +70,5 @@ export function RatingsFilterControls() {
         <Button variant="outlined" onClick={() => setGlobalFilters({})}>Clear Filters</Button>
       </Grid>
     </Grid>
-  )
+  );
 }

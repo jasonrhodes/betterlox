@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TMDBImage } from './images';
-import Image, { ImageProps } from 'next/image';
+import Image, { ImageProps } from "next/legacy/image";
 import { DisplayTable } from './DisplayTable';
 import { Box, Typography } from '@mui/material';
 import { ImdbLink, LetterboxdLink } from './externalServiceLinks';

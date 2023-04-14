@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { PageTemplate } from '../components/PageTemplate';
 import { useRouter } from 'next/router';
 import { Box, Button, Grid, Link, Typography } from '@mui/material';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
