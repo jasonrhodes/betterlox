@@ -24,7 +24,6 @@ interface BlindspotsOptions {
 }
 
 export function Blindspots({ blindspots, isLoading, sorting }: BlindspotsOptions) {
-  console.log('Loading Blindspots', { isLoading, sorting });
   if (isLoading) {
     return <LinearProgress />;
   }

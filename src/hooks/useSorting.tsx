@@ -1,6 +1,6 @@
 import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export type SortDir = 'ASC' | 'DESC';
 
@@ -15,12 +15,12 @@ export function useSorting<T extends string>(initialSortBy: T, initialSortDir: S
   const [sortBy, setSortBy] = useState<T>(initialSortBy);
   const [sortDir, setSortDir] = useState<SortDir>(initialSortDir);
 
-  return {
+  return useMemo(() => ({
     sortBy,
     setSortBy,
     sortDir,
     setSortDir
-  }
+  }), [sortBy, sortDir]);
 }
 
 export function SortControls<T extends string>({ 
