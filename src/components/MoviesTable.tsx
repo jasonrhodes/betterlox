@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TMDBImage } from './images';
-import Image, { ImageProps } from 'next/image';
+import Image, { ImageProps } from "next/legacy/image";
 import { DisplayTable } from './DisplayTable';
 import { Box, Typography } from '@mui/material';
 import { ImdbLink, LetterboxdLink } from './externalServiceLinks';
@@ -13,7 +13,7 @@ interface MoviesTableProps {
 }
 
 function MovieCard({ movie }: { movie: PartialMovie }) {
-  console.log('movie card', movie.title, movie);
+  // console.log('movie card', movie.title, movie);
   const sharedProps: Pick<ImageProps, "height" | "width" | "layout" | "alt"> = {
     height: 100,
     width: 66,

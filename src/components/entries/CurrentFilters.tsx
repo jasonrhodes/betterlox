@@ -69,5 +69,5 @@ export function CurrentFilters() {
         sx={ChipSx}
       />)}
     </Box>
-  )
+  );
 }
