@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { PageTemplate } from '../components/PageTemplate';
 import { ResetPasswordForm } from '../components/ResetPasswordForm';
 import { useRouter } from 'next/router';
-import { singleQueryParam } from '../lib/queryParams';
+import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 
 const ResetPasswordPage: NextPage = () => {
   const router = useRouter();

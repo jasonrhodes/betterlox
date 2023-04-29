@@ -1,6 +1,6 @@
 import { LessThan, MoreThan } from "typeorm";
-import { UserPublic } from "../../../../common/types/db";
-import { getUserRepository } from "../../../../db/repositories";
+import { UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
+import { getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { createApiRoute } from "../../../../lib/routes";
 
 type StaleUser = Pick<UserPublic, 'username' | 'lastLogin' | 'lastEntriesUpdate'>;

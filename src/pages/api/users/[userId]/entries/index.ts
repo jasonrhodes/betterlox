@@ -1,11 +1,11 @@
-import { getFilmEntriesRepository } from "../../../../../db/repositories/FilmEntriesRepo";
-import { numberListQueryParam, numericQueryParam, singleQueryParam, stringListQueryParam } from "../../../../../lib/queryParams";
+import { getFilmEntriesRepository } from "@rhodesjason/loxdb/dist/db/repositories/FilmEntriesRepo";
+import { numberListQueryParam, numericQueryParam, singleQueryParam, stringListQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
-import { convertYearsToRange } from "../../../../../lib/convertYearsToRange";
-import { EntryMovie, EntryQueryResult, EntryApiResponse } from "../../../../../common/types/api";
+import { convertYearsToRange } from "@rhodesjason/loxdb/dist/lib/convertYearsToRange";
+import { EntryMovie, EntryQueryResult, EntryApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
 import { ObjectLiteral, QueryBuilder, SelectQueryBuilder } from "typeorm";
-import { FilmEntry } from "../../../../../db/entities";
-import { CREW_JOB_MAP } from "../../../../../common/constants";
+import { FilmEntry } from "@rhodesjason/loxdb/dist/db/entities";
+import { CREW_JOB_MAP } from "@rhodesjason/loxdb/dist/common/constants";
 
 function convertResultsToEntries(results: EntryQueryResult[]): EntryApiResponse[] {
   return results.map(result => ({

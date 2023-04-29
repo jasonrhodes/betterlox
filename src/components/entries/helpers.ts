@@ -1,5 +1,5 @@
-import { EntryApiResponse } from "../../common/types/api";
-import { getErrorAsString } from "../../lib/getErrorAsString";
+import { EntryApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
 
 export type FilmEntrySortBy = 'date' | 'stars' | 'movie.title';
 export type SortDir = 'ASC' | 'DESC';

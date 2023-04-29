@@ -1,8 +1,8 @@
 import { In, LessThanOrEqual } from "typeorm";
-import { MovieApiResponse } from "../../../../common/types/api";
-import { getCastRepository, getCrewRepository, getMoviesRepository } from "../../../../db/repositories";
-import { getErrorAsString } from "../../../../lib/getErrorAsString";
-import { singleQueryParam } from "../../../../lib/queryParams";
+import { MovieApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { getCastRepository, getCrewRepository, getMoviesRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
+import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
 
 const MoviesApiRoute = createApiRoute<MovieApiResponse>({

@@ -1,9 +1,9 @@
-import { getMoviesRepository } from "../../../../../db/repositories";
+import { getMoviesRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { createApiRoute } from "../../../../../lib/routes";
-import { ApiErrorResponse, SyncOneMovieCredits, SyncOneMovieCollections } from "../../../../../common/types/api";
-import { numericQueryParam, singleQueryParam } from "../../../../../lib/queryParams";
-import { syncOneMovieCredits } from "../../../../../lib/managedSyncs/syncMoviesCredits";
-import { syncOneMovieCollections } from "../../../../../lib/managedSyncs/syncMoviesCollections";
+import { ApiErrorResponse, SyncOneMovieCredits, SyncOneMovieCollections } from "@rhodesjason/loxdb/dist/common/types/api";
+import { numericQueryParam, singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
+import { syncOneMovieCredits } from "@rhodesjason/loxdb/dist/lib/managedSyncs/syncMoviesCredits";
+import { syncOneMovieCollections } from "@rhodesjason/loxdb/dist/lib/managedSyncs/syncMoviesCollections";
 
 type SyncOneMovieResponses = 
   SyncOneMovieCredits | 

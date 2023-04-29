@@ -1,14 +1,14 @@
-import { getSyncRepository } from "../../../../db/repositories";
+import { getSyncRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { createApiRoute } from "../../../../lib/routes";
-import { SyncResponse } from "../../../../common/types/api";
-import { SyncStatus, SyncTrigger, SyncType } from "../../../../common/types/db";
-import { numericQueryParam, singleQueryParam } from "../../../../lib/queryParams";
-import { syncCastPeople, syncCrewPeople } from "../../../../lib/managedSyncs/syncPeople";
-import { syncAllMoviesCredits } from "../../../../lib/managedSyncs/syncMoviesCredits";
-import { syncAllMoviesCollections } from "../../../../lib/managedSyncs/syncMoviesCollections";
-import { syncPopularMoviesPerYear, syncPopularMoviesPerGenre } from "../../../../lib/managedSyncs/syncMovies";
-import { syncEntriesMovies } from "../../../../lib/managedSyncs/syncEntriesMovies";
-import { syncPopularMoviesMovies } from "../../../../lib/managedSyncs/syncPopularMoviesMovies";
+import { SyncResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { SyncStatus, SyncTrigger, SyncType } from "@rhodesjason/loxdb/dist/common/types/db";
+import { numericQueryParam, singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
+import { syncCastPeople, syncCrewPeople } from "@rhodesjason/loxdb/dist/lib/managedSyncs/syncPeople";
+import { syncAllMoviesCredits } from "@rhodesjason/loxdb/dist/lib/managedSyncs/syncMoviesCredits";
+import { syncAllMoviesCollections } from "@rhodesjason/loxdb/dist/lib/managedSyncs/syncMoviesCollections";
+import { syncPopularMoviesPerYear, syncPopularMoviesPerGenre } from "@rhodesjason/loxdb/dist/lib/managedSyncs/syncMovies";
+import { syncEntriesMovies } from "@rhodesjason/loxdb/dist/lib/managedSyncs/syncEntriesMovies";
+import { syncPopularMoviesMovies } from "@rhodesjason/loxdb/dist/lib/managedSyncs/syncPopularMoviesMovies";
 
 const SyncRatingsRoute = createApiRoute<SyncResponse>({
   isAdmin: true,

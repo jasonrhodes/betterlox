@@ -1,14 +1,14 @@
 import { Alert, LinearProgress } from "@mui/material";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { LetterboxdListsForUserApiResponse } from "../common/types/api";
-import { UserResponse } from "../common/types/db";
+import { LetterboxdListsForUserApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { UserResponse } from "@rhodesjason/loxdb/dist/common/types/db";
 import { AddList } from "../components/lists/AddList";
 import { ListsList } from "../components/lists/ListsList";
 import { MyTrackedLists } from "../components/lists/TrackedLists";
 import { UserPageTemplate } from "../components/PageTemplate";
 import { TabNavPage } from "../components/TabNavPage";
-import { LetterboxdList } from "../db/entities";
+import { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
 import { callApi } from "../hooks/useApi";
 
 const ListsPage: NextPage = () => {

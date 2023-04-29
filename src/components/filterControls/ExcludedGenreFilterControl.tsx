@@ -1,5 +1,5 @@
 import { Autocomplete, Box, Checkbox, TextField } from "@mui/material";
-import { GENRES } from "../../common/constants";
+import { GENRES } from "@rhodesjason/loxdb/dist/common/constants";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { checkboxIcon, checkboxIconChecked, listBoxProps } from "./shared";
 

@@ -3,7 +3,7 @@ import { AppBar, Container, Toolbar, Typography, Box, IconButton, Menu, MenuItem
 import { Lock, Menu as MenuIcon } from '@mui/icons-material';
 import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
-import { UserPublic } from '../common/types/db';
+import { UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
 import Image from "next/legacy/image";
 import { useRouter } from "next/router";
 

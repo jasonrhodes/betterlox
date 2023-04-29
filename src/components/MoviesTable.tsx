@@ -4,7 +4,7 @@ import Image, { ImageProps } from "next/legacy/image";
 import { DisplayTable } from './DisplayTable';
 import { Box, Typography } from '@mui/material';
 import { ImdbLink, LetterboxdLink } from './externalServiceLinks';
-import { PartialMovie } from '../common/types/base';
+import { PartialMovie } from "@rhodesjason/loxdb/dist/common/types/base";
 import { AppLink } from './AppLink';
 
 interface MoviesTableProps {

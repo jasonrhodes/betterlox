@@ -1,5 +1,5 @@
 import { NextApiHandler, NextApiResponse } from "next";
-import { ApiErrorResponse } from "../common/types/api";
+import { ApiErrorResponse } from "@rhodesjason/loxdb/dist/common/types/api";
 const { BETTERLOX_API_TOKEN } = process.env;
 
 function respondWithError(res: NextApiResponse, code: number, message: string) {

@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 import { Alert, AlertTitle, Avatar, Button, ButtonProps, CircularProgress, Tooltip } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import api from '../lib/callApi';
-import { getUserDetails } from '../lib/letterboxd';
+import { getUserDetails } from '@rhodesjason/loxdb/dist/lib/letterboxd';
 import { CheckCircle, Details, Error as ErrorIcon } from '@mui/icons-material';
 import { FormikTextField } from "./formControls/FormikTextField";
 import { useRouter } from 'next/router';

@@ -1,6 +1,6 @@
-import { ApiErrorResponse, UsersApiResponse } from "../../../common/types/api";
-import { getUserRepository } from "../../../db/repositories";
-import { numericQueryParam } from "../../../lib/queryParams";
+import { ApiErrorResponse, UsersApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { numericQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";
 
 const UsersRoute = createApiRoute<UsersApiResponse | ApiErrorResponse>({

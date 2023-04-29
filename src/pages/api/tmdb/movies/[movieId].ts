@@ -1,9 +1,9 @@
-import { TmdbMovieByIdApiResponse } from "../../../../common/types/api";
-import { getMoviesRepository } from "../../../../db/repositories";
-import { getErrorAsString } from "../../../../lib/getErrorAsString";
-import { numericQueryParam } from "../../../../lib/queryParams";
+import { TmdbMovieByIdApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { getMoviesRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
+import { numericQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
-import { tmdb } from "../../../../lib/tmdb";
+import { tmdb } from "@rhodesjason/loxdb/dist/lib/tmdb";
 
 const TmdbMovieByIdRoute = createApiRoute<TmdbMovieByIdApiResponse>({
   handlers: {

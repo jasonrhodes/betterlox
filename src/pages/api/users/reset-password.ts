@@ -1,7 +1,7 @@
 import { NextApiHandler } from "next";
-import { getResetTokensRepository } from "../../../db/repositories";
-import { getUserRepository } from "../../../db/repositories/UserRepo";
-import { singleQueryParam } from "../../../lib/queryParams";
+import { getResetTokensRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories/UserRepo";
+import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 
 const ResetPasswordRoute: NextApiHandler = async (req, res) => {
   const token = singleQueryParam(req.body.token);

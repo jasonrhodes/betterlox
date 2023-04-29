@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
 import { Avatar, Box, CircularProgress, Divider, FormControl, Grid, TextField, Typography } from '@mui/material';
 import { useCurrentUser } from '../../hooks/UserContext';
-import { UserSettings } from '../../db/entities';
+import { UserSettings } from "@rhodesjason/loxdb/dist/db/entities";
 import { UserSettingStatsMinCastOrder, UserSettingStatsMinWatched } from '../../components/settings/settingsFields';
 
 function SectionHeading({ children }: { children: React.ReactNode }) {

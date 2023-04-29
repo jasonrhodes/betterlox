@@ -1,12 +1,12 @@
 import { SyncRounded } from "@mui/icons-material";
-import { ApiErrorResponse, UserEntriesSyncApiResponse } from "../../../../../common/types/api";
-import { SyncStatus, SyncTrigger, SyncType } from "../../../../../common/types/db";
-import { getSyncRepository, getUserRepository } from "../../../../../db/repositories";
-import { handleGenericError } from "../../../../../lib/apiErrorHandler";
-import { getErrorAsString } from "../../../../../lib/getErrorAsString";
-import { numericQueryParam } from "../../../../../lib/queryParams";
+import { ApiErrorResponse, UserEntriesSyncApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { SyncStatus, SyncTrigger, SyncType } from "@rhodesjason/loxdb/dist/common/types/db";
+import { getSyncRepository, getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { handleGenericError } from "@rhodesjason/loxdb/dist/lib/apiErrorHandler";
+import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
+import { numericQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
-import { syncAllEntriesForUser, SyncLetterboxdError } from "../../../../../lib/syncAllEntriesForUser";
+import { syncAllEntriesForUser, SyncLetterboxdError } from "@rhodesjason/loxdb/dist/lib/syncAllEntriesForUser";
 
 const UserSyncRoute = createApiRoute<UserEntriesSyncApiResponse | ApiErrorResponse>({
   handlers: {

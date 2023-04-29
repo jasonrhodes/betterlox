@@ -1,7 +1,7 @@
 import { DiscoverMovieRequest, DiscoverMovieResponse } from "moviedb-promise/dist/request-types";
-import { ApiErrorResponse } from "../../../common/types/api";
+import { ApiErrorResponse } from "@rhodesjason/loxdb/dist/common/types/api";
 import { createApiRoute } from "../../../lib/routes";
-import { tmdb } from "../../../lib/tmdb";
+import { tmdb } from "@rhodesjason/loxdb/dist/lib/tmdb";
 
 interface TmdbDiscoverResponse {
   success: true;

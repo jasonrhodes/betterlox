@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageConfig } from "../common/types/api";
+import { ImageConfig } from "@rhodesjason/loxdb/dist/common/types/api";
 import { useApi } from './useApi';
 
 const ImageContext = React.createContext<ImageConfig & { errorStatus?: number }>({});

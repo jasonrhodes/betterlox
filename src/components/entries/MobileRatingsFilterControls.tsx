@@ -1,7 +1,7 @@
 import { Close, Tune } from '@mui/icons-material';
 import { Box, Button, Dialog, Grid } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import { GlobalFilters } from '../../common/types/api';
+import { GlobalFilters } from "@rhodesjason/loxdb/dist/common/types/api";
 import { GlobalFiltersContextProvider, GlobalFiltersContextConsumer } from '../../hooks/GlobalFiltersContext';
 import { RatingsFilterControls } from './RatingsFilterControls';
 

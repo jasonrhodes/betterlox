@@ -1,6 +1,6 @@
 import { Box, Typography, capitalize, Accordion, AccordionSummary, AccordionDetails, FormControl, Checkbox, FormControlLabel, Autocomplete, TextField, Switch, Chip } from "@mui/material";
 import { HtmlHTMLAttributes, useState } from "react";
-import { PersonStats, PeopleStatsType, StatMode, GlobalFilters } from "../../common/types/api";
+import { PersonStats, PeopleStatsType, StatMode, GlobalFilters } from "@rhodesjason/loxdb/dist/common/types/api";
 import { getTitleByMode } from "./helpers";
 import { StatsSettings } from "./StatsSettings";
 import { PersonDetails } from "./PersonDetails";

@@ -1,9 +1,8 @@
-import { NextApiHandler } from "next";
-import { getResetTokensRepository } from "../../../db/repositories";
-import { getUserRepository } from "../../../db/repositories/UserRepo";
-import { singleQueryParam } from "../../../lib/queryParams";
+import { getResetTokensRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories/UserRepo";
+import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";
-import { sendMail } from "../../../lib/sendMail";
+import { sendMail } from "@rhodesjason/loxdb/dist/lib/sendMail";
 
 function getAppUrl(path: string) {
   return `https://betterlox.herokuapp.com${path}`;

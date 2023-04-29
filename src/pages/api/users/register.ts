@@ -1,13 +1,13 @@
 import { NextApiHandler } from "next";
 import { TypeORMError } from "typeorm";
-import { DEFAULT_USER_SETTINGS } from "../../../common/constants";
-import { UserPublic } from "../../../common/types/db";
-import { User } from "../../../db/entities";
-import { getUserRepository } from "../../../db/repositories/UserRepo";
-import { handleGenericError } from "../../../lib/apiErrorHandler";
-import { getUserDetails } from "../../../lib/letterboxd";
-import { singleQueryParam } from "../../../lib/queryParams";
-import { syncAllEntriesForUser } from "../../../lib/syncAllEntriesForUser";
+import { DEFAULT_USER_SETTINGS } from "@rhodesjason/loxdb/dist/common/constants";
+import { UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
+import { User } from "@rhodesjason/loxdb/dist/db/entities";
+import { getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories/UserRepo";
+import { handleGenericError } from "@rhodesjason/loxdb/dist/lib/apiErrorHandler";
+import { getUserDetails } from "@rhodesjason/loxdb/dist/lib/letterboxd";
+import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
+import { syncAllEntriesForUser } from "@rhodesjason/loxdb/dist/lib/syncAllEntriesForUser";
 
 interface RegisterApiResponseSuccess {
   success: true;

@@ -1,8 +1,8 @@
 import { FindOptionsWhere } from "typeorm";
-import { LetterboxdListsForUserApiResponse } from "../../../../../common/types/api";
-import { LetterboxdList } from "../../../../../db/entities";
-import { getLetterboxdListsRepository } from "../../../../../db/repositories";
-import { numericQueryParam, singleQueryParam } from "../../../../../lib/queryParams";
+import { LetterboxdListsForUserApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
+import { getLetterboxdListsRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { numericQueryParam, singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
 
 const TrackedListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({

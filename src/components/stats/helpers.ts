@@ -1,5 +1,5 @@
-import { AllStatsType, PersonStats, StatMode } from "../../common/types/api";
-import { Collection } from "../../db/entities";
+import { AllStatsType, PersonStats, StatMode } from "@rhodesjason/loxdb/dist/common/types/api";
+import { Collection } from "@rhodesjason/loxdb/dist/db/entities";
 
 export function isPeople(list: PersonStats[] | Collection[], type: AllStatsType): list is PersonStats[] {
   return ["actors", "directors", "writers", "cinematographers", "editors"].includes(type);

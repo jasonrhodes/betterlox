@@ -6,7 +6,7 @@ import { DisplayTable } from './DisplayTable';
 import { Box, Typography } from '@mui/material';
 import { useCurrentUser } from '../hooks/UserContext';
 import { ImdbLink, LetterboxdLink } from './externalServiceLinks';
-import { EntryApiResponse } from '../common/types/api';
+import { EntryApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
 import { AppLink } from './AppLink';
 
 interface EntriesTableProps {

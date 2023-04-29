@@ -2,18 +2,18 @@ import { Badge, Box, Button, Grid, LinearProgress, SxProps, Tooltip, Typography 
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import { LetterboxdListBySlugApiResponse, ListUserStats, TmdbMovieByIdApiResponse, TmdbMovieByIdGetResponse, UserListStatsApiResponse } from "../../../common/types/api";
-import { UserPublic, UserResponse } from "../../../common/types/db";
+import { LetterboxdListBySlugApiResponse, ListUserStats, TmdbMovieByIdApiResponse, TmdbMovieByIdGetResponse, UserListStatsApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { UserPublic, UserResponse } from "@rhodesjason/loxdb/dist/common/types/db";
 import { AppLink } from "../../../components/AppLink";
 import { BasicSelect, SelectChangeHandler } from "../../../components/formControls/BasicSelect";
 import { TMDBImage } from "../../../components/images";
 import { ListMeta } from "../../../components/lists/ListMeta";
 import { ListProgressCircularChart } from "../../../components/lists/ListProgressCircularChart";
 import { PageTemplate } from "../../../components/PageTemplate";
-import { LetterboxdList, Movie } from "../../../db/entities";
+import { LetterboxdList, Movie } from "@rhodesjason/loxdb/dist/db/entities";
 import { callApi } from "../../../hooks/useApi";
 import { useCurrentUser } from "../../../hooks/UserContext";
-import { getErrorAsString } from "../../../lib/getErrorAsString";
+import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
 
 const UserListPage: NextPage = () => {
   const router = useRouter();

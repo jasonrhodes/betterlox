@@ -1,11 +1,11 @@
 import { FindOptionsWhere, ILike, In } from "typeorm";
-import { LetterboxdListsForUserApiResponse } from "../../../../../common/types/api";
-import { SyncStatus, SyncTrigger, SyncType } from "../../../../../common/types/db";
-import { LetterboxdList, LetterboxdListMovieEntry } from "../../../../../db/entities";
-import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getMoviesRepository, getSyncRepository, getUserRepository, getUserSettingsRepository } from "../../../../../db/repositories";
-import { getErrorAsString } from "../../../../../lib/getErrorAsString";
-import { scrapeListsForUser } from "../../../../../lib/letterboxd";
-import { numericQueryParam, singleQueryParam } from "../../../../../lib/queryParams";
+import { LetterboxdListsForUserApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { SyncStatus, SyncTrigger, SyncType } from "@rhodesjason/loxdb/dist/common/types/db";
+import { LetterboxdList, LetterboxdListMovieEntry } from "@rhodesjason/loxdb/dist/db/entities";
+import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getMoviesRepository, getSyncRepository, getUserRepository, getUserSettingsRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
+import { scrapeListsForUser } from "@rhodesjason/loxdb/dist/lib/letterboxd";
+import { numericQueryParam, singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../../lib/routes";
 
 const ListsForUserRoute = createApiRoute<LetterboxdListsForUserApiResponse>({

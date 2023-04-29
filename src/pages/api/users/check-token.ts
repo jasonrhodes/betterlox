@@ -1,7 +1,7 @@
-import { UserResponse } from "../../../common/types/db";
-import { UserRepoError, getUserRepository } from "../../../db/repositories/UserRepo";
-import { handleGenericError } from "../../../lib/apiErrorHandler";
-import { singleQueryParam } from "../../../lib/queryParams";
+import { UserResponse } from "@rhodesjason/loxdb/dist/common/types/db";
+import { UserRepoError, getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories/UserRepo";
+import { handleGenericError } from "@rhodesjason/loxdb/dist/lib/apiErrorHandler";
+import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";
 
 interface CheckTokenApiResponseSuccess {

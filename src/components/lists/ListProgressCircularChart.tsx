@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { LetterboxdList } from "../../db/entities";
+import { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
 
 export interface ListProgressCircularChartOptions {
   pct: number;

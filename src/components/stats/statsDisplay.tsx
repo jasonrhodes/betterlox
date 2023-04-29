@@ -1,7 +1,7 @@
 import { Star, Visibility } from "@mui/icons-material";
 import { Box, Badge, Typography, LinearProgress } from "@mui/material";
-import { PersonStats } from "../../common/types/api";
-import { round } from "../../lib/round";
+import { PersonStats } from "@rhodesjason/loxdb/dist/common/types/api";
+import { round } from "@rhodesjason/loxdb/dist/lib/round";
 import { PersonImage } from "./PersonImage";
 
 export interface StatsDisplayOptions {

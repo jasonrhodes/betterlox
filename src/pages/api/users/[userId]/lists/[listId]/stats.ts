@@ -1,7 +1,7 @@
-import { ApiErrorResponse, ApiSuccessResponse, UserListStatsApiResponse } from "../../../../../../common/types/api";
+import { ApiErrorResponse, ApiSuccessResponse, UserListStatsApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
 import { createApiRoute } from "../../../../../../lib/routes";
-import { numericQueryParam } from "../../../../../../lib/queryParams";
-import { getFilmEntriesRepository, getLetterboxdListsRepository } from "../../../../../../db/repositories";
+import { numericQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
+import { getFilmEntriesRepository, getLetterboxdListsRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { In } from "typeorm";
 
 const UserFollowListRoute = createApiRoute<UserListStatsApiResponse>({

@@ -1,13 +1,12 @@
 import { Box, LinearProgress, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { BlindspotMovie, BlindspotsSortBy, EntryApiResponse, GlobalFilters, MoviesApiResponse, TmdbPersonByIdResponse, UserBlindspotsApiResponse } from '../common/types/api';
-import { Movie, UserSettings } from '../db/entities';
+import React from 'react';
+import { BlindspotMovie, BlindspotsSortBy, EntryApiResponse, GlobalFilters, TmdbPersonByIdResponse, UserBlindspotsApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { UserSettings } from '@rhodesjason/loxdb/dist/db/entities';
 import { callApi } from '../hooks/useApi';
-import { UserPublic } from '../common/types/db';
-import { convertYearsToRange } from '../lib/convertYearsToRange';
-import { convertFiltersToQueryString } from '../lib/convertFiltersToQueryString';
+import { UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
+import { convertYearsToRange } from '@rhodesjason/loxdb/dist/lib/convertYearsToRange';
+import { convertFiltersToQueryString } from '@rhodesjason/loxdb/dist/lib/convertFiltersToQueryString';
 import { MoviesTable } from './MoviesTable';
-import { PartialMovie } from '../common/types/base';
 import { SortControls, SortManagement, useSorting } from '../hooks/useSorting';
 
 interface GetBlindspotsForUserOptions {

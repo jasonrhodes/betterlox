@@ -1,8 +1,8 @@
 import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from "typeorm";
-import { PeopleApiResponse } from "../../../common/types/api";
-import { Person } from "../../../db/entities";
-import { getPeopleRepository } from "../../../db/repositories";
-import { singleQueryParam } from "../../../lib/queryParams";
+import { PeopleApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { Person } from "@rhodesjason/loxdb/dist/db/entities";
+import { getPeopleRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";
 
 function forceArray(value: string | string[] | undefined) {

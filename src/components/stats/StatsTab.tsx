@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { DEFAULT_USER_SETTINGS } from "../../common/constants";
-import { AllStatsType, StatMode, PersonStats, UserStatsResponse, PeopleStatsType } from "../../common/types/api";
-import { Collection } from "../../db/entities";
+import { DEFAULT_USER_SETTINGS } from "@rhodesjason/loxdb/dist/common/constants";
+import { AllStatsType, StatMode, PersonStats, UserStatsResponse, PeopleStatsType } from "@rhodesjason/loxdb/dist/common/types/api";
+import { Collection } from "@rhodesjason/loxdb/dist/db/entities";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";
-import { convertFiltersToQueryString } from "../../lib/convertFiltersToQueryString";
+import { convertFiltersToQueryString } from "@rhodesjason/loxdb/dist/lib/convertFiltersToQueryString";
 import { CollectionsStatsPanel } from "./CollectionStatsPanel";
 import { isPeople, isCollections } from "./helpers";
 import { PeopleStatsPanel } from "./PeopleStatsPanel";

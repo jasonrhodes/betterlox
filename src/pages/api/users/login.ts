@@ -1,9 +1,9 @@
 import { NextApiHandler } from "next";
-import { UserPublic } from "../../../common/types/db";
-import { getUserRepository, UserRepoError } from "../../../db/repositories/UserRepo";
-import { handleGenericError } from "../../../lib/apiErrorHandler";
-import { singleQueryParam } from "../../../lib/queryParams";
-import { syncAllEntriesForUser } from "../../../lib/syncAllEntriesForUser";
+import { UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
+import { getUserRepository, UserRepoError } from "@rhodesjason/loxdb/dist/db/repositories/UserRepo";
+import { handleGenericError } from "@rhodesjason/loxdb/dist/lib/apiErrorHandler";
+import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
+import { syncAllEntriesForUser } from "@rhodesjason/loxdb/dist/lib/syncAllEntriesForUser";
 
 interface LoginApiResponseSuccess {
   success: true;

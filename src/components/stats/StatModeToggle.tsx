@@ -1,5 +1,5 @@
 import { ToggleButton, ToggleButtonGroup } from "@mui/lab";
-import { StatMode } from "../../common/types/api";
+import { StatMode } from "@rhodesjason/loxdb/dist/common/types/api";
 
 export interface StatModeToggleOptions {
   mode: StatMode; 

@@ -1,7 +1,7 @@
 import { Autocomplete, Box, SxProps, TextField, Typography } from '@mui/material';
 import React, { useState, useEffect, useCallback } from 'react';
-import { GlobalFilters, SearchApiResponse, SearchCollection } from '../../common/types/api';
-import { Person } from '../../db/entities';
+import { GlobalFilters, SearchApiResponse, SearchCollection } from "@rhodesjason/loxdb/dist/common/types/api";
+import { Person } from "@rhodesjason/loxdb/dist/db/entities";
 import { useGlobalFilters } from '../../hooks/GlobalFiltersContext';
 import { callApi, useApi } from '../../hooks/useApi';
 import { TMDBImage } from '../images';

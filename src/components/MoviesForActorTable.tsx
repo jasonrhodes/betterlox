@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import React from 'react';
-import { RatedMovie, RatedTmdbCast } from '../common/types/db';
+import { RatedMovie, RatedTmdbCast } from "@rhodesjason/loxdb/dist/common/types/db";
 import CreditControls from './CreditControls';
 import { TMDBImage } from './images';
 

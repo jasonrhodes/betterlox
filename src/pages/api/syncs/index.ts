@@ -1,5 +1,5 @@
-import { SyncsManagementGetResponse } from "../../../common/types/api";
-import { getSyncRepository } from "../../../db/repositories";
+import { SyncsManagementGetResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { getSyncRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { createApiRoute } from "../../../lib/routes";
 
 const SyncsManagementRoute = createApiRoute<SyncsManagementGetResponse>({

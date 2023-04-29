@@ -1,8 +1,8 @@
-import { SyncManagementApiResponse } from "../../../common/types/api";
-import { Sync } from "../../../db/entities";
-import { getSyncRepository } from "../../../db/repositories";
-import { getErrorAsString } from "../../../lib/getErrorAsString";
-import { numericQueryParam } from "../../../lib/queryParams";
+import { SyncManagementApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { Sync } from "@rhodesjason/loxdb/dist/db/entities";
+import { getSyncRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
+import { numericQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";
 
 const SyncManagementRoute = createApiRoute<SyncManagementApiResponse>({

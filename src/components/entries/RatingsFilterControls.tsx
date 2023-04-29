@@ -2,7 +2,7 @@ import { Button, Grid, Typography } from "@mui/material";
 import { CurrentFilters } from "./CurrentFilters";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { RatingsFilterFieldLookup } from "./FieldLookup";
-import { Collection, Person } from "../../db/entities";
+import { Collection, Person } from "@rhodesjason/loxdb/dist/db/entities";
 import { ReleaseDateRangeFilterControl } from "../filterControls/ReleaseDateRangeFilterControl";
 import { GenreFilterControl } from "../filterControls/GenreFilterControl";
 import { ExcludedGenreFilterControl } from "../filterControls/ExcludedGenreFilterControl";

@@ -1,6 +1,6 @@
 import { TextField, FormControl, CircularProgress } from "@mui/material";
 import { useState, ChangeEventHandler, useCallback, useEffect } from "react";
-import { UserSettings } from "../../db/entities";
+import { UserSettings } from "@rhodesjason/loxdb/dist/db/entities";
 import { useCurrentUser } from "../../hooks/UserContext";
 import debounce from "just-debounce";
 

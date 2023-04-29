@@ -1,9 +1,9 @@
 import { FindOptionsWhere, ILike } from "typeorm";
-import { LetterboxdListsManagementApiResponse } from "../../../../common/types/api";
-import { LetterboxdList } from "../../../../db/entities";
-import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getUserRepository } from "../../../../db/repositories";
-import { scrapeListByUrl } from "../../../../lib/letterboxd";
-import { numericQueryParam, singleQueryParam } from "../../../../lib/queryParams";
+import { LetterboxdListsManagementApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
+import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { scrapeListByUrl } from "@rhodesjason/loxdb/dist/lib/letterboxd";
+import { numericQueryParam, singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
 
 const ListsManagementRoute = createApiRoute<LetterboxdListsManagementApiResponse>({

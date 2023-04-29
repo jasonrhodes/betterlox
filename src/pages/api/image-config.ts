@@ -1,6 +1,6 @@
 import { ConfigurationResponse } from "moviedb-promise/dist/request-types";
 import { createApiRoute } from "../../lib/routes";
-import { tmdb } from "../../lib/tmdb";
+import { tmdb } from "@rhodesjason/loxdb/dist/lib/tmdb";
 
 // TODO: Not sure if this is worth looking up ever, or if it always stays the same.
 // But for now, I'm leaving this as a back-up option when the other lookup fails.
