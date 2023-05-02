@@ -76,7 +76,8 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     console.log(`Registration for ${userOptions.username} completed successfully, sync will begin now`);
 
     // after responding to the request, kick off a ratings sync for this user
-    syncAllEntriesForUser({ userId: user.id, username: user.username, order: "DESC" });
+    // DISABLED WHILE sync process is being reworked 2023-05-02
+    // syncAllEntriesForUser({ userId: user.id, username: user.username, order: "DESC" });
   } catch (error: unknown) {
     if (error instanceof TypeORMError) {
       if (error.message.startsWith("duplicate key value violates unique constraint")) {
