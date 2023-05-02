@@ -31,7 +31,11 @@ interface LetterboxdDetailState {
   details?: Awaited<ReturnType<typeof getUserDetails>>;
 }
 
-export const RegistrationForm = () => {
+export interface RegistrationFormProps {
+  isOpen?: boolean;
+}
+
+export const RegistrationForm = ({ isOpen = true }: RegistrationFormProps) => {
   const [pageError, setPageError] = useState<string | null>(null);
   const [letterboxdDetails, setLetterboxdDetails] = useState<LetterboxdDetailState>({
     retrieved: false
@@ -106,50 +110,52 @@ export const RegistrationForm = () => {
 
   return (
     <form onSubmit={formik.handleSubmit} action="/api/users/register" method="POST">
-      {pageError ? <Alert sx={{ my: 2 }} severity="warning"><AlertTitle>Unexpected Server Error</AlertTitle>{pageError}</Alert> : null}
-      <FormikTextField<RegisterValidationType>
-        fullWidth
-        formik={formik as any} // TODO: these are giving me some ridiculous problem about FormikValues that I can't solve
-        required={true}
-        id='email'
-        label='Email'
-      />
-      <FormikTextField<RegisterValidationType>
-        fullWidth
-        formik={formik as any} // TODO: fix also
-        required={true}
-        id='username'
-        label='Letterboxd Username'
-        InputProps={{
-          endAdornment: letterboxdStatus
-        }}
-        onBlur={async (e) => {
-          if (e.target.value === '') {
-            setLetterboxdDetails({ retrieved: false });
-            return;
-          }
-          setLLL(true);
-          const { data } = await api.getLetterboxdUserDetails(e.target.value);
-          setLLL(false);
-          if ('code' in data) {
-            setLetterboxdDetails({ retrieved: true });
-            return;
-          }
-          setLetterboxdDetails({ retrieved: true, details: data.details });
-        }}
-      />
-      <FormikTextField<RegisterValidationType>
-        fullWidth
-        formik={formik as any} // TODO: fix also
-        required={true}
-        id='password'
-        label='Password'
-        type='password'
-        autoComplete='new-password'
-      />
-      {formik.isSubmitting
-        ? <LoadingButton loading {...submitButtonProps}>Creating Account ...</LoadingButton>
-        : <Button {...submitButtonProps}>Create Account</Button>}
+      <fieldset disabled={!isOpen} style={{ border: "none", padding: 0, margin: 0 }}>
+        {pageError ? <Alert sx={{ my: 2 }} severity="warning"><AlertTitle>Unexpected Server Error</AlertTitle>{pageError}</Alert> : null}
+        <FormikTextField<RegisterValidationType>
+          fullWidth
+          formik={formik as any} // TODO: these are giving me some ridiculous problem about FormikValues that I can't solve
+          required={true}
+          id='email'
+          label='Email'
+        />
+        <FormikTextField<RegisterValidationType>
+          fullWidth
+          formik={formik as any} // TODO: fix also
+          required={true}
+          id='username'
+          label='Letterboxd Username'
+          InputProps={{
+            endAdornment: letterboxdStatus
+          }}
+          onBlur={async (e) => {
+            if (e.target.value === '') {
+              setLetterboxdDetails({ retrieved: false });
+              return;
+            }
+            setLLL(true);
+            const { data } = await api.getLetterboxdUserDetails(e.target.value);
+            setLLL(false);
+            if ('code' in data) {
+              setLetterboxdDetails({ retrieved: true });
+              return;
+            }
+            setLetterboxdDetails({ retrieved: true, details: data.details });
+          }}
+        />
+        <FormikTextField<RegisterValidationType>
+          fullWidth
+          formik={formik as any} // TODO: fix also
+          required={true}
+          id='password'
+          label='Password'
+          type='password'
+          autoComplete='new-password'
+        />
+        {formik.isSubmitting
+          ? <LoadingButton loading {...submitButtonProps}>Creating Account ...</LoadingButton>
+          : <Button disabled={!isOpen} {...submitButtonProps}>Create Account</Button>}
+      </fieldset>
     </form>
   )
 }
