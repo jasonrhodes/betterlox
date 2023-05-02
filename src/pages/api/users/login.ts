@@ -32,7 +32,8 @@ const LoginRoute: NextApiHandler<LoginApiResponse> = async (req, res) => {
 
     try {
       // after responding to the request, kick off a ratings sync for this user
-      syncAllEntriesForUser({ userId: user.id, username: user.username, order: "ASC" });
+      // DISABLED while sync process is being reworked
+      // syncAllEntriesForUser({ userId: user.id, username: user.username, order: "ASC" });
     } catch (e) {
       // ignore this error
       console.log(`Error while trying to do post-login entries sync for user ${user.username}`)
