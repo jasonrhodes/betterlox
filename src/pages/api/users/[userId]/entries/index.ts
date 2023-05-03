@@ -197,10 +197,10 @@ const UserEntriesRoute = createApiRoute({
       }, query);
 
       try {
-        console.log('\n\n\n');
-        console.log(fullQuery.getSql());
-        console.log('params', query.getParameters());
-        console.log('\n\n\n');
+        // console.log('\n\n\n');
+        // console.log(fullQuery.getSql());
+        // console.log('params', query.getParameters());
+        // console.log('\n\n\n');
 
         const results = await fullQuery.getRawMany<EntryQueryResult>();
         const entries = convertResultsToEntries(results);
