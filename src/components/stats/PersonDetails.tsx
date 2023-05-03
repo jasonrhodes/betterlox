@@ -1,13 +1,13 @@
 import { Close } from "@mui/icons-material";
 import { Drawer, Typography, capitalize } from "@mui/material";
 import { useState, useEffect } from "react";
-import { PeopleStatsType, PersonStats } from "../../common/types/api";
 import { FilmEntry } from "@rhodesjason/loxdb/dist/db/entities";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";
 import { convertFiltersToQueryString } from "@rhodesjason/loxdb/dist/lib/convertFiltersToQueryString";
 import { EntriesTable } from "../EntriesTable";
+import { PeopleStatsType, PersonStats } from "@rhodesjason/loxdb/dist/common/types/db";
 
 export function PersonDetails({ type, details, setDetails }: { type: PeopleStatsType; details: null | PersonStats; setDetails: (d: null | PersonStats) => void }) {
   const { user } = useCurrentUser();

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
-import { StatMode } from "../../common/types/api";
 import { StatModeToggle } from '../../components/stats/StatModeToggle';
 import { StatsTab } from '../../components/stats/StatsTab';
 import { TabNavPage } from '../../components/TabNavPage';
+import { StatMode } from '@rhodesjason/loxdb/dist/common/types/db';
 
 const StatsPage: NextPage = () => {
   const [mode, setMode] = useState<StatMode>('favorite');

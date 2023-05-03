@@ -1,4 +1,4 @@
-import { AllStatsType, PersonStats, StatMode } from "../../common/types/api";
+import { PersonStats, AllStatsType, StatMode } from "@rhodesjason/loxdb/dist/common/types/db";
 import { Collection } from "@rhodesjason/loxdb/dist/db/entities";
 
 export function isPeople(list: PersonStats[] | Collection[], type: AllStatsType): list is PersonStats[] {

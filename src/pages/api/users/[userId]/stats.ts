@@ -1,8 +1,9 @@
-import { ApiErrorResponse, StatMode, UserStatsResponse } from "../../../../common/types/api";
+import { ApiErrorResponse, UserStatsResponse } from "../../../../common/types/api";
 import { getPeopleRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { convertYearsToRange } from "@rhodesjason/loxdb/dist/lib/convertYearsToRange";
 import { numericQueryParam, singleQueryParam, stringListQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
+import { StatMode } from "@rhodesjason/loxdb/dist/common/types/db";
 
 const PeopleApiRoute = createApiRoute<UserStatsResponse | ApiErrorResponse>({
   handlers: {

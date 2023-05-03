@@ -1,5 +1,5 @@
 import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from "typeorm";
-import { PeopleApiResponse } from "../../common/types/api";
+import { PeopleApiResponse } from "../../../common/types/api";
 import { Person } from "@rhodesjason/loxdb/dist/db/entities";
 import { getPeopleRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";

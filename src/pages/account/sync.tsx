@@ -50,14 +50,14 @@ function SyncWatchData({
       const response = await callApi<ApiSuccessResponse | ApiErrorResponse>(`/api/users/${userId}/entries/sync`, {
         method: 'POST'
       });
-      if (response.success) {
+      if (response.data.success) {
         setSyncState("success");
         setSyncMessage(`Sync successfully started.`);
       } else {
         setSyncState("failed");
         let message = `Sync request failed due to a system error. Please try again.`;
-        if ('message' in response) {
-          message += ` [${response.message}]`;
+        if ('message' in response.data) {
+          message += ` [${response.data.message}]`;
         }
         setSyncMessage(message);
       }

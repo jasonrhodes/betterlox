@@ -1,6 +1,5 @@
 import { Box, Typography, capitalize, Accordion, AccordionSummary, AccordionDetails, FormControl, Checkbox, FormControlLabel, Autocomplete, TextField, Switch, Chip } from "@mui/material";
-import { HtmlHTMLAttributes, useState } from "react";
-import { PersonStats, PeopleStatsType, StatMode, GlobalFilters } from "../../common/types/api";
+import { useState } from "react";
 import { getTitleByMode } from "./helpers";
 import { StatsSettings } from "./StatsSettings";
 import { PersonDetails } from "./PersonDetails";
@@ -11,6 +10,7 @@ import { ReleaseDateRangeFilterControl } from "../filterControls/ReleaseDateRang
 import { GenreFilterControl } from "../filterControls/GenreFilterControl";
 import { ExcludedGenreFilterControl } from "../filterControls/ExcludedGenreFilterControl";
 import { OnlyNonBinaryFilterControl, OnlyWomenFilterControl } from "../filterControls/genderFilterControls";
+import { PersonStats, PeopleStatsType, StatMode } from "@rhodesjason/loxdb/dist/common/types/db";
 
 interface PeopleStatsPanelOptions {
   people: PersonStats[]; 

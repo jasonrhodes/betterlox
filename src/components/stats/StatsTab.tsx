@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DEFAULT_USER_SETTINGS } from "@rhodesjason/loxdb/dist/common/constants";
-import { AllStatsType, StatMode, PersonStats, UserStatsResponse, PeopleStatsType } from "../../common/types/api";
+import { UserStatsResponse } from "../../common/types/api";
 import { Collection } from "@rhodesjason/loxdb/dist/db/entities";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";
@@ -9,6 +9,7 @@ import { convertFiltersToQueryString } from "@rhodesjason/loxdb/dist/lib/convert
 import { CollectionsStatsPanel } from "./CollectionStatsPanel";
 import { isPeople, isCollections } from "./helpers";
 import { PeopleStatsPanel } from "./PeopleStatsPanel";
+import { AllStatsType, StatMode, PersonStats, PeopleStatsType } from "@rhodesjason/loxdb/dist/common/types/db";
 
 interface StatsTabOptions {
   type: AllStatsType;
