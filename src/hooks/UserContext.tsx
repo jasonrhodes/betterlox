@@ -5,7 +5,7 @@ import { useCookies } from 'react-cookie';
 import { useRouter } from 'next/router';
 import { UserSettings } from '@rhodesjason/loxdb/dist/db/entities';
 import { callApi } from './useApi';
-import { UpdateUserSettingsResponse, UserApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { UpdateUserSettingsResponse, UserApiResponse } from "../common/types/api";
 import { getErrorAsString } from '@rhodesjason/loxdb/dist/lib/getErrorAsString';
 import { isAdmin } from '@rhodesjason/loxdb/dist/lib/isAdmin';
 import { DEFAULT_USER_SETTINGS } from "@rhodesjason/loxdb/dist/common/constants";

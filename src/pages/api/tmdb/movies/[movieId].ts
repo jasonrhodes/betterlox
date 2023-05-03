@@ -1,4 +1,4 @@
-import { TmdbMovieByIdApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { TmdbMovieByIdApiResponse } from "../../../../common/types/api";
 import { getMoviesRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
 import { numericQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";

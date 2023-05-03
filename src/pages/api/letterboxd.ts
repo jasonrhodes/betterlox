@@ -1,4 +1,4 @@
-import { ApiErrorResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { ApiErrorResponse } from "../../common/types/api";
 import { getUserDetails, LetterboxdDetails } from "@rhodesjason/loxdb/dist/lib/letterboxd";
 import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../lib/routes";

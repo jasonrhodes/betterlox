@@ -1,4 +1,4 @@
-import { ApiErrorResponse, UsersApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { ApiErrorResponse, UsersApiResponse } from "../../../common/types/api";
 import { getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { numericQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";

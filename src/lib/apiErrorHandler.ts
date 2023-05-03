@@ -1,5 +1,5 @@
 import { NextApiResponse } from "next";
-import { getErrorAsString } from "./getErrorAsString";
+import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
 
 export function handleGenericError(error: unknown, res: NextApiResponse) {
   res.statusCode = 500;

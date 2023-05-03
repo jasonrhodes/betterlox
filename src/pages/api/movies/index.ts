@@ -1,5 +1,5 @@
 import e from "express";
-import { MoviesApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { MoviesApiResponse } from "../../../common/types/api";
 import { getMoviesRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { convertYearsToRange } from "@rhodesjason/loxdb/dist/lib/convertYearsToRange";
 import { numberListQueryParam, numericQueryParam, singleQueryParam, stringListQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";

@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import React, { useCallback, useContext, useState } from 'react';
-import { GlobalFilters } from "@rhodesjason/loxdb/dist/common/types/api";
+import { GlobalFilters } from "../common/types/api";
 
 const GlobalFiltersContext = React.createContext<{ 
   globalFilters: GlobalFilters;

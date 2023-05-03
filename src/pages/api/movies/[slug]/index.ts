@@ -1,5 +1,5 @@
 import { In, LessThanOrEqual } from "typeorm";
-import { MovieApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { MovieApiResponse } from "../../../../common/types/api";
 import { getCastRepository, getCrewRepository, getMoviesRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
 import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";

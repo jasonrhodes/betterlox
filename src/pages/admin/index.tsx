@@ -5,7 +5,7 @@ import { Box, Button, Grid, IconButton, MenuItem, MenuList, Paper, Tooltip, Typo
 import { DataGrid, GridValueFormatterParams } from '@mui/x-data-grid';
 import { Sync } from "@rhodesjason/loxdb/dist/db/entities";
 import { callApi, useApi } from '../../hooks/useApi';
-import { SyncsManagementGetResponse, UsersApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { SyncsManagementGetResponse, UsersApiResponse } from "../../common/types/api";
 import { useCurrentUser } from '../../hooks/UserContext';
 import { UserPublicSafe } from "@rhodesjason/loxdb/dist/common/types/db";
 import { SupervisorAccount, SwitchAccessShortcut } from '@mui/icons-material';

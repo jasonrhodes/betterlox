@@ -1,7 +1,7 @@
 import { CalendarMonth, Close, PersonPin, Theaters } from "@mui/icons-material";
 import { Alert, AlertTitle, Box, Button, FormControlLabel, InputAdornment, LinearProgress, Link, Pagination, Switch, TextField, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { LetterboxdListsForUserApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { LetterboxdListsForUserApiResponse } from "../../common/types/api";
 import { UserPublicSafe, UserResponse } from "@rhodesjason/loxdb/dist/common/types/db";
 import { escapeRegExp } from "@rhodesjason/loxdb/dist/lib/escapeRegex";
 import { LetterboxdList, LetterboxdListMovieEntry, Movie } from "@rhodesjason/loxdb/dist/db/entities";

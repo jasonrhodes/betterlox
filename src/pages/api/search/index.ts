@@ -1,4 +1,4 @@
-import { SearchApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { SearchApiResponse } from "../../../common/types/api";
 import { getCollectionsRepository, getPeopleRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { numericQueryParam, singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../lib/routes";

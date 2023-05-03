@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DEFAULT_USER_SETTINGS } from "@rhodesjason/loxdb/dist/common/constants";
-import { AllStatsType, StatMode, PersonStats, UserStatsResponse, PeopleStatsType } from "@rhodesjason/loxdb/dist/common/types/api";
+import { AllStatsType, StatMode, PersonStats, UserStatsResponse, PeopleStatsType } from "../../common/types/api";
 import { Collection } from "@rhodesjason/loxdb/dist/db/entities";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";

@@ -1,4 +1,4 @@
-import { SyncManagementApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { SyncManagementApiResponse } from "../../../common/types/api";
 import { Sync } from "@rhodesjason/loxdb/dist/db/entities";
 import { getSyncRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";

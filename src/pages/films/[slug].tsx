@@ -4,7 +4,7 @@ import { Avatar, Box, BoxProps, Grid, LinearProgress, Link, SxProps, Typography 
 import { callApi } from '../../hooks/useApi';
 import { PageTemplate } from '../../components/PageTemplate';
 import { useRouter } from 'next/router';
-import { MovieApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { MovieApiResponse } from "../../common/types/api";
 import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { CastRole, CrewRole, Movie } from "@rhodesjason/loxdb/dist/db/entities";
 import { BackdropImage, PosterImage, TmdbAvatar } from '../../components/images';

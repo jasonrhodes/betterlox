@@ -1,4 +1,4 @@
-import { ApiErrorResponse, StatMode, UserStatsResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { ApiErrorResponse, StatMode, UserStatsResponse } from "../../../../common/types/api";
 import { getPeopleRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { convertYearsToRange } from "@rhodesjason/loxdb/dist/lib/convertYearsToRange";
 import { numericQueryParam, singleQueryParam, stringListQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";

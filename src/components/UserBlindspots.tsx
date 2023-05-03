@@ -1,6 +1,6 @@
 import { Box, LinearProgress, Typography } from '@mui/material';
 import React from 'react';
-import { BlindspotMovie, BlindspotsSortBy, EntryApiResponse, GlobalFilters, TmdbPersonByIdResponse, UserBlindspotsApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { BlindspotMovie, BlindspotsSortBy, EntryApiResponse, GlobalFilters, TmdbPersonByIdResponse, UserBlindspotsApiResponse } from "../common/types/api";
 import { UserSettings } from '@rhodesjason/loxdb/dist/db/entities';
 import { callApi } from '../hooks/useApi';
 import { UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";

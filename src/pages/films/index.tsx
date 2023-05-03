@@ -9,7 +9,7 @@ import { MobileRatingsFilterControls } from '../../components/entries/MobileRati
 import { FilmEntryTabs } from '../../components/entries/FilmEntryTabs';
 import { convertFiltersToQueryString } from "@rhodesjason/loxdb/dist/lib/convertFiltersToQueryString";
 import { useGlobalFilters } from '../../hooks/GlobalFiltersContext';
-import { EntriesApiResponse, EntryApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { EntriesApiResponse, EntryApiResponse } from "../../common/types/api";
 import { BlindspotsInfo } from '../../components/BlindspotsInfo';
 
 function PageContent({ userId }: { userId: number }) {

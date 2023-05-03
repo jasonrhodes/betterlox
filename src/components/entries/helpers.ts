@@ -1,4 +1,4 @@
-import { EntryApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { EntryApiResponse } from "../../common/types/api";
 import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";
 
 export type FilmEntrySortBy = 'date' | 'stars' | 'movie.title';
@@ -18,6 +18,40 @@ export function applyTitleFilter(filterString: string, entries?: EntryApiRespons
   });
 }
 
+function sortByLetterboxdDate(a: EntryApiResponse, b: EntryApiResponse, sortDir: SortDir) {
+  // sort by date DESC, then by sortId ASC
+  // date is no longer tied to the entry date, but
+  // rather to the 'collection' date, so we store
+  // a sortId that shows what order it was on the
+  // letterboxd page and use that instead -- but it's
+  // only valid per collection, so we want the latest
+  // collection batch first (we could maybe just use
+  // sortId but for now we use both)
+  if (!a.date && !b.date) {
+    return 0;
+  }
+  if (!a.date) {
+    return 1;
+  }
+  if (!b.date) {
+    return -1;
+  }
+  if (a.date === b.date) {
+    if (!a.sortId || !b.sortId) {
+      return 0;
+    }
+    if (sortDir === 'ASC') {
+      return a.sortId > b.sortId ? -1 : 1;
+    } else {
+      return a.sortId < b.sortId ? -1 : 1;
+    }
+  } else if (sortDir === 'ASC') {
+    return a.date < b.date ? -1 : 1;
+  } else {
+    return a.date > b.date ? -1 : 1;
+  }
+}
+
 export function applySort(sortBy: FilmEntrySortBy, sortDir: SortDir, entries: EntryApiResponse[]) {
   if (!Array.isArray(entries)) {
     return [];
@@ -27,22 +61,12 @@ export function applySort(sortBy: FilmEntrySortBy, sortDir: SortDir, entries: En
   rated.sort((a, b) => {
     try {
       switch (sortBy) {
-        case 'date':  
-          if (!a.date && !b.date) {
-            return 0;
-          }
-          if (!a.date) {
-            return 1;
-          }
-          if (!b.date) {
-            return -1;
-          }
-          if (sortDir === 'ASC') {
-            return a.date < b.date ? -1 : 1;
-          } else {
-            return a.date > b.date ? -1 : 1;
-          }
+        case 'date':
+          return sortByLetterboxdDate(a, b, sortDir);
         case 'stars':
+          if (a.stars === b.stars) {
+            return sortByLetterboxdDate(a, b, 'DESC');
+          }
           if (sortDir === 'ASC') {
             return a.stars! < b.stars! ? -1 : 1;
           } else {

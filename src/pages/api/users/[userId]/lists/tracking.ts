@@ -1,5 +1,5 @@
 import { FindOptionsWhere } from "typeorm";
-import { LetterboxdListsForUserApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { LetterboxdListsForUserApiResponse } from "../../../../../common/types/api";
 import { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
 import { getLetterboxdListsRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { numericQueryParam, singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";

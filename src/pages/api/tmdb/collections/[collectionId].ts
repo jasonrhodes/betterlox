@@ -1,4 +1,4 @@
-import { ApiErrorResponse, TmdbCollectionByIdResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { ApiErrorResponse, TmdbCollectionByIdResponse } from "../../../../common/types/api";
 import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { createApiRoute } from "../../../../lib/routes";
 import { tmdb } from "@rhodesjason/loxdb/dist/lib/tmdb";

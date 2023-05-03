@@ -1,5 +1,5 @@
 import { In } from "typeorm";
-import { BlindspotMovie, BlindspotsSortBy, UserBlindspotExtras, UserBlindspotsApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { BlindspotMovie, BlindspotsSortBy, UserBlindspotExtras, UserBlindspotsApiResponse } from "../../../../common/types/api";
 import { getDataSource } from "@rhodesjason/loxdb/dist/db/orm";
 import { getCollectionsRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { convertYearsToRange } from "@rhodesjason/loxdb/dist/lib/convertYearsToRange";

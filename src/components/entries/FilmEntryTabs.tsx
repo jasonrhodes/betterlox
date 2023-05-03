@@ -1,6 +1,6 @@
 import { TextField, Box, Tabs, Tab, FormControl } from "@mui/material";
 import React, { useState, useEffect, useCallback } from "react";
-import { BlindspotMovie, BlindspotsSortBy, EntryApiResponse, GlobalFilters } from "@rhodesjason/loxdb/dist/common/types/api";
+import { BlindspotMovie, BlindspotsSortBy, EntryApiResponse, GlobalFilters } from "../../common/types/api";
 import { escapeRegExp } from "@rhodesjason/loxdb/dist/lib/escapeRegex";
 import { EntriesTable } from "../EntriesTable";
 import { TabPanel, a11yTabProps } from "../TabPanel";

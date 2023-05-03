@@ -7,7 +7,7 @@ import { getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories/UserR
 import { handleGenericError } from "@rhodesjason/loxdb/dist/lib/apiErrorHandler";
 import { getUserDetails } from "@rhodesjason/loxdb/dist/lib/letterboxd";
 import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
-import { syncAllEntriesForUser } from "@rhodesjason/loxdb/dist/lib/syncAllEntriesForUser";
+import { syncAllUserWatches } from "@rhodesjason/loxdb/dist/lib/syncUserWatches";
 
 interface RegisterApiResponseSuccess {
   success: true;
@@ -75,9 +75,12 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
 
     console.log(`Registration for ${userOptions.username} completed successfully, sync will begin now`);
 
-    // after responding to the request, kick off a ratings sync for this user
-    // DISABLED WHILE sync process is being reworked 2023-05-02
-    // syncAllEntriesForUser({ userId: user.id, username: user.username, order: "DESC" });
+    // AFTER responding to the request, kick off a ratings sync for this user
+    try {
+      syncAllUserWatches({ userId: user.id });
+    } catch (error: any) {
+      console.error(`Error while trying to sync user watches for user ${user.username}`, error.message);
+    }
   } catch (error: unknown) {
     if (error instanceof TypeORMError) {
       if (error.message.startsWith("duplicate key value violates unique constraint")) {

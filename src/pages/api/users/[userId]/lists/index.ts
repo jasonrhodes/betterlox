@@ -1,5 +1,5 @@
 import { FindOptionsWhere, ILike, In } from "typeorm";
-import { LetterboxdListsForUserApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { LetterboxdListsForUserApiResponse } from "../../../../../common/types/api";
 import { SyncStatus, SyncTrigger, SyncType } from "@rhodesjason/loxdb/dist/common/types/db";
 import { LetterboxdList, LetterboxdListMovieEntry } from "@rhodesjason/loxdb/dist/db/entities";
 import { getLetterboxdListMovieEntriesRepository, getLetterboxdListsRepository, getMoviesRepository, getSyncRepository, getUserRepository, getUserSettingsRepository } from "@rhodesjason/loxdb/dist/db/repositories";

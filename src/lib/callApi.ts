@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { ApiErrorResponse, ApiSuccessResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { ApiErrorResponse, ApiSuccessResponse } from "../common/types/api";
 import { LetterboxdAccountLevel } from "@rhodesjason/loxdb/dist/common/types/base";
 import { UserPublic, UserResponse } from "@rhodesjason/loxdb/dist/common/types/db";
 import { ApiGetLetterboxdDetailsResponse } from "../pages/api/letterboxd";

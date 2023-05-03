@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { NextPage } from 'next';
 import { UserPageTemplate } from '../../components/PageTemplate';
-import { StatMode } from "@rhodesjason/loxdb/dist/common/types/api";
+import { StatMode } from "../../common/types/api";
 import { StatModeToggle } from '../../components/stats/StatModeToggle';
 import { StatsTab } from '../../components/stats/StatsTab';
 import { TabNavPage } from '../../components/TabNavPage';

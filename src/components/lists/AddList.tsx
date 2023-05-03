@@ -1,7 +1,7 @@
 import { Alert, AlertColor, Box, Button, TextField } from "@mui/material";
 import { useCallback, useState } from "react";
 import { string } from "yup";
-import { LetterboxdListsManagementApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { LetterboxdListsManagementApiResponse } from "../../common/types/api";
 import { UserResponse } from "@rhodesjason/loxdb/dist/common/types/db";
 import { callApi } from "../../hooks/useApi";
 import { getErrorAsString } from "@rhodesjason/loxdb/dist/lib/getErrorAsString";

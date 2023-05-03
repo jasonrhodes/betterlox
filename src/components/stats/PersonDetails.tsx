@@ -1,7 +1,7 @@
 import { Close } from "@mui/icons-material";
 import { Drawer, Typography, capitalize } from "@mui/material";
 import { useState, useEffect } from "react";
-import { PeopleStatsType, PersonStats } from "@rhodesjason/loxdb/dist/common/types/api";
+import { PeopleStatsType, PersonStats } from "../../common/types/api";
 import { FilmEntry } from "@rhodesjason/loxdb/dist/db/entities";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";

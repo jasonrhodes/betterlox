@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CollectionsApiResponse, PeopleApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { CollectionsApiResponse, PeopleApiResponse } from "../../common/types/api";
 import { Collection, Person } from "@rhodesjason/loxdb/dist/db/entities";
 import { callApi } from '../../hooks/useApi';
 

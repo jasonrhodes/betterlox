@@ -2,7 +2,7 @@ import { Badge, Box, Button, Grid, LinearProgress, SxProps, Tooltip, Typography 
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import { LetterboxdListBySlugApiResponse, ListUserStats, TmdbMovieByIdApiResponse, TmdbMovieByIdGetResponse, UserListStatsApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { LetterboxdListBySlugApiResponse, ListUserStats, TmdbMovieByIdApiResponse, TmdbMovieByIdGetResponse, UserListStatsApiResponse } from "../../../common/types/api";
 import { UserPublic, UserResponse } from "@rhodesjason/loxdb/dist/common/types/db";
 import { AppLink } from "../../../components/AppLink";
 import { BasicSelect, SelectChangeHandler } from "../../../components/formControls/BasicSelect";

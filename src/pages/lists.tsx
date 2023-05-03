@@ -1,7 +1,7 @@
 import { Alert, LinearProgress } from "@mui/material";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { LetterboxdListsForUserApiResponse } from "@rhodesjason/loxdb/dist/common/types/api";
+import { LetterboxdListsForUserApiResponse } from "../common/types/api";
 import { UserResponse } from "@rhodesjason/loxdb/dist/common/types/db";
 import { AddList } from "../components/lists/AddList";
 import { ListsList } from "../components/lists/ListsList";

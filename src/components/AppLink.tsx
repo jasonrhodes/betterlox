@@ -1,4 +1,4 @@
-import { Link, LinkProps } from '@mui/material';
+import { Box, LinkProps } from '@mui/material';
 import NextLink from 'next/link';
 
 export interface AppLinkProps extends LinkProps {
@@ -11,7 +11,7 @@ export function AppLink({ href, children, ...rest }: AppLinkProps) {
   }
   return (
     <NextLink href={href} passHref>
-      <Link {...rest}>{children}</Link>
+      <Box {...rest}>{children}</Box>
     </NextLink>
   );
 }

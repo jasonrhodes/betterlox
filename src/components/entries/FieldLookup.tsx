@@ -1,6 +1,7 @@
 import { Autocomplete, Box, SxProps, TextField, Typography } from '@mui/material';
-import React, { useState, useEffect, useCallback } from 'react';
-import { GlobalFilters, SearchApiResponse, SearchCollection } from "@rhodesjason/loxdb/dist/common/types/api";
+import React, { useState, useEffect } from 'react';
+import { GlobalFilters, SearchApiResponse } from "../../common/types/api";
+import { SearchCollection } from "@rhodesjason/loxdb/dist/common/types/db";
 import { Person } from "@rhodesjason/loxdb/dist/db/entities";
 import { useGlobalFilters } from '../../hooks/GlobalFiltersContext';
 import { callApi, useApi } from '../../hooks/useApi';
@@ -20,8 +21,6 @@ interface AutocompleteFilterProps<T> {
   loading: boolean;
   loadingCount: number;
 }
-
-let retrievalCount = 0;
 
 function useAutocompleteFilterOptions<T extends Person | SearchCollection>({
   searchType,
@@ -156,9 +155,10 @@ function FieldLookup<T>({
   sx?: SxProps;
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { loadingCount, getId, ...safeDOMProps } = acProps;
   return (
     <Autocomplete<T>
-      {...acProps}
+      {...safeDOMProps}
       id={id}
       sx={sx}
       open={isOpen}

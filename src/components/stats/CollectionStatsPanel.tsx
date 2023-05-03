@@ -1,5 +1,5 @@
 import { Box, Typography, Grid, Card, CardHeader, CardMedia } from "@mui/material";
-import { StatMode } from "@rhodesjason/loxdb/dist/common/types/api";
+import { StatMode } from "../../common/types/api";
 import { Collection } from "@rhodesjason/loxdb/dist/db/entities";
 import { useTmdbImageBaseUrl } from "../images";
 import { getTitleByMode } from "./helpers";

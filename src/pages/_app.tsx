@@ -38,8 +38,6 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="apple-touch-icon" sizes="152x152" href="/img/logo/apple-touch-icon-152x152.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/img/logo/apple-touch-icon-180x180.png" />
 
-        <link rel="stylesheet" href="/styles/baseline.css" />
-
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://app.betterlox.com" />
         <meta property="og:title" content="Betterlox" />
