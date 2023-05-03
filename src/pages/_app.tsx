@@ -1,4 +1,5 @@
 import type { AppProps } from 'next/app';
+import "../styles/baseline.css";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { ImageContextProvider } from "../hooks/ImageConfigContext";
 import "@fontsource/inter/400.css";

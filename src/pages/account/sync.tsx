@@ -78,7 +78,7 @@ function SyncWatchData({
           <Typography variant="h5">Re-Sync Watch Data</Typography>
         </Box>
       </Box>
-      <Typography sx={{ mb: 1 }} variant="body1" component="div">Manually sync your watch data to retrieve your latest entries from Letterboxd. Entries are collected from <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/by/rated-date/`}>your 'Watches' page</Link> and are periodically refreshed for you. Manually syncing your entires should ONLY be necessary if you seem to be missing entries in Betterlox. <b>Note:</b> This will resync ALL of your watches and will usually take 3-5 minutes or more.</Typography>
+      <Typography sx={{ mb: 1 }} variant="body1" component="div">Manually sync your watch data to retrieve your latest entries from Letterboxd. Entries are collected from <Link target="_blank" rel="noreferrer" href={`https://letterboxd.com/${user.username}/films/by/rated-date/`}>your &lsquo;Watches&rsquo; page</Link> and are periodically refreshed for you. Manually syncing your entires should ONLY be necessary if you seem to be missing entries in Betterlox. <b>Note:</b> This will resync ALL of your watches and will usually take 3-5 minutes or more.</Typography>
 
       <Box sx={{ py: 3 }}>
         <Button 
@@ -110,7 +110,7 @@ function LatestSync({ user, syncMessage }: { user: UserPublic, syncMessage: stri
       }
     }
     retrieve();
-  }, [syncMessage]);
+  }, [syncMessage, user.id]);
 
   if (syncs.length === 0) {
     return null;
