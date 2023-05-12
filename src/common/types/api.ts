@@ -1,7 +1,6 @@
-import { InsertResult } from "typeorm";
-import { Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings, FilmEntry, LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
-import { TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "@rhodesjason/loxdb/dist/lib/tmdb";
-import { PersonStats, RatedMovie, RatedTmdbCast, SearchCollection, TypeOrmEntityMethods, UserPublicSafe } from "@rhodesjason/loxdb/dist/common/types/db";
+import type { Person, Movie, Sync, CastRole, CrewRole, Collection, UserSettings, FilmEntry, LetterboxdList, LetterboxdUserEntrySync } from "@rhodesjason/loxdb/dist/db/entities";
+import type { TmdbConfigurationResponse, TmdbEnhancedCollection, TmdbPersonWithMovieCredits } from "@rhodesjason/loxdb/dist/lib/tmdb";
+import type { DBInsertResult, PersonStats, RatedMovie, RatedTmdbCast, SearchCollection, TypeOrmEntityMethods, UserPublicSafe } from "@rhodesjason/loxdb/dist/common/types/db";
 
 export type OrderDirection = "ASC" | "DESC";
 export type ImageConfig = TmdbConfigurationResponse["images"];
@@ -27,7 +26,7 @@ export interface ApiErrorResponse {
 
 export interface SyncEntriesMoviesResponse extends ApiSuccessResponse {
   type: 'entries_movies';
-  synced: Array<InsertResult | null>;
+  synced: Array<DBInsertResult | null>;
 }
 
 export interface SyncPopularMoviesResponse extends ApiSuccessResponse {
@@ -92,7 +91,7 @@ export interface UnsyncedGetResponse {
 }
 
 export interface SyncsForUserResponse extends ApiSuccessResponse {
-  syncs: Sync[];
+  syncs: LetterboxdUserEntrySync[];
 }
 
 export interface UserEntriesSyncApiResponse extends ApiSuccessResponse {
@@ -202,6 +201,28 @@ export interface UsersApiSuccessResponse extends ApiSuccessResponse {
 
 export type UsersApiResponse = UsersApiSuccessResponse | ApiErrorResponse;
 
+export interface LetterboxdUserEntrySyncQueryResult extends LetterboxdUserEntrySync {
+  user: never;
+  username: string;
+  userId: number;
+}
+
+export interface UserSyncsGetSuccessResponse extends ApiSuccessResponse {
+  syncs: LetterboxdUserEntrySyncQueryResult[];
+}
+
+export interface UserSyncsPostSuccessResponse extends ApiSuccessResponse {
+  
+}
+
+export type UserSyncsApiResponse = UserSyncsGetSuccessResponse | UserSyncsPostSuccessResponse | ApiErrorResponse;
+
+export interface UserSyncGetSuccessResponse extends ApiSuccessResponse {
+  sync: Omit<LetterboxdUserEntrySync, 'user'>;
+}
+
+export type UserSyncApiResponse = UserSyncGetSuccessResponse | ApiErrorResponse;
+
 interface MoviesApiFindResponse extends ApiSuccessResponse {
   movies: Movie[];
 }
@@ -240,6 +261,7 @@ export interface ListUserStats {
   watchedIds: number[];
   movies: number;
 }
+
 export interface UserListStatsGetResponse extends ApiSuccessResponse {
   stats: ListUserStats;
 }
@@ -270,14 +292,17 @@ export type MovieApiResponse = ApiResponse<MovieGetResponse>;
 
 export type BlindspotMovie = Pick<Movie, 'id' | 'title' | 'posterPath' | 'runtime' | 'releaseDate' | 'popularity' | 'status' | 'imdbId' | 'letterboxdSlug' | 'genres'> 
   & { averageRating: number; countRatings: number; loxScore: number; reason?: string; };
+
 export interface UserBlindspotExtras {
   collections?: Collection[];
 }
+
 export interface UserBlindspotsGetResponse extends ApiSuccessResponse {
   blindspots: BlindspotMovie[];
   extras?: UserBlindspotExtras;
   unknownIds?: number[];
 }
+
 export type UserBlindspotsApiResponse = ApiResponse<UserBlindspotsGetResponse>;
 
 export type BlindspotsSortBy = 'loxScore' | 'loxMostRated' | 'loxHighestRated' | 'releaseDate' | 'title';

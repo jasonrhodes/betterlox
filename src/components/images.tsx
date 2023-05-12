@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarProps, Box, SxProps } from "@mui/material";
 import useImageConfigs from "../hooks/useImageConfigs";
-import Image, { ImageProps } from "next/legacy/image";
+import Image, { ImageProps } from "next/image";
 
 const indexedSizes = ["smallest", "small", "medium", "large", "largest"];
 

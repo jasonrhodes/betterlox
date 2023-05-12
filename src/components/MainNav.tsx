@@ -4,7 +4,7 @@ import { Lock, Menu as MenuIcon } from '@mui/icons-material';
 import Link from 'next/link';
 import { useCurrentUser, UserContextConsumer, UserContextValue } from '../hooks/UserContext';
 import { UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import { useRouter } from "next/router";
 
 const pages = [

@@ -1,9 +1,8 @@
 import { CalendarMonth, PersonPin, Theaters } from "@mui/icons-material";
-import { Box, FormControlLabel, Link, Switch, Typography, Icon } from "@mui/material";
+import { Box, FormControlLabel, Link, Switch, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
-import { ListSortBy } from "@rhodesjason/loxdb/dist/common/types/base";
 import { UserPublicSafe } from "@rhodesjason/loxdb/dist/common/types/db";
-import { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
+import type { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
 import { callApi } from "../../hooks/useApi";
 import { Meta } from "../Meta";
 

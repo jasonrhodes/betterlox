@@ -8,7 +8,7 @@ import { ListsList } from "../components/lists/ListsList";
 import { MyTrackedLists } from "../components/lists/TrackedLists";
 import { UserPageTemplate } from "../components/PageTemplate";
 import { TabNavPage } from "../components/TabNavPage";
-import { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
+import type { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
 import { callApi } from "../hooks/useApi";
 
 const ListsPage: NextPage = () => {

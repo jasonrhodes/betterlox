@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from 'react';
-import { UserPublicSafe, UserResponse, UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
+import type { UserPublicSafe, UserResponse, UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
 import api from '../lib/callApi';
 import { useCookies } from 'react-cookie';
 import { useRouter } from 'next/router';
-import { UserSettings } from '@rhodesjason/loxdb/dist/db/entities';
+import type { UserSettings } from '@rhodesjason/loxdb/dist/db/entities';
 import { callApi } from './useApi';
 import { UpdateUserSettingsResponse, UserApiResponse } from "../common/types/api";
 import { getErrorAsString } from '@rhodesjason/loxdb/dist/lib/getErrorAsString';

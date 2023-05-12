@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { DEFAULT_USER_SETTINGS } from "@rhodesjason/loxdb/dist/common/constants";
 import { UserStatsResponse } from "../../common/types/api";
-import { Collection } from "@rhodesjason/loxdb/dist/db/entities";
+import type { Collection } from "@rhodesjason/loxdb/dist/db/entities";
 import { useGlobalFilters } from "../../hooks/GlobalFiltersContext";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";

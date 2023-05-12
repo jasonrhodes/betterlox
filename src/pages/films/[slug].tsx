@@ -9,7 +9,7 @@ import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
 import { CastRole, CrewRole, Movie } from "@rhodesjason/loxdb/dist/db/entities";
 import { BackdropImage, PosterImage, TmdbAvatar } from '../../components/images';
 import { LetterboxdIconLink } from '../../components/externalServiceLinks';
-import Image from "next/legacy/image";
+import Image from "next/image";
 import { Meta } from '../../components/Meta';
 import { CalendarMonth, ChairAlt } from '@mui/icons-material';
 

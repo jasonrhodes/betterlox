@@ -9,7 +9,15 @@ const UsersRoute = createApiRoute<UsersApiResponse | ApiErrorResponse>({
       const UsersRepo = await getUserRepository();
       const limit = numericQueryParam(req.query.limit);
       const offset = numericQueryParam(req.query.offset);
-      const users = await UsersRepo.getPublicSafeUsers({ limit, offset });
+      const includeEntrySyncs = Boolean(req.query.includeEntrySyncs);
+
+      const users = await UsersRepo.getPublicSafeUsers({
+        limit, 
+        offset, 
+        relations: {
+          letterboxdEntrySyncs: includeEntrySyncs
+        }
+      });
       res.json({ success: true, users });   
     },
   }

@@ -20,14 +20,12 @@
     "@mui/lab": "^5.0.0-alpha.91",
     "@mui/material": "^5.9.1",
     "@mui/x-data-grid": "^5.6.1",
-    "@rhodesjason/loxdb": "^2.4.0",
+    "@rhodesjason/loxdb": "^4.2.0",
     "@sendgrid/mail": "^7.6.2",
     "@types/lodash.merge": "^4.6.7",
     "@types/node-fetch": "^2.6.1",
     "axios": "^0.27.2",
-    "better-sqlite3": "^7.5.0",
     "body-parser": "^1.19.2",
-    "cheerio": "^1.0.0-rc.12",
     "clsx": "^1.1.1",
     "express": "^4.17.3",
     "fast-csv": "^4.3.6",
@@ -40,20 +38,14 @@
     "next": "^13.1.6",
     "node-fetch": "^3.2.10",
     "nodemon": "^2.0.15",
-    "pg": "^8.7.3",
-    "pg-hstore": "^2.3.4",
     "react": "^18.2.0",
     "react-cookie": "^4.1.1",
     "react-data-grid": "^7.0.0-beta.14",
     "react-dom": "^18.2.0",
-    "reflect-metadata": "^0.1.13",
     "sharp": "^0.31.0",
-    "sqlite3": "^5.0.4",
-    "typeorm": "^0.3.6",
     "yup": "^1.0.0-beta.3"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.5.0",
     "@types/express": "^4.17.13",
     "@types/node": "17.0.21",
     "@types/react": "17.0.40",
@@ -70,7 +62,6 @@
     ".next/cache"
   ],
   "engines": {
-    "node": "16.x",
-    "npm": "8.x"
+    "node": "16.x"
   }
 }

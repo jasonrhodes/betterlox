@@ -1,5 +1,5 @@
 import { Box, Tooltip } from "@mui/material";
-import Image from "next/legacy/image";
+import Image from "next/image";
 
 const DEFAULT_ICON_SIZE = 20;
 

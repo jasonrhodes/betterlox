@@ -1,9 +1,7 @@
-import { getSyncRepository, getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories";
+import { getLetterboxdUserEntrySyncRepository, getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 import { SyncsForUserResponse, ApiErrorResponse } from "../../../../../common/types/api";
 import { createApiRoute } from "../../../../../lib/routes";
-import { SyncStatus, SyncTrigger } from "@rhodesjason/loxdb/dist/common/types/db";
 import { numericQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
-import { Not } from "typeorm";
 
 const SyncsForUserRoute = createApiRoute<SyncsForUserResponse | ApiErrorResponse>({
   handlers: {
@@ -34,17 +32,17 @@ const SyncsForUserRoute = createApiRoute<SyncsForUserResponse | ApiErrorResponse
         });
       }
 
-      const SyncsRepo = await getSyncRepository();
+      const SyncsRepo = await getLetterboxdUserEntrySyncRepository();
       const syncs = await SyncsRepo.find({
         where: {
-          trigger: SyncTrigger.USER,
-          username: user.username,
-          status: Not(SyncStatus.SKIPPED)
+          user: {
+            id: numericUserId
+          } 
         },
         order: {
-          started: 'DESC'
+          startDate: 'DESC'
         },
-        take: 10
+        take: 100
       });
 
       return res.status(200).json({
