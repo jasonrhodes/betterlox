@@ -3,7 +3,7 @@ import { UserPublic } from "@rhodesjason/loxdb/dist/common/types/db";
 import { getUserRepository, UserRepoError } from "@rhodesjason/loxdb/dist/db/repositories/UserRepo";
 import { handleGenericError } from "@rhodesjason/loxdb/dist/lib/apiErrorHandler";
 import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
-import { syncRecentUserWatches } from "@rhodesjason/loxdb/dist/lib/syncUserWatches";
+import { syncRecentEntriesForUser } from "../../../lib/syncRecentEntriesForUser";
 
 interface LoginApiResponseSuccess {
   success: true;
@@ -32,7 +32,7 @@ const LoginRoute: NextApiHandler<LoginApiResponse> = async (req, res) => {
 
     try {
       // AFTER responding to the request, kick off a ratings sync for this user
-      syncRecentUserWatches({ userId: user.id });
+      await syncRecentEntriesForUser({ user });
     } catch (e) {
       // ignore this error
       console.log(`Error while trying to do post-login entries sync for user ${user.username}`)

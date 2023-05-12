@@ -7,7 +7,7 @@ import { getUserRepository } from "@rhodesjason/loxdb/dist/db/repositories/UserR
 import { handleGenericError } from "@rhodesjason/loxdb/dist/lib/apiErrorHandler";
 import { getUserDetails } from "@rhodesjason/loxdb/dist/lib/letterboxd";
 import { singleQueryParam } from "@rhodesjason/loxdb/dist/lib/queryParams";
-import { syncAllUserWatches } from "@rhodesjason/loxdb/dist/lib/syncUserWatches";
+import { getLetterboxdUserEntrySyncRepository } from "@rhodesjason/loxdb/dist/db/repositories";
 
 interface RegisterApiResponseSuccess {
   success: true;
@@ -73,13 +73,14 @@ const RegisterRoute: NextApiHandler<RegisterApiResponse> = async (req, res) => {
     
     res.json({ success: true, created: user });
 
-    console.log(`Registration for ${userOptions.username} completed successfully, sync will begin now`);
+    console.log(`Registration for ${userOptions.username} completed successfully, FULL sync will be requested now`);
 
-    // AFTER responding to the request, kick off a ratings sync for this user
+    // AFTER responding to the request, request a ratings sync for this user
     try {
-      syncAllUserWatches({ userId: user.id });
+      const SyncsRepo = await getLetterboxdUserEntrySyncRepository();
+      await SyncsRepo.requestFullSync({ user: saved });
     } catch (error: any) {
-      console.error(`Error while trying to sync user watches for user ${user.username}`, error.message);
+      console.error(`Error while trying to request FULL sync for all user watches for user ${user.username}`, error.message);
     }
   } catch (error: unknown) {
     if (error instanceof TypeORMError) {

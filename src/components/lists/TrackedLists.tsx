@@ -1,8 +1,8 @@
-import { Box, CircularProgress, Grid, LinearProgress, SxProps, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, LinearProgress, SxProps, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
 import { LetterboxdListsForUserApiResponse, ListUserStats, UserListStatsApiResponse } from "../../common/types/api";
-import { UserPublicSafe } from "@rhodesjason/loxdb/dist/common/types/db";
-import { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
+import type { UserPublicSafe } from "@rhodesjason/loxdb/dist/common/types/db";
+import type { LetterboxdList } from "@rhodesjason/loxdb/dist/db/entities";
 import { callApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/UserContext";
 import { AppLink } from "../AppLink";
